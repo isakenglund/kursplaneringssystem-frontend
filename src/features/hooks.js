@@ -22,7 +22,7 @@ function pickList(res, field) {
     return [];
 }
 
-export default function useCourses() {
+export default function useGetCourses() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -56,4 +56,26 @@ export default function useCourses() {
 
     return { data, loading, err };
 
+}
+
+export function useSaveCourse(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function save(course) {
+        setLoading(true);
+        setErr(null);
+         try {
+                const res = await API.saveCourse(course);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+             setErr(e);
+             throw e;
+            } finally {
+             setLoading(false);
+            }
+        }
+    return { data, loading, err, save };
 }

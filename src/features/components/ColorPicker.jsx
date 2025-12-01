@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
-export default function ColorPicker() {
-const [color, setColor] = useState("#0077ffff");
-const [showPicker, setShowPicker] = useState(false);
+export default function ColorPicker(handleColorHex) {
+    const [color, setColor] = useState("#0077ffff");
+    const [showPicker, setShowPicker] = useState(false);
+
+    const sendColorHex = () => {
+        handleColorHex(color);
+    }
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
@@ -31,7 +35,7 @@ const [showPicker, setShowPicker] = useState(false);
             boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           }}
         >
-          <HexColorPicker color={color} onChange={setColor} />
+          <HexColorPicker color={color} onChange= {(value) => {setColor(value); sendColorHex(value);}} />
         </div>
       )}
 
@@ -39,7 +43,7 @@ const [showPicker, setShowPicker] = useState(false);
       <input
         type="text"
         value={color}
-        onChange={(e) => setColor(e.target.value)}
+        onChange= {(c) => {setColor(c.target.value); sendColorHex(c.target.value);}}
         style={{
           width: "100px",
           padding: "0.5rem",
