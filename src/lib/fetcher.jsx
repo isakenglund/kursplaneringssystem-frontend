@@ -1,4 +1,4 @@
-const BASE = '/api'; // proxas i dev
+const BASE = 'http://localhost:8080/api'; // proxas i dev
 
 export async function api(path, init = {}) {
     const sep = path.includes('?') ? '&' : '?';
