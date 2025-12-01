@@ -20,6 +20,13 @@ export default function DemoApp() {
 
     const calendarRef = useRef(null)
 
+    function removeExternalEvent(eventId) {
+        if (confirm(`Are you sure you want to delete the event`)) {
+        setExternalEvents(prev => prev.filter(e => e.id !== eventId));
+        }
+    }
+
+
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
@@ -51,14 +58,35 @@ export default function DemoApp() {
         const droppedEventId = info.event.id;
 
         // Ta bort eventet från externalEvents-staten
-        setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
+        //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
+
+        setExternalEvents(prev =>
+            prev.map(e =>
+                e.id === droppedEventId ? { ...e, disabled: true } : e
+            )
+        );
+
     }
 
     function handleEventClick(clickInfo) {
-        if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-            clickInfo.event.remove()
+        if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
+            const removedEventId = clickInfo.event.id;
+
+            // Ta bort från kalendern
+            clickInfo.event.remove();
+
+            // Uppdatera currentEvents så Sidebar renderas om
+            setCurrentEvents(prev => prev.filter(event => event.id !== removedEventId));
+
+            // Om eventet fanns i externalEvents, återaktivera det
+            setExternalEvents(prev =>
+                prev.map(e =>
+                    e.id === removedEventId ? { ...e, disabled: false } : e
+                )
+            );
         }
     }
+
 
     function handleEvents(events) {
         setCurrentEvents(events)
@@ -105,9 +133,11 @@ export default function DemoApp() {
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
-                externalEvents={externalEvents} // Skickar ner listan
+                externalEvents={externalEvents}
                 openModal={() => setIsModalOpen(true)}
+                removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
+
 
             <div className='demo-app-main flex-grow p-4'>
                 <FullCalendar
@@ -151,7 +181,7 @@ function renderEventContent(eventInfo) {
 }
 
 // -- UPPDATERAD SIDEBAR MED DRAGGABLE LOGIK --
-function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externalEvents, openModal }) {
+function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externalEvents, openModal, removeExternalEvent }) {
     const draggableContainerRef = useRef(null);
 
     // Initiera Draggable funktionaliteten på containern
@@ -186,6 +216,7 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
                     className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
                 >
                     + Nytt oplanerat event
+
                 </button>
             </div>
 
@@ -201,11 +232,32 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
                         <div
                             key={event.id}
                             data-id={event.id}
-                            className="fc-event-external bg-white p-3 rounded border border-gray-200 shadow-sm cursor-move hover:bg-blue-50 transition border-l-4 border-l-blue-500 text-sm font-medium text-gray-700"
+                            className={`fc-event-external p-3 rounded border shadow-sm text-sm font-medium transition flex justify-between items-center
+        ${event.disabled
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
+                                : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
+                            }`}
                         >
-                            {event.title}
+                            {/* Text */}
+                            <span className="text-sm">{event.title}</span>
+
+                            {/* SVG-knapp */}
+                            {!event.disabled && (
+                                <button
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => removeExternalEvent(event.id)} // <-- tar bort eventet
+                                    className="flex items-center justify-center w-5 h-5 text-sm text-gray-700 hover:text-red-500"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-full h-full">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                </button>
+                            )}
+
                         </div>
+
                     ))}
+
                 </div>
             </div>
             {/* ----------------------------------------- */}
