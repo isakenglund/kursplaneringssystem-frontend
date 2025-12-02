@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { formatDate } from '@fullcalendar/core'
+import React, {useState, useRef, useEffect} from 'react'
+import {formatDate} from '@fullcalendar/core'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
-import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
-import { INITIAL_EVENTS, createEventId } from './event-utils.js'
-import ColorPicker from './features/components/ColorPicker.jsx'
-import CreateCategory from "./features/components/CreateCategory.jsx";
+import interactionPlugin, {Draggable} from '@fullcalendar/interaction'
+import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
+import ColorPicker from '../components/ColorPicker.jsx'
+import CreateCategory from "../components/CreateCategory.jsx";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -15,8 +15,8 @@ export default function DemoApp() {
     const counter = 0;
 
     const [externalEvents, setExternalEvents] = useState([
-        { id: createEventId(), title: 'Oplanerat uppdrag 1' },
-        { id: createEventId(), title: 'Oplanerat uppdrag 2' }
+        {id: createEventId(), title: 'Oplanerat uppdrag 1'},
+        {id: createEventId(), title: 'Oplanerat uppdrag 2'}
     ])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [newEventTitle, setNewEventTitle] = useState('')
@@ -25,15 +25,13 @@ export default function DemoApp() {
 
     function removeExternalEvent(eventId) {
         if (confirm(`Are you sure you want to delete the event`)) {
-        setExternalEvents(prev => prev.filter(e => e.id !== eventId));
+            setExternalEvents(prev => prev.filter(e => e.id !== eventId));
         }
     }
 
-
-
-  function handleWeekendsToggle() {
-    setWeekendsVisible(!weekendsVisible)
-  }
+    function handleWeekendsToggle() {
+        setWeekendsVisible(!weekendsVisible)
+    }
 
     // -- ÄNDRAD: Skapar eventet i "externa listan" istället för direkt i kalendern --
     function handleFormSubmit(e) {
@@ -61,7 +59,7 @@ export default function DemoApp() {
     function handleEventReceive(info) {
         const droppedEventId = info.event.id;
 
-        console.log("Släppt datum: " , info.event.start.toLocaleTimeString());
+        console.log("Släppt datum: ", info.event.start.toLocaleTimeString());
 
         //if(droppedEventId.)
         // Ta bort eventet från externalEvents-staten
@@ -69,7 +67,7 @@ export default function DemoApp() {
 
         setExternalEvents(prev =>
             prev.map(e =>
-                e.id === droppedEventId ? { ...e, disabled: true } : e
+                e.id === droppedEventId ? {...e, disabled: true} : e
             )
         );
 
@@ -88,7 +86,7 @@ export default function DemoApp() {
             // Om eventet fanns i externalEvents, återaktivera det
             setExternalEvents(prev =>
                 prev.map(e =>
-                    e.id === removedEventId ? { ...e, disabled: false } : e
+                    e.id === removedEventId ? {...e, disabled: false} : e
                 )
             );
         }
@@ -101,7 +99,6 @@ export default function DemoApp() {
     return (
         <div className='demo-app relative h-screen flex'>
 
-            {/* -- MODAL (Bara titel nu) -- */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-96">
@@ -127,7 +124,8 @@ export default function DemoApp() {
                                 >
                                     Avbryt
                                 </button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                <button type="submit"
+                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                                     Lägg i lista
                                 </button>
                             </div>
@@ -136,7 +134,7 @@ export default function DemoApp() {
                 </div>
             )}
 
-            <CreateCategory
+            <Sidebar
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
@@ -158,14 +156,16 @@ export default function DemoApp() {
                     initialView='timeGridWeek'
                     editable={true}
                     firstDay={1}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={weekendsVisible}
-          initialEvents={INITIAL_EVENTS}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={weekendsVisible}
+                    initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
+
                     droppable={true} // Tillåter att man släpper saker på kalendern
                     eventReceive={handleEventReceive} // Körs när ett externt event släpps här
+
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
@@ -184,37 +184,42 @@ function renderEventContent(eventInfo) {
     )
 }
 
-// -- UPPDATERAD SIDEBAR MED DRAGGABLE LOGIK --
-function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externalEvents, openModal, removeExternalEvent }) {
+function Sidebar({
+                     weekendsVisible,
+                     handleWeekendsToggle,
+                     currentEvents,
+                     externalEvents,
+                     openModal,
+                     removeExternalEvent
+                 }) {
     const draggableContainerRef = useRef(null);
 
-    // Initiera Draggable funktionaliteten på containern
     useEffect(() => {
         let draggable = null;
 
         if (draggableContainerRef.current) {
             draggable = new Draggable(draggableContainerRef.current, {
-                itemSelector: '.fc-event-external', // Klassen på elementen som ska gå att dra
-                eventData: function(eventEl) {
+                itemSelector: '.fc-event-external',
+                eventData: function (eventEl) {
                     return {
                         title: eventEl.innerText,
                         id: eventEl.getAttribute('data-id'),
-                        // Du kan lägga till färg eller annat här om du vill
+
                     };
                 }
             });
         }
 
-        // Cleanup när komponenten avmonteras
         return () => {
             if (draggable) draggable.destroy();
         }
-    }, []); // Körs bara en gång vid mount
+    }, []);
 
     const [showCreateCatagory, setShowCreateCatagory] = useState(false);
 
-  return (
-    <div className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+    return (
+        <div
+            className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
 
             <div className='demo-app-sidebar-section mb-8'>
                 <button
@@ -226,13 +231,12 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
                 </button>
             </div>
 
-            {/* -- HÄR ÄR LISTAN MED OPLANERADE EVENTS -- */}
             <div className='mb-8'>
                 <h2 className="text-lg font-bold mb-3 text-gray-700">Dra till kalendern</h2>
 
-                {/* Ref kopplas till denna container */}
                 <div id="external-events" ref={draggableContainerRef} className="space-y-2">
-                    {externalEvents.length === 0 && <p className="text-sm text-gray-400 italic">Inga oplanerade events.</p>}
+                    {externalEvents.length === 0 &&
+                        <p className="text-sm text-gray-400 italic">Inga oplanerade events.</p>}
 
                     {externalEvents.map((event) => (
                         <div
@@ -244,18 +248,18 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
                                 : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
                             }`}
                         >
-                            {/* Text */}
                             <span className="text-sm">{externalEvents.indexOf(event)} {event.title}</span>
 
-                            {/* SVG-knapp */}
                             {!event.disabled && (
                                 <button
-                                    style={{ cursor: "pointer" }}
+                                    style={{cursor: "pointer"}}
                                     onClick={() => removeExternalEvent(event.id)} // <-- tar bort eventet
                                     className="flex items-center justify-center w-5 h-5 text-sm text-gray-700 hover:text-red-500"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-full h-full">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                         strokeWidth={1.5} stroke="currentColor" className="w-full h-full">
+                                        <path strokeLinecap="round" strokeLinejoin="round"
+                                              d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
                                     </svg>
                                 </button>
                             )}
@@ -266,7 +270,6 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
 
                 </div>
             </div>
-            {/* ----------------------------------------- */}
 
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -277,16 +280,16 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
                         className="rounded text-blue-600 focus:ring-blue-500"
                     ></input>
                     <span className="text-gray-600">Visa helger</span>
-        </label>
-      </div>
-      <button onClick={() => setShowCreateCatagory(!showCreateCatagory)}>Create category</button>
-      {showCreateCatagory && <ShowCategoryInput setShowCreateCatagory={setShowCreateCatagory}/>}
+                </label>
+            </div>
+
+            <CreateCategory/>
 
             <div className='demo-app-sidebar-section'>
                 <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
                 <ul className="space-y-2">
                     {currentEvents.map((event) => (
-                        <SidebarEvent key={event.id} event={event} />
+                        <SidebarEvent key={event.id} event={event}/>
                     ))}
                 </ul>
             </div>

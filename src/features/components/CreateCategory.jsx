@@ -2,29 +2,15 @@ import React, {useState} from "react";
 import ColorPicker from "./ColorPicker.jsx";
 import {useSaveCourse} from "../hooks.js";
 
-export default function CreateCategory({ weekendsVisible, handleWeekendsToggle, currentEvents }) {
+export default function CreateCategory() {
     const [showCreateCatagory, setShowCreateCatagory] = useState(false);
 
 
 
     return (
         <div className='demo-app-sidebar'>
-            <div className='demo-app-sidebar-section'>
-                <label>
-                    <input
-                        type='checkbox'
-                        checked={weekendsVisible}
-                        onChange={handleWeekendsToggle}
-                    ></input>
-                    toggle weekends
-                </label>
-            </div>
             <button onClick={() => setShowCreateCatagory(!showCreateCatagory)}>Create category</button>
             {showCreateCatagory && <ShowCategoryInput setShowCreateCatagory={setShowCreateCatagory}/>}
-            <div className='demo-app-sidebar-section'>
-                <h2>All Events ({currentEvents.length})</h2>
-
-            </div>
         </div>
     )
 }
