@@ -5,8 +5,9 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
-import { INITIAL_EVENTS, createEventId } from './event-utils'
-import ColorPicker from './colorPicker'
+import { INITIAL_EVENTS, createEventId } from './event-utils.js'
+import ColorPicker from './features/components/ColorPicker.jsx'
+import CreateCategory from "./features/components/CreateCategory.jsx";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -93,7 +94,6 @@ export default function DemoApp() {
         }
     }
 
-
     function handleEvents(events) {
         setCurrentEvents(events)
     }
@@ -136,7 +136,7 @@ export default function DemoApp() {
                 </div>
             )}
 
-            <Sidebar
+            <CreateCategory
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
@@ -294,122 +294,3 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
     )
 }
 
-function ShowCategoryInput({setShowCreateCatagory}) {
-
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0"); // month is 0-indexed
-  const dd = String(today.getDate()).padStart(2, "0");
-  const todayDate = `${yyyy}-${mm}-${dd}`;
-
-
-  const [categoryType, setCategoryType] = useState("course")
-  const [hp, setHp] = useState(null);
-  const [studentNum, setStudentNum] = useState(null);
-  const [startDate, setStartDate] = useState(todayDate);
-  const [endDate, setEndDate] = useState(todayDate);
-  return (
-    <div>
-      <label style={{ fontWeight: 600 }}>Namn på kategorin</label>
-      <br></br>
-      <input
-        type="text"
-        placeholder="T.ex Datasystem, Matematik"
-      />
-      <br></br>
-      <label>
-        <input
-          type='radio'
-          name='categoryType'
-          value='course'
-          checked={categoryType === "course"}
-          onChange={(e) => {
-            setCategoryType(e.target.value);
-            setStartDate(todayDate);
-            setEndDate(todayDate);
-          }}
-        /> Kurs
-      </label>
-      <label>
-        <input
-          type='radio'
-          name='categoryType'
-          value='misc'
-          checked={categoryType === "misc"}
-          onChange={(e) => {
-            setCategoryType(e.target.value);
-            setStartDate(todayDate);
-            setEndDate(todayDate)}}
-        /> Övrigt
-      </label>
-      <br></br>
-      <ColorPicker />
-      {categoryType === "course" && (
-        <div>
-          <label>
-            HP:
-            <input
-              type="number"
-              value={hp}
-              onChange={(e) => setHp(parseFloat(e.target.value))}
-              min={0}    // min HP
-              max={180}   // max HP
-              step={0.5} // increment
-            />
-          </label>
-          <br></br>
-          <label>
-            Antal studenter:
-            <input
-              type="number"
-              value={studentNum}
-              onChange={(e) => setStudentNum(parseFloat(e.target.value))}
-              min={0}    // min HP
-              max={1000}   // max HP
-              step={1} // increment
-            />
-          </label>
-          <br></br>
-          <label>
-            Start Datum:
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </label>
-          <br></br>
-          <label>
-            Slut Datum:
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </label>
-            {new Date(startDate) > new Date(endDate) && (
-            <p style={{ color: "red", marginTop: "0.5rem" }}>
-              ⚠️ Start datum är nu EFTER slut datum
-            </p>
-          )}
-          {new Date(startDate) < new Date(todayDate) && (
-            <p style={{ color: "red", marginTop: "0.5rem" }}>
-              ⚠️ Start datum är nu FÖRE dagens datum
-            </p>
-          )}
-        </div>
-      )}
-      <button style={{ color: "blue"}}>Skapa</button>
-      <button onClick={() => setShowCreateCatagory(false)}>avbryt</button>
-    </div>
-  )
-}
-
-function SidebarEvent({ event }) {
-    return (
-        <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
-            <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
-            <span className="block italic">{event.title}</span>
-        </li>
-    )
-}
