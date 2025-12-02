@@ -10,6 +10,7 @@ import { INITIAL_EVENTS, createEventId } from './event-utils'
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
+    const counter = 0;
 
     const [externalEvents, setExternalEvents] = useState([
         { id: createEventId(), title: 'Oplanerat uppdrag 1' },
@@ -57,6 +58,9 @@ export default function DemoApp() {
     function handleEventReceive(info) {
         const droppedEventId = info.event.id;
 
+        console.log("Släppt datum: " , info.event.start.toLocaleTimeString());
+
+        //if(droppedEventId.)
         // Ta bort eventet från externalEvents-staten
         //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
 
@@ -108,7 +112,8 @@ export default function DemoApp() {
                                     value={newEventTitle}
                                     onChange={(e) => setNewEventTitle(e.target.value)}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="T.ex. Kundbesök..."
+                                    placeholder="T.ex. Föreläsning
+                                   "
                                     autoFocus
                                 />
                             </div>
@@ -156,12 +161,8 @@ export default function DemoApp() {
                     weekends={weekendsVisible}
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
-
-                    // -- VIKTIGA TILLÄGG --
                     droppable={true} // Tillåter att man släpper saker på kalendern
                     eventReceive={handleEventReceive} // Körs när ett externt event släpps här
-                    // ---------------------
-
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
@@ -239,7 +240,7 @@ function Sidebar({ weekendsVisible, handleWeekendsToggle, currentEvents, externa
                             }`}
                         >
                             {/* Text */}
-                            <span className="text-sm">{event.title}</span>
+                            <span className="text-sm">{externalEvents.indexOf(event)} {event.title}</span>
 
                             {/* SVG-knapp */}
                             {!event.disabled && (
