@@ -4,9 +4,9 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { INITIAL_EVENTS, createEventId } from '../../event-utils.js'
-import ColorPicker from '../components/ColorPicker.jsx'
-import CreateCategory from "../components/CreateCategory.jsx";
+import { INITIAL_EVENTS, createEventId } from './event-utils.js'
+import ColorPicker from './features/components/ColorPicker.jsx'
+import CreateCategory from "./features/components/CreateCategory.jsx";
 
 export default function DemoApp() {
   const [weekendsVisible, setWeekendsVisible] = useState(true)
