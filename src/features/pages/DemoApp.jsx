@@ -18,7 +18,8 @@ export default function DemoApp() {
         {id: createEventId(), title: 'Oplanerat uppdrag 1'},
         {id: createEventId(), title: 'Oplanerat uppdrag 2'}
     ])
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isEventModalOpen, setIsEventModalOpen] = useState(false)
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [newEventTitle, setNewEventTitle] = useState('')
 
     const calendarRef = useRef(null)
@@ -47,7 +48,7 @@ export default function DemoApp() {
             setExternalEvents([...externalEvents, newExternalEvent])
 
             // Stäng modal och rensa
-            setIsModalOpen(false)
+            setIsEventModalOpen(false)
             setNewEventTitle('')
         } else {
             alert('Vänligen fyll i en titel')
@@ -99,7 +100,7 @@ export default function DemoApp() {
     return (
         <div className='demo-app relative h-screen flex'>
 
-            {isModalOpen && (
+            {isEventModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                         <h3 className="text-xl font-bold mb-4">Skapa oplanerat event</h3>
@@ -119,7 +120,7 @@ export default function DemoApp() {
                             <div className="flex justify-end gap-2 mt-4">
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => setIsEventModalOpen(false)}
                                     className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
                                 >
                                     Avbryt
@@ -134,12 +135,17 @@ export default function DemoApp() {
                 </div>
             )}
 
+            {isCategoryModalOpen && (
+                <CreateCategory setIsCategoryModalOpen={setIsCategoryModalOpen}/>
+            )}
+
             <Sidebar
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
                 externalEvents={externalEvents}
-                openModal={() => setIsModalOpen(true)}
+                openNewEventModal={() => setIsEventModalOpen(true)}
+                openNewCategoryModal={() => setIsCategoryModalOpen(true)}
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
 
@@ -189,7 +195,8 @@ function Sidebar({
                      handleWeekendsToggle,
                      currentEvents,
                      externalEvents,
-                     openModal,
+                     openNewEventModal,
+                     openNewCategoryModal,
                      removeExternalEvent
                  }) {
     const draggableContainerRef = useRef(null);
@@ -215,15 +222,20 @@ function Sidebar({
         }
     }, []);
 
-    const [showCreateCatagory, setShowCreateCatagory] = useState(false);
-
     return (
         <div
             className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
 
             <div className='demo-app-sidebar-section mb-8'>
                 <button
-                    onClick={openModal}
+                    className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
+                    onClick={openNewCategoryModal}>Create category
+                </button>
+            </div>
+
+            <div className='demo-app-sidebar-section mb-8'>
+                <button
+                    onClick={openNewEventModal}
                     className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
                 >
                     + Nytt oplanerat event
@@ -282,8 +294,6 @@ function Sidebar({
                     <span className="text-gray-600">Visa helger</span>
                 </label>
             </div>
-
-            <CreateCategory/>
 
             <div className='demo-app-sidebar-section'>
                 <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
