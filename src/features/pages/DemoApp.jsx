@@ -1,18 +1,15 @@
-import React, {useState, useRef, useEffect} from 'react'
-import {formatDate} from '@fullcalendar/core'
+import React, {useState, useRef} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin, {Draggable} from '@fullcalendar/interaction'
 import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
-import ColorPicker from '../components/ColorPicker.jsx'
-import CreateCategory from "../components/CreateCategory.jsx";
+import Sidebar from "../components/Sidebar.jsx";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const counter = 0;
 
     const [externalEvents, setExternalEvents] = useState([
         {id: createEventId(), title: 'Oplanerat uppdrag 1'},
@@ -24,36 +21,17 @@ export default function DemoApp() {
 
     const calendarRef = useRef(null)
 
+    function handleWeekendsToggle() {
+        setWeekendsVisible(!weekendsVisible)
+    }
+
     function removeExternalEvent(eventId) {
         if (confirm(`Are you sure you want to delete the event`)) {
             setExternalEvents(prev => prev.filter(e => e.id !== eventId));
         }
     }
 
-    function handleWeekendsToggle() {
-        setWeekendsVisible(!weekendsVisible)
-    }
-
     // -- ÄNDRAD: Skapar eventet i "externa listan" istället för direkt i kalendern --
-    function handleFormSubmit(e) {
-        e.preventDefault()
-
-        if (newEventTitle) {
-            const newExternalEvent = {
-                id: createEventId(),
-                title: newEventTitle
-            }
-
-            // Lägg till i listan för oplanerade events
-            setExternalEvents([...externalEvents, newExternalEvent])
-
-            // Stäng modal och rensa
-            setIsEventModalOpen(false)
-            setNewEventTitle('')
-        } else {
-            alert('Vänligen fyll i en titel')
-        }
-    }
 
     // -- NYTT: När ett event släpps PÅ kalendern --
     // Vi vill ta bort det från "Oplanerade listan" eftersom det nu ligger i kalendern
@@ -97,43 +75,13 @@ export default function DemoApp() {
         setCurrentEvents(events)
     }
 
+    function addExternalEvent(newEvent) {
+        setExternalEvents(prev => [...prev, newEvent]);
+    }
+
     return (
         <div className='demo-app relative h-screen flex'>
 
-            {isEventModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-                    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                        <h3 className="text-xl font-bold mb-4">Skapa oplanerat event</h3>
-                        <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Titel</label>
-                                <input
-                                    type="text"
-                                    value={newEventTitle}
-                                    onChange={(e) => setNewEventTitle(e.target.value)}
-                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="T.ex. Föreläsning
-                                   "
-                                    autoFocus
-                                />
-                            </div>
-                            <div className="flex justify-end gap-2 mt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsEventModalOpen(false)}
-                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                                >
-                                    Avbryt
-                                </button>
-                                <button type="submit"
-                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                                    Lägg i lista
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
 
             {isCategoryModalOpen && (
                 <CreateCategory setIsCategoryModalOpen={setIsCategoryModalOpen}/>
@@ -144,6 +92,7 @@ export default function DemoApp() {
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
                 externalEvents={externalEvents}
+                addExternalEvent={addExternalEvent}
                 openNewEventModal={() => setIsEventModalOpen(true)}
                 openNewCategoryModal={() => setIsCategoryModalOpen(true)}
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
