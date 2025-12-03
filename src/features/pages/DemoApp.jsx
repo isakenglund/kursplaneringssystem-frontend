@@ -85,7 +85,7 @@ export default function DemoApp() {
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
                 externalEvents={externalEvents}
-                addExternalEvents={addExternalEvent}
+                addExternalEvent={addExternalEvent}
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
 

@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {createEventId} from "../../event-utils.js";
+import {formatDate} from "@fullcalendar/core";
 
 
 export default function CreateEvent({
@@ -14,6 +15,15 @@ export default function CreateEvent({
                                     }) {
 
     const [newEventTitle, setNewEventTitle] = useState('')
+
+    function SidebarEvent({ event }) {
+        return (
+            <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
+                <span className="block italic">{event.title}</span>
+            </li>
+        )
+    }
 
     function handleFormSubmit(e) {
         e.preventDefault()
