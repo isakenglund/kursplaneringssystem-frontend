@@ -1,12 +1,11 @@
-import React, {useState, useRef, useEffect} from 'react'
+import React, {useState, useRef} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
-import interactionPlugin, {Draggable} from '@fullcalendar/interaction'
+import interactionPlugin from '@fullcalendar/interaction'
 import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
-import CreateCategory from "../components/CreateCategory.jsx";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -16,10 +15,6 @@ export default function DemoApp() {
         {id: createEventId(), title: 'Oplanerat uppdrag 1'},
         {id: createEventId(), title: 'Oplanerat uppdrag 2'}
     ])
-    const [isEventModalOpen, setIsEventModalOpen] = useState(false)
-
-    const [newEventTitle, setNewEventTitle] = useState('')
-
     const calendarRef = useRef(null)
 
     function handleWeekendsToggle() {
