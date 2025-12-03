@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import ColorPicker from "./ColorPicker.jsx";
 import {useSaveCourse} from "../hooks.js";
 
-export default function CreateCategory({setIsCategoryModalOpen}) {
+export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
 
 
     const today = new Date();
