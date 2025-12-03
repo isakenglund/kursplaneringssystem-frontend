@@ -1,8 +1,8 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import ColorPicker from "./ColorPicker.jsx";
-import {useSaveCourse} from "../hooks.js";
+import { useSaveCourse } from "../hooks.js";
 
-export default function CreateCategory({setIsCategoryModalOpen}) {
+export default function CreateCategory({ setIsCategoryModalOpen }) {
 
 
     const today = new Date();
@@ -30,11 +30,11 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
         endDate: endDate
     }
 
-    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourse();
+    const { data: savedCourse, loading: savingCourse, err: courseSaveErr, save } = useSaveCourse();
 
 
     const handleColorHex = (colorHex) => {
-        setColorHex((colorHex));
+        setColorHex(colorHex);
     }
 
     async function handleCreateClick() {
@@ -94,7 +94,7 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                     </label>
                 </div>
 
-                <ColorPicker onCallback={handleColorHex}/>
+                <ColorPicker handleColorHex={handleColorHex} />
 
                 {/* Extra fält för kurs */}
                 {categoryType === "course" && (
@@ -102,16 +102,16 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                         {/* HP */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">HP:</label>
-                                <input
-                                    type="number"
-                                    value={hp}
-                                    onChange={(e) => setHp(parseFloat(e.target.value))}
-                                    min={0}    // min HP
-                                    max={180}   // max HP
-                                    step={0.5} // increment
-                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
+                            <input
+                                type="number"
+                                value={hp}
+                                onChange={(e) => setHp(parseFloat(e.target.value))}
+                                min={0}    // min HP
+                                max={180}   // max HP
+                                step={0.5} // increment
+                                className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
                                    focus:ring-blue-500 focus:border-blue-500"
-                                />
+                            />
                         </div>
                         {/* Antal studenter */}
                         <div className="space-y-1">
@@ -122,7 +122,17 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                                 min={0}
                                 max={1000}
                                 step={1}
-                                onChange={(e) => setNumOfStudents(parseFloat(e.target.value))}
+                                onChange={(e) => {
+                                    v = e.target.value;
+                                   
+                                    setNumOfStudents(v)
+                                }}
+                                onBlur={(e) => {
+                                    // Reset empty field
+                                    if (e.target.value.trim() === "") {
+                                        setNumOfStudents(0);
+                                    }
+                                }}
                                 className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
@@ -161,10 +171,10 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                 )}
                 <div className="flex justify-end gap-2 mt-4">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                            onClick={handleCreateClick}>Skapa
+                        onClick={handleCreateClick}>Skapa
                     </button>
                     <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                            onClick={() => setIsCategoryModalOpen(false)}>Avbryt
+                        onClick={() => setIsCategoryModalOpen(false)}>Avbryt
                     </button>
                 </div>
             </div>
