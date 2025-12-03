@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ColorPicker from "./ColorPicker.jsx";
 import { useSaveCourse } from "../hooks.js";
+import Chip from "./Chip.jsx";
 
 export default function CreateCategory({ setIsCategoryModalOpen }) {
 
@@ -19,7 +20,7 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
     const [numOfStudents, setNumOfStudents] = useState(0);
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
-
+    
     const course = {
         type: categoryType,
         name: name,
@@ -105,7 +106,31 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
                             <input
                                 type="number"
                                 value={hp}
-                                onChange={(e) => setHp(parseFloat(e.target.value))}
+                                onChange={(e) => {
+                                    let max = 180;
+                                    const value = e.target.value;
+                                    if (value === "") {
+                                        setHp("");
+                                        return;
+                                    }
+                                    const numberValue = parseFloat(value);
+                                    if (isNaN(numberValue)) return;
+                                    if(numberValue>max){
+                                        setHp(max);
+                                        return;
+                                    }
+                                    setHp(numberValue);
+                                }} onKeyDown={(e) => {
+                                    // Prevent typing minus
+                                    if (e.key === "-" || e.key === "e"||e.key==="."||e.key==="+") {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                     if (e.target.value.trim() === "") {
+                                         setHp(0);
+                                     }
+                                 }}
                                 min={0}    // min HP
                                 max={180}   // max HP
                                 step={0.5} // increment
@@ -123,16 +148,31 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
                                 max={1000}
                                 step={1}
                                 onChange={(e) => {
-                                    v = e.target.value;
-                                   
-                                    setNumOfStudents(v)
-                                }}
-                                onBlur={(e) => {
-                                    // Reset empty field
-                                    if (e.target.value.trim() === "") {
-                                        setNumOfStudents(0);
+                                    let max = 1000;
+                                    const value = e.target.value;
+                                    if (value === "") {
+                                        setNumOfStudents("");
+                                        return;
+                                    }
+                                    const numberValue = parseInt(value);
+                                    if (isNaN(numberValue)) return;
+                                    if(numberValue>max){
+                                        setNumOfStudents(max);
+                                        return;
+                                    }
+                                    setNumOfStudents(numberValue);
+                                }} onKeyDown={(e) => {
+                                    // Prevent typing minus
+                                    if (e.key === "-" || e.key === "e"||e.key==="."||e.key===","||e.key==="+") {
+                                        e.preventDefault();
                                     }
                                 }}
+                                onBlur={(e) => {
+                                     if (e.target.value.trim() === "") {
+                                         setHp(0);
+                                     }
+                                 }}
+
                                 className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
