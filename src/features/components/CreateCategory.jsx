@@ -3,7 +3,7 @@ import ColorPicker from "./ColorPicker.jsx";
 import {useSaveCourse} from "../hooks.js";
 
 
-export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
+export default function CreateCategory({setIsCategoryModalOpen}) {
 
 
     const today = new Date();
@@ -105,8 +105,19 @@ export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
                             <label className="block text-sm font-medium text-gray-700">HP:</label>
                             <input
                                 type="text"
-                                inputMode={"decimal"}
+                                inputMode={"numeric"}
                                 value={hp}
+                                min={0}    // min HP
+                                max={180}   // max HP
+                                step={0.5} // increment
+                                onFocus={(e) => {
+                                    let value = e.target.value;
+                                    let numberValue = parseInt(value);
+                                    if(numberValue === 0) {
+                                        numberValue = "";
+                                    }
+                                    setHp(numberValue);
+                                }}
                                 onChange={(e) => {
                                     let value = e.target.value;
 
@@ -123,7 +134,9 @@ export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
                                         setHp("");
                                         return;
                                     }
-                                    setHp(value);
+                                    const numberValue = parseInt(value);
+                                    if (isNaN(numberValue)) return;
+                                    setHp(numberValue);
                                 }} onBlur={(e) => {
                                 const max = 300;
                                 if (e.target.value.trim() === "") {
@@ -134,16 +147,12 @@ export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
                                 let numberValue = parseFloat(normalized);
 
                                 if (isNaN(numberValue)) {
-                                    setHp("0");
                                     return;
                                 }
                                 if (numberValue > max) numberValue = max;
 
                                 setHp(String(numberValue));
                             }}
-                                min={0}    // min HP
-                                max={180}   // max HP
-                                step={0.5} // increment
                                 className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
@@ -158,6 +167,14 @@ export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
                                 min={0}
                                 max={1000}
                                 step={1}
+                                onFocus={(e) => {
+                                    let value = e.target.value;
+                                    let numberValue = parseInt(value);
+                                    if(numberValue === 0) {
+                                        numberValue = "";
+                                    }
+                                    setNumOfStudents(numberValue);
+                                }}
                                 onChange={(e) => {
                                     const max = 1000;
                                     let value = e.target.value;
@@ -178,7 +195,7 @@ export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
                                 }}
                                 onBlur={(e) => {
                                     if (e.target.value.trim() === "") {
-                                        setHp(0);
+                                        setNumOfStudents(0);
                                     }
                                 }}
 
