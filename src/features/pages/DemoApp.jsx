@@ -2,6 +2,7 @@ import React, {useState, useRef} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
@@ -75,6 +76,17 @@ export default function DemoApp() {
         setExternalEvents(prev => [...prev, newEvent]);
     }
 
+    const [scrollPosition,setScrollPosition] = useState(0);
+
+    const handleScroll = (e) => {
+        const {scrollTop, scrollHeight, clientHeight} = e.target;
+        const position = Math.ceil(
+            (scrollTop / (scrollHeight - clientHeight)) * 100
+        );
+        setScrollPosition(position);
+        console.log("HEJASN")
+    }
+
     return (
         <div className='demo-app relative h-screen flex'>
 
@@ -91,16 +103,37 @@ export default function DemoApp() {
             />
 
 
-            <div className='demo-app-main flex-grow p-4'>
+            <div className='demo-app-main flex-grow p-4'
+            onScroll={handleScroll}>
                 <FullCalendar
                     ref={calendarRef}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                    headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
+                    views={{
+                        customThreeDay: {
+                            type: 'timeGrid',
+                            duration: { days: 3 },
+                            buttonText: '3 Dagar'
+                        },
+                        customTwoWeeks: {
+                            type: 'timeGrid',
+                            duration: { weeks: 2 },
+                            buttonText: '2 Veckor'
+                        },
+                        multiMonthFourMonth: {
+                            type: 'multiMonth',
+                            duration: { months: 4 }
+                        }
                     }}
-                    initialView='timeGridWeek'
+                    headerToolbar={{
+                        left: 'prev,next,today',
+                        center: 'title',
+                        right: 'customThreeDay,customTwoWeeks,dayGridMonth,timeGridWeek,timeGridDay'
+                    }}
+                    height="100%"
+                    //Hanterar scroll grejen
+                    initialView='multiWeekMonth'
+                    multiWeekMaxColumns={1}
+
                     editable={true}
                     firstDay={1}
                     selectable={true}
@@ -116,6 +149,7 @@ export default function DemoApp() {
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
+                    updateSize={scrollPosition}
                 />
             </div>
         </div>
