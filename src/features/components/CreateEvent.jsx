@@ -47,7 +47,6 @@ export default function CreateEvent({
 
     return (
         <div>
-
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-96">

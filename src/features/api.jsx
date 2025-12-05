@@ -2,7 +2,10 @@ import {api} from "../lib/fetcher.jsx";
 
 export const API = {
 
-    courses: () => api('/courses'),
+    courses: () => api('/courses', {
+        method: "GET",
+
+    }),
 
     saveCourse: (course) => api('/courses', {
         method: "POST",
