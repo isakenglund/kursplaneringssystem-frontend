@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import ColorPicker from "./ColorPicker.jsx";
-import { useSaveCourse } from "../hooks.js";
-import Chip from "./Chip.jsx";
+import {useSaveCourse} from "../hooks.js";
 
-export default function CreateCategory({ setIsCategoryModalOpen }) {
+
+export default function CreateCategory({setIsCategoryModalOpen}) {
 
 
     const today = new Date();
@@ -20,7 +20,7 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
     const [numOfStudents, setNumOfStudents] = useState(0);
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
-    
+
     const course = {
         type: categoryType,
         name: name,
@@ -31,7 +31,7 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
         endDate: endDate
     }
 
-    const { data: savedCourse, loading: savingCourse, err: courseSaveErr, save } = useSaveCourse();
+    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourse();
 
 
     const handleColorHex = (colorHex) => {
@@ -95,7 +95,7 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
                     </label>
                 </div>
 
-                <ColorPicker handleColorHex={handleColorHex} />
+                <ColorPicker handleColorHex={handleColorHex}/>
 
                 {/* Extra fält för kurs */}
                 {categoryType === "course" && (
@@ -104,33 +104,43 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">HP:</label>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode={"decimal"}
                                 value={hp}
                                 onChange={(e) => {
-                                    let max = 180;
-                                    const value = e.target.value;
+                                    let value = e.target.value;
+
+                                    value = value.replace(/[^0-9,.]/g, "");
+
+                                    const dotCount = (value.match(/\./g) || []).length;
+                                    const commaCount = (value.match(/,/g) || []).length;
+
+                                    if (dotCount + commaCount > 1) {
+                                        value = value.slice(0, -1);
+                                    }
+
                                     if (value === "") {
                                         setHp("");
                                         return;
                                     }
-                                    const numberValue = parseFloat(value);
-                                    if (isNaN(numberValue)) return;
-                                    if(numberValue>max){
-                                        setHp(max);
-                                        return;
-                                    }
-                                    setHp(numberValue);
-                                }} onKeyDown={(e) => {
-                                    // Prevent typing minus
-                                    if (e.key === "-" || e.key === "e"||e.key==="."||e.key==="+") {
-                                        e.preventDefault();
-                                    }
-                                }}
-                                onBlur={(e) => {
-                                     if (e.target.value.trim() === "") {
-                                         setHp(0);
-                                     }
-                                 }}
+                                    setHp(value);
+                                }} onBlur={(e) => {
+                                const max = 300;
+                                if (e.target.value.trim() === "") {
+                                    setHp(0);
+                                    return;
+                                }
+                                const normalized = hp.replace(",", ".");
+                                let numberValue = parseFloat(normalized);
+
+                                if (isNaN(numberValue)) {
+                                    setHp("0");
+                                    return;
+                                }
+                                if (numberValue > max) numberValue = max;
+
+                                setHp(String(numberValue));
+                            }}
                                 min={0}    // min HP
                                 max={180}   // max HP
                                 step={0.5} // increment
@@ -142,36 +152,35 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Antal studenter:</label>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode={"numeric"}
                                 value={numOfStudents}
                                 min={0}
                                 max={1000}
                                 step={1}
                                 onChange={(e) => {
-                                    let max = 1000;
-                                    const value = e.target.value;
+                                    const max = 1000;
+                                    let value = e.target.value;
+
+                                    value = value.replace(/[^0-9]/g, "");
+
                                     if (value === "") {
                                         setNumOfStudents("");
                                         return;
                                     }
                                     const numberValue = parseInt(value);
                                     if (isNaN(numberValue)) return;
-                                    if(numberValue>max){
+                                    if (numberValue > max) {
                                         setNumOfStudents(max);
                                         return;
                                     }
                                     setNumOfStudents(numberValue);
-                                }} onKeyDown={(e) => {
-                                    // Prevent typing minus
-                                    if (e.key === "-" || e.key === "e"||e.key==="."||e.key===","||e.key==="+") {
-                                        e.preventDefault();
-                                    }
                                 }}
                                 onBlur={(e) => {
-                                     if (e.target.value.trim() === "") {
-                                         setHp(0);
-                                     }
-                                 }}
+                                    if (e.target.value.trim() === "") {
+                                        setHp(0);
+                                    }
+                                }}
 
                                 className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
                                    focus:ring-blue-500 focus:border-blue-500"
@@ -211,10 +220,10 @@ export default function CreateCategory({ setIsCategoryModalOpen }) {
                 )}
                 <div className="flex justify-end gap-2 mt-4">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                        onClick={handleCreateClick}>Skapa
+                            onClick={handleCreateClick}>Skapa
                     </button>
                     <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                        onClick={() => setIsCategoryModalOpen(false)}>Avbryt
+                            onClick={() => setIsCategoryModalOpen(false)}>Avbryt
                     </button>
                 </div>
             </div>
