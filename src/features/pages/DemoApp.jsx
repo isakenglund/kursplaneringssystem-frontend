@@ -22,31 +22,46 @@ export default function DemoApp() {
     }
 
     function removeExternalEvent(eventId) {
-        if (confirm(`Are you sure you want to delete the event`)) {
+        if (confirm(`Vill du ta bort eventet?`)) {
             setExternalEvents(prev => prev.filter(e => e.id !== eventId));
         }
     }
 
-    // -- ÄNDRAD: Skapar eventet i "externa listan" istället för direkt i kalendern --
-
-    // -- NYTT: När ett event släpps PÅ kalendern --
-    // Vi vill ta bort det från "Oplanerade listan" eftersom det nu ligger i kalendern
     function handleEventReceive(info) {
         const droppedEventId = info.event.id;
+        const droppedEventStart = info.event.start;
 
-        console.log("Släppt datum: ", info.event.start.toLocaleTimeString());
+        const externalIndex = externalEvents.findIndex(e => e.id === droppedEventId);
 
-        //if(droppedEventId.)
-        // Ta bort eventet från externalEvents-staten
-        //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
+        if (externalIndex > 0) {
+
+            const previousEvent = externalEvents[externalIndex - 1];
+            const previousEventId = previousEvent.id;
+
+            const calendar = info.view.calendar;
+            const previousEventOnCalendar = calendar.getEventById(previousEventId);
+
+            if (previousEventOnCalendar) {
+                const prevEnd = previousEventOnCalendar.end || previousEventOnCalendar.start;
+
+                if (droppedEventStart < prevEnd) {
+
+                    if(confirm(`Det är inte en giltig tid för det eventet.`)) {
+                        info.revert();
+                        return;
+                    }
+                }
+            }
+        }
+
 
         setExternalEvents(prev =>
             prev.map(e =>
                 e.id === droppedEventId ? {...e, disabled: true} : e
             )
         );
-
     }
+
 
     function handleEventClick(clickInfo) {
         if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
