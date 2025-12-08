@@ -79,3 +79,39 @@ export function useSaveCourse(){
         }
     return { data, loading, err, save };
 }
+
+export function useGetTeachers() {
+    const [teachers, setTeachers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [err, setErr] = useState(null);
+
+    useEffect(() => {
+        let live = true;
+        (async () => {
+            try {
+                setLoading(true);
+                setErr(null);
+
+                const res = await API.teachers();
+                if (!live) return;
+
+                if (!res.ok) throw new Error("Failed to fetch teachers");
+                const data = await res.json();
+                setTeachers(data);
+
+            } catch (e) {
+                if (live) {
+                    setErr(e);
+                    setTeachers([]);
+                }
+            } finally {
+                if(live) setLoading(false);
+            }
+        })();
+        return () => { live = false; };
+
+    }, []);
+
+    return {teachers, loading, err};
+
+}

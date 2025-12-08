@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Draggable} from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
+import TeacherPicker from "./TeacherPicker.jsx";
 
 
 export default function Sidebar({
@@ -16,6 +17,7 @@ export default function Sidebar({
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedTeachers, setSelectedTeachers] = useState([])
 
     useEffect(() => {
         let draggable = null;
@@ -77,6 +79,13 @@ export default function Sidebar({
                 removeExternalEvent={removeExternalEvent}
                 addExternalEvent={addExternalEvent}
             />
+
+            <TeacherPicker
+                selectedTeachers={selectedTeachers}
+                setSelectedTeachers={setSelectedTeachers}
+            />
+
+
 
         </div>
     )

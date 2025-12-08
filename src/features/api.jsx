@@ -17,4 +17,6 @@ export const API = {
         })
     }, ),
 
+    teachers: () => api('/persons'),
+
 };
