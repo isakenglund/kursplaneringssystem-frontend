@@ -7,10 +7,16 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
+import '../Calenda.css'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
+
+    const [dateRange, setDateRange] = useState({
+        start: '2020-01-01',
+        end: '2020-01-16'
+    })
 
     const [externalEvents, setExternalEvents] = useState([
         {id: createEventId(), title: 'Oplanerat uppdrag 1'},
@@ -28,18 +34,11 @@ export default function DemoApp() {
         }
     }
 
-    // -- ÄNDRAD: Skapar eventet i "externa listan" istället för direkt i kalendern --
 
-    // -- NYTT: När ett event släpps PÅ kalendern --
-    // Vi vill ta bort det från "Oplanerade listan" eftersom det nu ligger i kalendern
     function handleEventReceive(info) {
         const droppedEventId = info.event.id;
 
         console.log("Släppt datum: ", info.event.start.toLocaleTimeString());
-
-        //if(droppedEventId.)
-        // Ta bort eventet från externalEvents-staten
-        //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
 
         setExternalEvents(prev =>
             prev.map(e =>
@@ -76,22 +75,8 @@ export default function DemoApp() {
         setExternalEvents(prev => [...prev, newEvent]);
     }
 
-    const [scrollPosition,setScrollPosition] = useState(0);
-
-    const handleScroll = (e) => {
-        const {scrollTop, scrollHeight, clientHeight} = e.target;
-        const position = Math.ceil(
-            (scrollTop / (scrollHeight - clientHeight)) * 100
-        );
-        setScrollPosition(position);
-        console.log("HEJASN")
-    }
-
     return (
         <div className='demo-app relative h-screen flex'>
-
-
-
 
             <Sidebar
                 weekendsVisible={weekendsVisible}
@@ -103,36 +88,39 @@ export default function DemoApp() {
             />
 
 
-            <div className='demo-app-main flex-grow p-4'
-            onScroll={handleScroll}>
+
+            <div className='demo-app-main flex-grow p-4'>
+                <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange(e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
+            focus:ring-blue-500 focus:border-blue-500"/>
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
                     views={{
-                        customThreeDay: {
-                            type: 'timeGrid',
-                            duration: { days: 3 },
-                            buttonText: '3 Dagar'
-                        },
                         customTwoWeeks: {
                             type: 'timeGrid',
                             duration: { weeks: 2 },
                             buttonText: '2 Veckor'
                         },
-                        multiMonthFourMonth: {
-                            type: 'multiMonth',
-                            duration: { months: 4 }
+                        customInterval: {
+                            type: 'timeGrid',
+                            buttonText: 'Intervall'
                         }
                     }}
                     headerToolbar={{
                         left: 'prev,next,today',
                         center: 'title',
-                        right: 'customThreeDay,customTwoWeeks,dayGridMonth,timeGridWeek,timeGridDay'
+                        right: 'customInterval,dayGridMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
-                    //Hanterar scroll grejen
-                    initialView='multiWeekMonth'
-                    multiWeekMaxColumns={1}
+
+                    initialView='multiMonthYear'
+                    multiMonthMaxColumns={1}
+
+                    visibleRange={dateRange}
 
                     editable={true}
                     firstDay={1}
@@ -143,13 +131,12 @@ export default function DemoApp() {
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
 
-                    droppable={true} // Tillåter att man släpper saker på kalendern
-                    eventReceive={handleEventReceive} // Körs när ett externt event släpps här
+                    droppable={true}
+                    eventReceive={handleEventReceive}
 
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
-                    updateSize={scrollPosition}
                 />
             </div>
         </div>
