@@ -2,7 +2,6 @@ import React, {useEffect, useRef, useState} from "react";
 import {Draggable} from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
-import useGetCourses, {useSaveCourse} from "../hooks.js";
 
 
 export default function Sidebar({
@@ -17,7 +16,7 @@ export default function Sidebar({
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const {data: listOfCourses, loading: loadingCourses, err: coursesGetErr} = useGetCourses();
+
 
     useEffect(() => {
         let draggable = null;
@@ -55,28 +54,47 @@ export default function Sidebar({
                     className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
                     onClick={() => setIsCategoryModalOpen(true) }>Create category
                 </button>
+
+                <CreateEvent
+                    draggableContainerRef={draggableContainerRef}
+                    currentEvents={currentEvents}
+                    externalEvents={externalEvents}
+                    openModal={() => setIsModalOpen(true)}
+                    closeModal={() => setIsModalOpen(false)}
+                    isModalOpen={isModalOpen}
+                    removeExternalEvent={removeExternalEvent}
+                    addExternalEvent={addExternalEvent}
+                />
+                {/*
                 <span>
                   <ul>
                     {listOfCourses.map(course => (
-                        <li key={course.id}>
-                            <h2>{course.name}</h2>
-                            {course.event && course.event.length > 0 ? (
-                                <ul>
-                                    {course.event.map(ev => (
-                                        <li key={ev.id}>
-                                            <strong>{ev.name}</strong>
-                                            <div>Start: {new Date(ev.startTime).toLocaleString()}</div>
-                                            <div>End: {new Date(ev.endTime).toLocaleString()}</div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>No events</p>
-                            )}
-                        </li>
+                        <>
+
+                            <li key={course.id}>
+                                <h2>{course.name}</h2>
+                                {course.event && course.event.length > 0 ? (
+                                    <ul>
+                                        {course.event.map(ev => (
+                                            <li key={ev.id}>
+                                                <strong>{ev.name}</strong>
+                                                <div>Start: {new Date(ev.startTime).toLocaleString()}</div>
+                                                <div>End: {new Date(ev.endTime).toLocaleString()}</div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>No events</p>
+                                )}
+                            </li>
+
+                        </>
+
+
                     ))}
                   </ul>
                 </span>
+                */}
 
 
             </div>
@@ -93,16 +111,9 @@ export default function Sidebar({
                 </label>
             </div>
 
-            <CreateEvent
-                draggableContainerRef={draggableContainerRef}
-                currentEvents={currentEvents}
-                externalEvents={externalEvents}
-                openModal={() => setIsModalOpen(true)}
-                closeModal={() => setIsModalOpen(false)}
-                isModalOpen={isModalOpen}
-                removeExternalEvent={removeExternalEvent}
-                addExternalEvent={addExternalEvent}
-            />
+
+
+
 
         </div>
     )
