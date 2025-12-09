@@ -8,6 +8,8 @@ import interactionPlugin from '@fullcalendar/interaction'
 import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
 import '../Calenda.css'
+import {addDays} from "@fullcalendar/core/internal";
+import {formatDate} from "@fullcalendar/core";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -17,6 +19,10 @@ export default function DemoApp() {
         start: '2020-01-01',
         end: '2020-01-16'
     })
+
+    const updateDateRange = (e) => {
+        setDateRange({...dateRange, [e.target.name]: e.target.value});
+    }
 
     const [externalEvents, setExternalEvents] = useState([
         {id: createEventId(), title: 'Oplanerat uppdrag 1'},
@@ -88,14 +94,27 @@ export default function DemoApp() {
             />
 
 
-
             <div className='demo-app-main flex-grow p-4'>
-                <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
-            focus:ring-blue-500 focus:border-blue-500"/>
+                <div className='flex'>
+                    <input
+                        className="ml-auto mb-1 block w-35 rounded-md border border-gray-300 p-2 shadow-sm
+                    focus:ring-blue-500 focus:border-blue-500"
+                        type="date"
+                        name="start"
+                        value={dateRange.start}
+                        onChange={updateDateRange}
+                    />
+                    <input
+                        className="mb-1 block w-35 rounded-md border border-gray-300 p-2 shadow-sm
+                    focus:ring-blue-500 focus:border-blue-500"
+                        type="date"
+                        name="end"
+                        value={dateRange.end}
+                        onChange={updateDateRange}
+                    />
+                </div>
+
+
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
@@ -107,7 +126,9 @@ export default function DemoApp() {
                         },
                         customInterval: {
                             type: 'timeGrid',
-                            buttonText: 'Intervall'
+                            buttonText: 'Intervall',
+                            slotMinTime: '06:00:00',
+                            slotMaxTime: '17:00:00'
                         }
                     }}
                     headerToolbar={{
@@ -120,7 +141,10 @@ export default function DemoApp() {
                     initialView='multiMonthYear'
                     multiMonthMaxColumns={1}
 
-                    visibleRange={dateRange}
+                    visibleRange={{
+                        start: dateRange.start,
+                        end: new Date(dateRange.end)
+                    }}
 
                     editable={true}
                     firstDay={1}
