@@ -92,11 +92,9 @@ export function useGetTeachers() {
                 setLoading(true);
                 setErr(null);
 
-                const res = await API.teachers();
+                const data = await API.teachers();
                 if (!live) return;
 
-                if (!res.ok) throw new Error("Failed to fetch teachers");
-                const data = await res.json();
                 setTeachers(data);
 
             } catch (e) {
