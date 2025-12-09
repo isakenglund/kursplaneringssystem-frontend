@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Draggable} from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
+import useGetCourses, {useSaveCourse} from "../hooks.js";
 
 
 export default function Sidebar({

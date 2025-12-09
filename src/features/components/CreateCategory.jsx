@@ -32,7 +32,6 @@ export default function CreateCategory({setIsCategoryModalOpen, closeModal}) {
 
     const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourse();
 
-
     const handleColorHex = (colorHex) => {
         setColorHex((colorHex));
     }

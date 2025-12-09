@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {createEventId} from "../../event-utils.js";
 import {formatDate} from "@fullcalendar/core";
-import useGetCourses, {useSaveCourse} from "../hooks.js";
+import useGetCourses, {useSaveCourse, useSaveCourseEvent} from "../hooks.js";
 
 
 export default function CreateEvent({
@@ -16,17 +16,40 @@ export default function CreateEvent({
                                     }) {
 
     const [newEventTitle, setNewEventTitle] = useState('')
+    const [categoryId, setCategoryId] = useState('')
+    const [categoryName, setCategoryName] = useState('')
     const {data: listOfCourses, loading: loadingCourses, err: coursesGetErr} = useGetCourses();
+    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourseEvent();
+
+    const [description, setDescription] = useState('')
+    const [endDate, setEndDate] = useState(new Date())
+    const [name, setName] = useState('')
+    const [startDate, setStartDate] = useState(new Date())
+    const [courseId, setCourseId] = useState('')
+
+    const courseEvent = {
+        description: description,
+        endDate: endDate,
+        name: name,
+        startDate: startDate,
+        courseId: courseId,
+    }
+
+    async function handleCreateEvent() {
+        try {
+            await save(courseEvent);
+        } catch (e) {
+            console.error("Kunde inte spara",e);
+        }
+    }
+
     function SidebarEvent({ event }) {
         return (
             <>
-
-
             <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
                 <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
                 <span className="block italic">{event.title}</span>
             </li>
-
             </>
         )
     }
@@ -37,7 +60,8 @@ export default function CreateEvent({
         if (newEventTitle) {
             const newExternalEvent = {
                 id: createEventId(),
-                title: newEventTitle
+                title: newEventTitle,
+                categoryId: 1
             }
 
             // Lägg till i listan för oplanerade events
@@ -56,7 +80,7 @@ export default function CreateEvent({
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                        <h3 className="text-xl font-bold mb-4">Skapa oplanerat event</h3>
+                        <h3 className="text-xl font-bold mb-4">Skapa event för {categoryName}</h3>
                         <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Titel</label>
@@ -65,8 +89,7 @@ export default function CreateEvent({
                                     value={newEventTitle}
                                     onChange={(e) => setNewEventTitle(e.target.value)}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="T.ex. Föreläsning
-                                   "
+                                    placeholder="T.ex. Föreläsning"
                                     autoFocus
                                 />
                             </div>
@@ -79,7 +102,9 @@ export default function CreateEvent({
                                     Avbryt
                                 </button>
                                 <button type="submit"
-                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                                        onClick={handleCreateEvent}
+                                >
                                     Lägg i lista
                                 </button>
                             </div>
@@ -96,23 +121,27 @@ export default function CreateEvent({
                                 <h2 className="text-base font-bold">{course.name}</h2>
 
                                 <button
-                                    onClick={openModal}
+                                    onClick={() => {
+                                        openModal();
+                                        setCategoryId(course.id);
+                                        setCategoryName(course.name);
+                                        setCourseId(course.id);
+                                    }}
                                     className="bg-blue-600 text-white font-bold px-3 py-1 rounded shadow hover:bg-blue-700 transition"
                                 >
                                     +
                                 </button>
+
                             </div>
 
                             {course.event && course.event.length > 0 ? (
                                 <div>
                                     {course.event.map(event => (
-
                                         <div
                                             key={event.id}
                                             data-id={event.id}
                                             className={`mb-1 fc-event-external p-3 rounded border shadow-sm text-sm font-medium transition flex justify-between items-center
-                            ${event.disabled
-                                                ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
+                                            ${event.disabled? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none" 
                                                 : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
                                             }`}
                                         >
@@ -121,7 +150,7 @@ export default function CreateEvent({
                                             {!event.disabled && (
                                                 <button
                                                     style={{cursor: "pointer"}}
-                                                    onClick={() => removeExternalEvent(event.id)} // <-- tar bort eventet
+                                                    onClick={() => removeExternalEvent(event.id)}
                                                     className="flex items-center justify-center w-5 h-5 text-sm text-gray-700 hover:text-red-500"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -131,7 +160,6 @@ export default function CreateEvent({
                                                     </svg>
                                                 </button>
                                             )}
-
                                         </div>
 
                                     ))}

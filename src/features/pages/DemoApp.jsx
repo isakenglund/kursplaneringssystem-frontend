@@ -10,11 +10,7 @@ import Sidebar from "../components/Sidebar.jsx";
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-
-    const [externalEvents, setExternalEvents] = useState([
-        {id: createEventId(), title: 'Oplanerat uppdrag 1'},
-        {id: createEventId(), title: 'Oplanerat uppdrag 2'}
-    ])
+    const [externalEvents, setExternalEvents] = useState([])
     const calendarRef = useRef(null)
 
     function handleWeekendsToggle() {
@@ -27,18 +23,8 @@ export default function DemoApp() {
         }
     }
 
-    // -- ÄNDRAD: Skapar eventet i "externa listan" istället för direkt i kalendern --
-
-    // -- NYTT: När ett event släpps PÅ kalendern --
-    // Vi vill ta bort det från "Oplanerade listan" eftersom det nu ligger i kalendern
     function handleEventReceive(info) {
         const droppedEventId = info.event.id;
-
-        console.log("Släppt datum: ", info.event.start.toLocaleTimeString());
-
-        //if(droppedEventId.)
-        // Ta bort eventet från externalEvents-staten
-        //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
 
         setExternalEvents(prev =>
             prev.map(e =>
@@ -77,10 +63,6 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-
-
-
-
             <Sidebar
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
@@ -89,7 +71,6 @@ export default function DemoApp() {
                 addExternalEvent={addExternalEvent}
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
-
 
             <div className='demo-app-main flex-grow p-4'>
                 <FullCalendar
@@ -109,10 +90,8 @@ export default function DemoApp() {
                     weekends={weekendsVisible}
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
-
                     droppable={true} // Tillåter att man släpper saker på kalendern
                     eventReceive={handleEventReceive} // Körs när ett externt event släpps här
-
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
