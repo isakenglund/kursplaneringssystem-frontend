@@ -28,45 +28,52 @@ export default function DemoApp() {
         }
     }
 
-    function handleEventReceive(info) {
-        const droppedEventId = info.event.id;
-        const droppedEventStart = info.event.start;
+    function validateEventDrop(info, externalEvents) {
+        const movedEventId = info.event.id;
+        const movedEventStart = info.event.start;
+        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
 
-        const droppedEventEnd = info.event.end || new Date(droppedEventStart.getTime() + 60 * 60 * 1000);
-
-        const externalIndex = externalEvents.findIndex(e => e.id === droppedEventId);
+        const index = externalEvents.findIndex(e => e.id === movedEventId);
         const calendar = info.view.calendar;
 
-        if (externalIndex > 0) {
-            const previousEvent = externalEvents[externalIndex - 1];
-            const previousEventOnCalendar = calendar.getEventById(previousEvent.id);
+        if(index > 0) {
+            const prevEvent = externalEvents[index - 1];
+            const prevEventOnCalendar = calendar.getEventById(prevEvent.id);
 
-            if (previousEventOnCalendar) {
-                const previousEventEndTime = previousEventOnCalendar.end || previousEventOnCalendar.start;
-
-                if (droppedEventStart < previousEventEndTime) {
-                    alert(`Ogiltig placering, event ${info.event.title} måste ligga efter ${previousEvent.title}.`);
+            if (prevEventOnCalendar) {
+                const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
+                if(movedEventStart < prevEventEndTime) {
+                    alert(`Ogiltig placerin, eventet måste ligga EFTER ${prevEvent.title}.`);
                     info.revert();
-                    return;
+                    return false;
                 }
             }
         }
-
-        if (externalIndex < externalEvents.length - 1) {
-            const nextEvent = externalEvents[externalIndex + 1];
+        if(index < externalEvents.length - 1) {
+            const nextEvent = externalEvents[index + 1];
             const nextEventOnCalendar = calendar.getEventById(nextEvent.id);
 
             if (nextEventOnCalendar) {
-                const nextStart = nextEventOnCalendar.start;
-
-                if (droppedEventEnd > nextStart) {
-                    alert(`Ogiltig placering, ${info.event.title} måste ligga före ${nextEvent.title}.`);
+                const nextEventStartTime = nextEventOnCalendar.start;
+                if(movedEventEnd > nextEventStartTime) {
+                    alert(`Ogiltig placering! Måste ligga efter ${nextEvent.title}.`);
                     info.revert();
-                    return;
+                    return false;
                 }
             }
         }
 
+        return true;
+    }
+
+    function handleEventReceive(info) {
+        const isValidEventPlacement = validateEventDrop(info, externalEvents);
+
+        if (!isValidEventPlacement) {
+            return;
+        }
+
+        const droppedEventId = info.event.id;
         setExternalEvents(prev =>
             prev.map(e =>
                 e.id === droppedEventId ? {...e, disabled: true} : e
@@ -74,18 +81,18 @@ export default function DemoApp() {
         );
     }
 
+    function handleEventDrop(info) {
+        validateEventDrop(info, externalEvents);
+    }
 
     function handleEventClick(clickInfo) {
         if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
             const removedEventId = clickInfo.event.id;
 
-            // Ta bort från kalendern
             clickInfo.event.remove();
 
-            // Uppdatera currentEvents så Sidebar renderas om
             setCurrentEvents(prev => prev.filter(event => event.id !== removedEventId));
 
-            // Om eventet fanns i externalEvents, återaktivera det
             setExternalEvents(prev =>
                 prev.map(e =>
                     e.id === removedEventId ? {...e, disabled: false} : e
@@ -136,10 +143,9 @@ export default function DemoApp() {
                     weekends={weekendsVisible}
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
-
-                    droppable={true} // Tillåter att man släpper saker på kalendern
-                    eventReceive={handleEventReceive} // Körs när ett externt event släpps här
-
+                    droppable={true}
+                    eventReceive={handleEventReceive}
+                    eventDrop={handleEventDrop}
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
