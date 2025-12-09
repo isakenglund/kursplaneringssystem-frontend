@@ -37,13 +37,13 @@ export default function TeacherPicker({
     const unSelectedTeachers = teachers ? teachers.filter(teacher => !isSelected(teacher)) : [];
 
     return (
-        <div className="relative mb-6" >
+        <div className="relative mb-6 inline-block w-min" ref={containerRef}>
             <button
                 type={"button"}
                 onClick={() => setOpen(prev => !prev)}
                 className="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition duration-150 ease-in-out relative"
             >
-                <UserPlusIcon className="h-6 w-6 text-gray-700" aria-hidden="true" />
+                <UserPlusIcon className="h-6 w-6 text-gray-700" aria-hidden="true"/>
                 {selectedTeachers.length > 0 && (
                     <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
                         {selectedTeachers.length}
@@ -53,8 +53,7 @@ export default function TeacherPicker({
 
             {open && (
                 <div
-                    ref={containerRef}
-                    className="absolute z-20 mt-2 w-64 right-0 border border-gray-200 rounded-lg bg-white shadow-xl max-h-80 overflow-y-auto divide-y divide-gray-100">
+                    className="absolute z-20 mt-2 right-0 w-58 border border-gray-200 rounded-lg bg-white shadow-xl max-h-80 overflow-y-auto divide-y divide-gray-100">
                     {selectedTeachers.length > 0 && (
                         <div className="p-2 bg-gray-50">
                             <h3 className="text-xs font-medium text-gray-500 uppercase px-2 mb-1">Valda ({selectedTeachers.length})</h3>

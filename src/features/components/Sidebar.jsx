@@ -80,12 +80,12 @@ export default function Sidebar({
                 addExternalEvent={addExternalEvent}
             />
 
+            <div className='ml-auto'>
             <TeacherPicker
                 selectedTeachers={selectedTeachers}
                 setSelectedTeachers={setSelectedTeachers}
             />
-
-
+            </div>
 
         </div>
     )
