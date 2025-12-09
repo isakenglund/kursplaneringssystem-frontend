@@ -12,8 +12,9 @@ export default function DemoApp() {
     const [currentEvents, setCurrentEvents] = useState([])
 
     const [externalEvents, setExternalEvents] = useState([
-        {id: createEventId(), title: 'Oplanerat uppdrag 1'},
-        {id: createEventId(), title: 'Oplanerat uppdrag 2'}
+        {id: createEventId(), title: 'FL1'},
+        {id: createEventId(), title: 'FL2'},
+        {id: createEventId(), title: 'FL3'}
     ])
     const calendarRef = useRef(null)
 
@@ -31,29 +32,40 @@ export default function DemoApp() {
         const droppedEventId = info.event.id;
         const droppedEventStart = info.event.start;
 
+        const droppedEventEnd = info.event.end || new Date(droppedEventStart.getTime() + 60 * 60 * 1000);
+
         const externalIndex = externalEvents.findIndex(e => e.id === droppedEventId);
+        const calendar = info.view.calendar;
 
         if (externalIndex > 0) {
-
             const previousEvent = externalEvents[externalIndex - 1];
-            const previousEventId = previousEvent.id;
-
-            const calendar = info.view.calendar;
-            const previousEventOnCalendar = calendar.getEventById(previousEventId);
+            const previousEventOnCalendar = calendar.getEventById(previousEvent.id);
 
             if (previousEventOnCalendar) {
-                const prevEnd = previousEventOnCalendar.end || previousEventOnCalendar.start;
+                const previousEventEndTime = previousEventOnCalendar.end || previousEventOnCalendar.start;
 
-                if (droppedEventStart < prevEnd) {
-
-                    if(confirm(`Det är inte en giltig tid för det eventet.`)) {
-                        info.revert();
-                        return;
-                    }
+                if (droppedEventStart < previousEventEndTime) {
+                    alert(`Ogiltig placering, event ${info.event.title} måste ligga efter ${previousEvent.title}.`);
+                    info.revert();
+                    return;
                 }
             }
         }
 
+        if (externalIndex < externalEvents.length - 1) {
+            const nextEvent = externalEvents[externalIndex + 1];
+            const nextEventOnCalendar = calendar.getEventById(nextEvent.id);
+
+            if (nextEventOnCalendar) {
+                const nextStart = nextEventOnCalendar.start;
+
+                if (droppedEventEnd > nextStart) {
+                    alert(`Ogiltig placering, ${info.event.title} måste ligga före ${nextEvent.title}.`);
+                    info.revert();
+                    return;
+                }
+            }
+        }
 
         setExternalEvents(prev =>
             prev.map(e =>
