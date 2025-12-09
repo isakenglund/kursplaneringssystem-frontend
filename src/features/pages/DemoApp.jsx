@@ -6,16 +6,18 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
+import { useGetHolidays } from '../hooks.js'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-
     const [externalEvents, setExternalEvents] = useState([
         {id: createEventId(), title: 'Oplanerat uppdrag 1'},
         {id: createEventId(), title: 'Oplanerat uppdrag 2'}
     ])
     const calendarRef = useRef(null)
+    const { data: holidays = [] } = useGetHolidays();
+
 
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
@@ -31,22 +33,35 @@ export default function DemoApp() {
 
     // -- NYTT: När ett event släpps PÅ kalendern --
     // Vi vill ta bort det från "Oplanerade listan" eftersom det nu ligger i kalendern
-    function handleEventReceive(info) {
-        const droppedEventId = info.event.id;
+  function handleEventReceive(info) {
+     const droppedEventId = info.event.id;
+    const eventDate = info.event.start; // JS Date object
+    const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
+    const eventDay = eventDate.getDate();
 
-        console.log("Släppt datum: ", info.event.start.toLocaleTimeString());
+    // Check if the date is a holiday
+     const isHoliday = holidays.some(h => {
+        const match = h.month === eventMonth && h.day === eventDay;
+        return match;
+    });
 
-        //if(droppedEventId.)
-        // Ta bort eventet från externalEvents-staten
-        //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
 
-        setExternalEvents(prev =>
-            prev.map(e =>
-                e.id === droppedEventId ? {...e, disabled: true} : e
-            )
-        );
-
+    if (isHoliday) {
+        alert("You cannot drop events on a holiday!");
+        info.revert(); // Undo the drop in FullCalendar
+        return;
     }
+
+    console.log("Dropped date: ", eventDate.toLocaleString());
+
+    // Disable the event in externalEvents
+    setExternalEvents(prev =>
+        prev.map(e =>
+            e.id === droppedEventId ? { ...e, disabled: true } : e
+        )
+    );
+}
+
 
     function handleEventClick(clickInfo) {
         if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
@@ -77,10 +92,6 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-
-
-
-
             <Sidebar
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}

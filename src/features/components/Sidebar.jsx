@@ -43,7 +43,7 @@ export default function Sidebar({
     return (
         <div
             className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
-
+        
             {isCategoryModalOpen && (
                 <CreateCategory setIsCategoryModalOpen={setIsCategoryModalOpen}/>
             )}
