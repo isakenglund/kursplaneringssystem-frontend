@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {formatDate} from "@fullcalendar/core";
-import useGetCourses, {useSaveCourse, useSaveCourseEvent} from "../hooks.js";
+import {useSaveCourseEvent} from "../hooks.js";
 
 
 export default function CreateEvent({
@@ -11,7 +11,7 @@ export default function CreateEvent({
                                         isModalOpen,
                                         listOfCourses,
                                         refetchCourses,
-                                        onRemoveEvent
+                                        onRemoveEvent,
                                     }) {
     const { save } = useSaveCourseEvent();
     const [categoryId, setCategoryId] = useState('')

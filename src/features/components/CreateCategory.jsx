@@ -1,9 +1,7 @@
 import React, {useState} from "react";
 import ColorPicker from "./ColorPicker.jsx";
-import {useSaveCourse} from "../hooks.js";
 
-
-export default function CreateCategory({setIsCategoryModalOpen}) {
+export default function CreateCategory({setIsCategoryModalOpen, refetchCourses}) {
 
 
     const today = new Date();
@@ -31,8 +29,6 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
         endDate: endDate
     }
 
-    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourse();
-
     const handleColorHex = (colorHex) => {
         setColorHex(colorHex);
     }
@@ -40,6 +36,11 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
     async function handleCreateClick() {
         try {
             await save(course);
+
+            if(refetchCourses) {
+                refetchCourses();
+            }
+
             setIsCategoryModalOpen(false);
         } catch (e) {
             console.error("Kunde inte spara", e);

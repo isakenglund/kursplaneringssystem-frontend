@@ -130,6 +130,7 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 refetchCourses={refetchCourses}
                 onRemoveEvent={handleRemoveEventFromSidebar}
+                refetchCourses={refetchCourses}
             />
 
             <div className='demo-app-main flex-grow p-4'>
