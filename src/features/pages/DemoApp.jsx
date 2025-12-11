@@ -13,8 +13,6 @@ export default function DemoApp() {
     const [currentEvents, setCurrentEvents] = useState([])
     const [externalEvents, setExternalEvents] = useState([
         { id: createEventId(), title: 'FL1' },
-        { id: createEventId(), title: 'FL2' },
-        { id: createEventId(), title: 'FL3' }
     ])
     const calendarRef = useRef(null)
     const { data: holidays = [] } = useGetHolidays();
@@ -29,60 +27,6 @@ export default function DemoApp() {
         }
     }
 
-    function validateEventDrop(info, externalEvents) {
-        const movedEventId = info.event.id;
-        const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
-        const eventDate = info.event.start; // JS Date object
-        const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
-        const eventDay = eventDate.getDate();
-
-        // Check if the date is a holiday
-        // Find the holiday that matches the event date
-        const matchingHoliday = holidays.find(
-            h => h.month === eventMonth && h.day === eventDay
-        );
-
-        if (matchingHoliday) {
-            const holidayName = matchingHoliday.name;
-            alert(`You cannot drop events on a holiday: ${holidayName}`);
-            info.revert(); // Undo the drop
-            return;
-        }
-
-        const index = externalEvents.findIndex(e => e.id === movedEventId);
-        const calendar = info.view.calendar;
-
-        if (index > 0) {
-            const prevEvent = externalEvents[index - 1];
-            const prevEventOnCalendar = calendar.getEventById(prevEvent.id);
-
-            if (prevEventOnCalendar) {
-                const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
-                if (movedEventStart < prevEventEndTime) {
-                    alert(`Ogiltig placerin, eventet måste ligga EFTER ${prevEvent.title}.`);
-                    info.revert();
-                    return false;
-                }
-            }
-        }
-        if (index < externalEvents.length - 1) {
-            const nextEvent = externalEvents[index + 1];
-            const nextEventOnCalendar = calendar.getEventById(nextEvent.id);
-
-            if (nextEventOnCalendar) {
-                const nextEventStartTime = nextEventOnCalendar.start;
-                if (movedEventEnd > nextEventStartTime) {
-                    alert(`Ogiltig placering! Måste ligga FÖRE ${nextEvent.title}.`);
-                    info.revert();
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     function handleEventReceive(info) {
         const isValidEventPlacement = validateEventDrop(info, externalEvents);
 
@@ -91,17 +35,6 @@ export default function DemoApp() {
         }
 
         const droppedEventId = info.event.id;
-        const eventDate = info.event.start; // JS Date object
-
-
-        console.log("Dropped date: ", eventDate.toLocaleString());
-
-        // Disable the event in externalEvents
-        setExternalEvents(prev =>
-            prev.map(e =>
-                e.id === droppedEventId ? { ...e, disabled: true } : e
-            )
-        );
 
         setExternalEvents(prev =>
             prev.map(e =>
@@ -149,7 +82,6 @@ export default function DemoApp() {
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
 
-
             <div className='demo-app-main flex-grow p-4'>
                 <FullCalendar
                     ref={calendarRef}
@@ -168,9 +100,8 @@ export default function DemoApp() {
                     weekends={weekendsVisible}
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
-                    droppable={true}
-                    eventReceive={handleEventReceive}
-                    eventDrop={handleEventDrop}
+                    droppable={true} // Tillåter att man släpper saker på kalendern
+                    eventReceive={handleEventReceive} // Körs när ett externt event släpps här
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
