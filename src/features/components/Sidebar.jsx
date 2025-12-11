@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
-import useGetCourses, {useSaveCourse} from "../hooks.js";
+import useGetCourses, { useSaveCourse } from "../hooks.js";
 
 
 export default function Sidebar({
@@ -26,11 +26,7 @@ export default function Sidebar({
             draggable = new Draggable(draggableContainerRef.current, {
                 itemSelector: '.fc-event-external',
                 eventData: function (eventEl) {
-                    return {
-                        title: eventEl.innerText,
-                        id: eventEl.getAttribute('data-id'),
-
-                    };
+                    return JSON.parse(eventEl.dataset.event);
                 }
             });
         }
@@ -39,6 +35,7 @@ export default function Sidebar({
             if (draggable) draggable.destroy();
         }
     }, []);
+
 
 
 
