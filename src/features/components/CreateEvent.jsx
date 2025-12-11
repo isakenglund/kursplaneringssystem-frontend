@@ -125,7 +125,7 @@ export default function CreateEvent({
                 <div id="external-events" ref={draggableContainerRef} className="space-y-2">
                     {listOfCourses.map(course => (
 
-                        <div key={course.id}>
+                        <div key={course.id} className="border border-gray-300 rounded-lg p-3 bg-gray-50">
                             <div className="flex items-center justify-between mb-2">
                                 <h2 className="text-base font-bold">{course.name}</h2>
 
