@@ -12,7 +12,7 @@ export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [externalEvents, setExternalEvents] = useState([
-        { id: createEventId(), title: 'FL1' },
+        { id: createEventId(), title: 'FL1' }
     ])
     const calendarRef = useRef(null)
     const { data: holidays = [] } = useGetHolidays();
