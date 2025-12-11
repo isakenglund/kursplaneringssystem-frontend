@@ -6,6 +6,10 @@ export const API = {
         method: "GET",
 
     }),
+    courses: () => api('/courses', {
+        method: "GET",
+
+    }),
 
     saveCourse: (course) => api('/courses', {
         method: "POST",
