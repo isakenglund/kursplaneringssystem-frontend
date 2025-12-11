@@ -1,10 +1,10 @@
-import React, {useState, useRef} from 'react'
+import React, { useState, useRef } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
-import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
+import { INITIAL_EVENTS, createEventId } from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
 import { useGetHolidays } from '../hooks.js'
 
@@ -12,13 +12,12 @@ export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [externalEvents, setExternalEvents] = useState([
-        {id: createEventId(), title: 'FL1'},
-        {id: createEventId(), title: 'FL2'},
-        {id: createEventId(), title: 'FL3'}
+        { id: createEventId(), title: 'FL1' },
+        { id: createEventId(), title: 'FL2' },
+        { id: createEventId(), title: 'FL3' }
     ])
     const calendarRef = useRef(null)
     const { data: holidays = [] } = useGetHolidays();
-
 
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
@@ -34,31 +33,47 @@ export default function DemoApp() {
         const movedEventId = info.event.id;
         const movedEventStart = info.event.start;
         const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
+        const eventDate = info.event.start; // JS Date object
+        const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
+        const eventDay = eventDate.getDate();
+
+        // Check if the date is a holiday
+        // Find the holiday that matches the event date
+        const matchingHoliday = holidays.find(
+            h => h.month === eventMonth && h.day === eventDay
+        );
+
+        if (matchingHoliday) {
+            const holidayName = matchingHoliday.name;
+            alert(`You cannot drop events on a holiday: ${holidayName}`);
+            info.revert(); // Undo the drop
+            return;
+        }
 
         const index = externalEvents.findIndex(e => e.id === movedEventId);
         const calendar = info.view.calendar;
 
-        if(index > 0) {
+        if (index > 0) {
             const prevEvent = externalEvents[index - 1];
             const prevEventOnCalendar = calendar.getEventById(prevEvent.id);
 
             if (prevEventOnCalendar) {
                 const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
-                if(movedEventStart < prevEventEndTime) {
+                if (movedEventStart < prevEventEndTime) {
                     alert(`Ogiltig placerin, eventet måste ligga EFTER ${prevEvent.title}.`);
                     info.revert();
                     return false;
                 }
             }
         }
-        if(index < externalEvents.length - 1) {
+        if (index < externalEvents.length - 1) {
             const nextEvent = externalEvents[index + 1];
             const nextEventOnCalendar = calendar.getEventById(nextEvent.id);
 
             if (nextEventOnCalendar) {
                 const nextEventStartTime = nextEventOnCalendar.start;
-                if(movedEventEnd > nextEventStartTime) {
-                    alert(`Ogiltig placering! Måste ligga efter ${nextEvent.title}.`);
+                if (movedEventEnd > nextEventStartTime) {
+                    alert(`Ogiltig placering! Måste ligga FÖRE ${nextEvent.title}.`);
                     info.revert();
                     return false;
                 }
@@ -75,36 +90,22 @@ export default function DemoApp() {
             return;
         }
 
-            const droppedEventId = info.event.id;
-    const eventDate = info.event.start; // JS Date object
-    const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
-    const eventDay = eventDate.getDate();
-
-    // Check if the date is a holiday
-     const isHoliday = holidays.some(h => {
-        const match = h.month === eventMonth && h.day === eventDay;
-        return match;
-    });
+        const droppedEventId = info.event.id;
+        const eventDate = info.event.start; // JS Date object
 
 
-    if (isHoliday) {
-        alert("You cannot drop events on a holiday!");
-        info.revert(); // Undo the drop in FullCalendar
-        return;
-    }
+        console.log("Dropped date: ", eventDate.toLocaleString());
 
-    console.log("Dropped date: ", eventDate.toLocaleString());
-
-    // Disable the event in externalEvents
-    setExternalEvents(prev =>
-        prev.map(e =>
-            e.id === droppedEventId ? { ...e, disabled: true } : e
-        )
-    );
-        
+        // Disable the event in externalEvents
         setExternalEvents(prev =>
             prev.map(e =>
-                e.id === droppedEventId ? {...e, disabled: true} : e
+                e.id === droppedEventId ? { ...e, disabled: true } : e
+            )
+        );
+
+        setExternalEvents(prev =>
+            prev.map(e =>
+                e.id === droppedEventId ? { ...e, disabled: true } : e
             )
         );
     }
@@ -123,7 +124,7 @@ export default function DemoApp() {
 
             setExternalEvents(prev =>
                 prev.map(e =>
-                    e.id === removedEventId ? {...e, disabled: false} : e
+                    e.id === removedEventId ? { ...e, disabled: false } : e
                 )
             );
         }
