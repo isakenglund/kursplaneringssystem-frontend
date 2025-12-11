@@ -7,6 +7,11 @@ export const API = {
 
     }),
 
+    courseEvents: () => api('/course-events', {
+        method: "GET",
+
+    }),
+
     saveCourse: (course) => api('/courses', {
         method: "POST",
         body: JSON.stringify({
