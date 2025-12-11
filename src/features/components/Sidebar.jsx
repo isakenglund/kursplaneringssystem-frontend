@@ -4,18 +4,18 @@ import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
 
 
+
 export default function Sidebar({
     weekendsVisible,
     handleWeekendsToggle,
     currentEvents,
-    externalEvents,
-    addExternalEvent,
     removeExternalEvent,
 
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+
 
     useEffect(() => {
         let draggable = null;
@@ -24,11 +24,7 @@ export default function Sidebar({
             draggable = new Draggable(draggableContainerRef.current, {
                 itemSelector: '.fc-event-external',
                 eventData: function (eventEl) {
-                    return {
-                        title: eventEl.innerText,
-                        id: eventEl.getAttribute('data-id'),
-
-                    };
+                    return JSON.parse(eventEl.dataset.event);
                 }
             });
         }
@@ -37,6 +33,7 @@ export default function Sidebar({
             if (draggable) draggable.destroy();
         }
     }, []);
+
 
 
 
@@ -53,6 +50,47 @@ export default function Sidebar({
                     className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
                     onClick={() => setIsCategoryModalOpen(true)}>Create category
                 </button>
+
+                <CreateEvent
+                    draggableContainerRef={draggableContainerRef}
+                    currentEvents={currentEvents}
+                    openModal={() => setIsModalOpen(true)}
+                    closeModal={() => setIsModalOpen(false)}
+                    isModalOpen={isModalOpen}
+                    removeExternalEvent={removeExternalEvent}
+                />
+                {/*
+                <span>
+                  <ul>
+                    {listOfCourses.map(course => (
+                        <>
+
+                            <li key={course.id}>
+                                <h2>{course.name}</h2>
+                                {course.event && course.event.length > 0 ? (
+                                    <ul>
+                                        {course.event.map(ev => (
+                                            <li key={ev.id}>
+                                                <strong>{ev.name}</strong>
+                                                <div>Start: {new Date(ev.startTime).toLocaleString()}</div>
+                                                <div>End: {new Date(ev.endTime).toLocaleString()}</div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>No events</p>
+                                )}
+                            </li>
+
+                        </>
+
+
+                    ))}
+                  </ul>
+                </span>
+                */}
+
+
             </div>
 
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
@@ -62,10 +100,10 @@ export default function Sidebar({
                         checked={weekendsVisible}
                         onChange={handleWeekendsToggle}
                         className="
-                            h-5 w-5 rounded-md 
-                            appearance-none 
-                            border border-gray-400 
-                            checked:bg-blue-600 
+                            h-5 w-5 rounded-md
+                            appearance-none
+                            border border-gray-400
+                            checked:bg-blue-600
                             checked:border-blue-600
                             flex items-center justify-center
                             "
@@ -74,16 +112,9 @@ export default function Sidebar({
                 </label>
             </div>
 
-            <CreateEvent
-                draggableContainerRef={draggableContainerRef}
-                currentEvents={currentEvents}
-                externalEvents={externalEvents}
-                openModal={() => setIsModalOpen(true)}
-                closeModal={() => setIsModalOpen(false)}
-                isModalOpen={isModalOpen}
-                removeExternalEvent={removeExternalEvent}
-                addExternalEvent={addExternalEvent}
-            />
+
+
+
 
         </div>
     )

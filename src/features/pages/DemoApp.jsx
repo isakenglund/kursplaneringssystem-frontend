@@ -63,9 +63,7 @@ export default function DemoApp() {
     }
 
     const [externalEvents, setExternalEvents] = useState([
-        { id: createEventId(), title: 'FL1' },
-        { id: createEventId(), title: 'FL2' },
-        { id: createEventId(), title: 'FL3' }
+        { id: createEventId(), title: 'FL1' }
     ])
     const calendarRef = useRef(null)
     const { data: holidays = [] } = useGetHolidays();
@@ -201,7 +199,6 @@ export default function DemoApp() {
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
 
-
             <div className='demo-app-main flex-grow p-4'>
                 <div class="fc">
                     {showDateInputs && (
@@ -295,6 +292,9 @@ export default function DemoApp() {
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
+                    eventColor={function (info) {
+                        return info.event.extendedProps.color; // use the color you passed
+                    }}
                 />
             </div>
         </div>

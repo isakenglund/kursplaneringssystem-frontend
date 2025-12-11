@@ -2,7 +2,15 @@ import {api} from "../lib/fetcher.jsx";
 
 export const API = {
 
-    courses: () => api('/courses'),
+    courses: () => api('/courses', {
+        method: "GET",
+
+    }),
+
+    courseEvents: () => api('/course-events', {
+        method: "GET",
+
+    }),
 
     saveCourse: (course) => api('/courses', {
         method: "POST",
@@ -15,7 +23,22 @@ export const API = {
             startDate: course.startDate,
             endDate: course.endDate,
         })
-    }, ),
+    },),
+
+    saveCourseEvent: (courseEvent) => api ('/course-events', {
+        method: "POST",
+        body: JSON.stringify({
+            description: courseEvent.description,
+            endDate: courseEvent.endDate,
+            name: courseEvent.name,
+            startDate: courseEvent.startDate,
+            courseId: courseEvent.courseId,
+            teachers: courseEvent.teachers,
+        })
+    }),
+
+    teachers: () => api('/persons'),
 
     holidays: () => api('/holidays'),
+
 };
