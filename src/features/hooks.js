@@ -89,7 +89,7 @@ export function useSaveCourseEvent(){
         setLoading(true);
         setErr(null);
         try {
-            const res = await API.saveCourse(courseEvent);
+            const res = await API.saveCourseEvent(courseEvent);
             setData(pickList(res));
             return res;
         } catch (e) {
@@ -200,24 +200,3 @@ export function useGetCourseEvents() {
     return { data, loading, err };
 }
 
-export function useSaveCourseEvent() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function save(courseEvent) {
-        setLoading(true);
-        setErr(null);
-        try {
-            const res = await API.saveCourseEvent(courseEvent);
-            setData(pickList(res));
-            return res;
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-    return { data, loading, err, save };
-}

@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {formatDate} from "@fullcalendar/core";
 import TeacherPicker from "./TeacherPicker.jsx";
-import useGetCourses, {useGetCourseEvents, useSaveCourse, useSaveCourseEvent} from "../hooks.js";
+import useGetCourses, {useSaveCourseEvent} from "../hooks.js";
 
 
 export default function CreateEvent({
