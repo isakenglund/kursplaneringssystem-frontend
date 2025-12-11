@@ -13,7 +13,7 @@ export default function CreateEvent({
                                         refetchCourses,
                                         onRemoveEvent
                                     }) {
-
+    const { save } = useSaveCourseEvent();
     const [categoryId, setCategoryId] = useState('')
     const [categoryName, setCategoryName] = useState('')
 

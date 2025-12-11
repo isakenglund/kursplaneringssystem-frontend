@@ -61,38 +61,6 @@ export default function Sidebar({
                     refetchCourses={refetchCourses}
                     onRemoveEvent={onRemoveEvent}
                 />
-                {/*
-                <span>
-                  <ul>
-                    {listOfCourses.map(course => (
-                        <>
-
-                            <li key={course.id}>
-                                <h2>{course.name}</h2>
-                                {course.event && course.event.length > 0 ? (
-                                    <ul>
-                                        {course.event.map(ev => (
-                                            <li key={ev.id}>
-                                                <strong>{ev.name}</strong>
-                                                <div>Start: {new Date(ev.startTime).toLocaleString()}</div>
-                                                <div>End: {new Date(ev.endTime).toLocaleString()}</div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No events</p>
-                                )}
-                            </li>
-
-                        </>
-
-
-                    ))}
-                  </ul>
-                </span>
-                */}
-
-
             </div>
 
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>

@@ -25,8 +25,8 @@ export default function DemoApp() {
     }
 
     function validateEventDrop(info) {
-        const movedEventId = info.event.id;
-        const courseId = info.event.extendedProps.courseId;
+        const movedEventId = parseInt(info.event.id, 10);
+        const courseId = parseInt(info.event.extendedProps.courseId, 10);
         const course = listOfCourses.find(c => c.id === courseId);
 
         if(!course || !course.event) return true;
@@ -34,30 +34,16 @@ export default function DemoApp() {
         const courseEvents = course.event;
         const index = courseEvents.findIndex(e => e.id === movedEventId);
 
+        if(index === -1) return true;
+
         const calendar = info.view.calendar;
         const movedEventStart = info.event.start;
         const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
 
-        const eventDate = info.event.start; // JS Date object
-        const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
-        const eventDay = eventDate.getDate();
-
-        // Check if the date is a holiday
-        // Find the holiday that matches the event date
-        const matchingHoliday = holidays.find(
-            h => h.month === eventMonth && h.day === eventDay
-        );
-
-        if (matchingHoliday) {
-            const holidayName = matchingHoliday.name;
-            alert(`You cannot drop events on a holiday: ${holidayName}`);
-            info.revert(); // Undo the drop
-            return;
-        }
 
         if (index > 0) {
             const prevEventData = courseEvents[index - 1];
-            const prevEventOnCalendar = calendar.getEventById(prevEventData.id);
+            const prevEventOnCalendar = calendar.getEventById(String(prevEventData.id));
 
             if (prevEventOnCalendar) {
                 const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
@@ -70,7 +56,7 @@ export default function DemoApp() {
         }
         if (index < courseEvents.length - 1) {
             const nextEventData = courseEvents[index + 1];
-            const nextEventOnCalendar = calendar.getEventById(nextEventData.id);
+            const nextEventOnCalendar = calendar.getEventById(String(nextEventData.id));
 
             if (nextEventOnCalendar) {
                 const nextEventStartTime = nextEventOnCalendar.start;
@@ -85,18 +71,43 @@ export default function DemoApp() {
         return true;
     }
 
+    function checkForHoliday(info) {
+        const eventDate = info.event.start; // JS Date object
+        const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
+        const eventDay = eventDate.getDate();
 
+        // Check if the date is a holiday
+        // Find the holiday that matches the event date
+        const matchingHoliday = holidays.find(
+            h => h.month === eventMonth && h.day === eventDay
+        );
+
+        if (matchingHoliday) {
+            const holidayName = matchingHoliday.name;
+            alert(`You cannot drop events on a holiday: ${holidayName}`);
+            info.revert(); // Undo the drop
+            return true;
+        }
+
+        return false;
+    }
 
     function handleEventReceive(info) {
         const isValidEventPlacement = validateEventDrop(info);
+        const isHoliday = checkForHoliday(info);
+
+        if(isHoliday) {
+            return;
+        }
 
         if (!isValidEventPlacement) {
-            info.revert();
+            return;
         }
     }
 
     function handleEventDrop(info) {
         validateEventDrop(info);
+        if(checkForHoliday(info)) return;
     }
 
     function handleEventClick(clickInfo) {
