@@ -20,4 +20,17 @@ export const API = {
     teachers: () => api('/persons'),
 
     holidays: () => api('/holidays'),
+
+    saveCourseEvent: (event) => api('/courseEvent', {
+        method: "POST",
+        body: JSON.stringify({
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            teachers: event.teachers,
+        })
+    },),
+
 };

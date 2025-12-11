@@ -17,7 +17,6 @@ export default function Sidebar({
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [selectedTeachers, setSelectedTeachers] = useState([])
 
     useEffect(() => {
         let draggable = null;
@@ -86,13 +85,6 @@ export default function Sidebar({
                 removeExternalEvent={removeExternalEvent}
                 addExternalEvent={addExternalEvent}
             />
-
-            <div className='ml-auto'>
-            <TeacherPicker
-                selectedTeachers={selectedTeachers}
-                setSelectedTeachers={setSelectedTeachers}
-            />
-            </div>
 
         </div>
     )

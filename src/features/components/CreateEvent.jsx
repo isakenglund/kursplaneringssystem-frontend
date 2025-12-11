@@ -1,6 +1,7 @@
-import {useState} from "react";
+import React, {useState} from "react";
 import {createEventId} from "../../event-utils.js";
 import {formatDate} from "@fullcalendar/core";
+import TeacherPicker from "./TeacherPicker.jsx";
 
 
 export default function CreateEvent({
@@ -15,6 +16,8 @@ export default function CreateEvent({
                                     }) {
 
     const [newEventTitle, setNewEventTitle] = useState('')
+    const [selectedTeachers, setSelectedTeachers] = useState([])
+
 
     function SidebarEvent({ event }) {
         return (
@@ -66,6 +69,12 @@ export default function CreateEvent({
                                 />
                             </div>
                             <div className="flex justify-end gap-2 mt-4">
+                                <div className='mr-auto'>
+                                    <TeacherPicker
+                                        selectedTeachers={selectedTeachers}
+                                        setSelectedTeachers={setSelectedTeachers}
+                                    />
+                                </div>
                                 <button
                                     type="button"
                                     onClick={closeModal}
