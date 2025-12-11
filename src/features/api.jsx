@@ -6,10 +6,6 @@ export const API = {
         method: "GET",
 
     }),
-    courses: () => api('/courses', {
-        method: "GET",
-
-    }),
 
     courseEvents: () => api('/course-events', {
         method: "GET",
@@ -37,6 +33,7 @@ export const API = {
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
+            teachers: courseEvent.teachers,
         })
     }),
 
