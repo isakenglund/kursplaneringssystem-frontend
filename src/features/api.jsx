@@ -19,4 +19,5 @@ export const API = {
 
     teachers: () => api('/persons'),
 
+    holidays: () => api('/holidays'),
 };

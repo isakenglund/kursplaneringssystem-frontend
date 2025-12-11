@@ -113,3 +113,32 @@ export function useGetTeachers() {
     return {teachers, loading, err};
 
 }
+
+export function useGetHolidays() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    useEffect(() => {
+        let live = true;
+
+        (async () => {
+            try {
+                setLoading(true);
+                setErr(null);
+
+                const res = await API.holidays(); // fetch from DB
+                if (!live) return;
+                setData(res); // assign directly
+            } catch (e) {
+                if (live) setErr(e);
+            } finally {
+                if (live) setLoading(false);
+            }
+        })();
+
+        return () => { live = false; };
+    }, []);
+
+    return { data, loading, err };
+}

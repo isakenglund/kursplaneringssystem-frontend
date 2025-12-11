@@ -1,67 +1,130 @@
-import React, {useState, useRef} from 'react'
+import React, { useState, useRef } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
-import {INITIAL_EVENTS, createEventId} from '../../event-utils.js'
+import { INITIAL_EVENTS, createEventId } from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
+import { useGetHolidays } from '../hooks.js'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-
     const [externalEvents, setExternalEvents] = useState([
-        {id: createEventId(), title: 'Oplanerat uppdrag 1'},
-        {id: createEventId(), title: 'Oplanerat uppdrag 2'}
+        { id: createEventId(), title: 'FL1' },
+        { id: createEventId(), title: 'FL2' },
+        { id: createEventId(), title: 'FL3' }
     ])
     const calendarRef = useRef(null)
+    const { data: holidays = [] } = useGetHolidays();
 
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
 
     function removeExternalEvent(eventId) {
-        if (confirm(`Are you sure you want to delete the event`)) {
+        if (confirm(`Vill du ta bort eventet?`)) {
             setExternalEvents(prev => prev.filter(e => e.id !== eventId));
         }
     }
 
-    // -- ÄNDRAD: Skapar eventet i "externa listan" istället för direkt i kalendern --
+    function validateEventDrop(info, externalEvents) {
+        const movedEventId = info.event.id;
+        const movedEventStart = info.event.start;
+        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
+        const eventDate = info.event.start; // JS Date object
+        const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
+        const eventDay = eventDate.getDate();
 
-    // -- NYTT: När ett event släpps PÅ kalendern --
-    // Vi vill ta bort det från "Oplanerade listan" eftersom det nu ligger i kalendern
+        // Check if the date is a holiday
+        // Find the holiday that matches the event date
+        const matchingHoliday = holidays.find(
+            h => h.month === eventMonth && h.day === eventDay
+        );
+
+        if (matchingHoliday) {
+            const holidayName = matchingHoliday.name;
+            alert(`You cannot drop events on a holiday: ${holidayName}`);
+            info.revert(); // Undo the drop
+            return;
+        }
+
+        const index = externalEvents.findIndex(e => e.id === movedEventId);
+        const calendar = info.view.calendar;
+
+        if (index > 0) {
+            const prevEvent = externalEvents[index - 1];
+            const prevEventOnCalendar = calendar.getEventById(prevEvent.id);
+
+            if (prevEventOnCalendar) {
+                const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
+                if (movedEventStart < prevEventEndTime) {
+                    alert(`Ogiltig placerin, eventet måste ligga EFTER ${prevEvent.title}.`);
+                    info.revert();
+                    return false;
+                }
+            }
+        }
+        if (index < externalEvents.length - 1) {
+            const nextEvent = externalEvents[index + 1];
+            const nextEventOnCalendar = calendar.getEventById(nextEvent.id);
+
+            if (nextEventOnCalendar) {
+                const nextEventStartTime = nextEventOnCalendar.start;
+                if (movedEventEnd > nextEventStartTime) {
+                    alert(`Ogiltig placering! Måste ligga FÖRE ${nextEvent.title}.`);
+                    info.revert();
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     function handleEventReceive(info) {
+        const isValidEventPlacement = validateEventDrop(info, externalEvents);
+
+        if (!isValidEventPlacement) {
+            return;
+        }
+
         const droppedEventId = info.event.id;
+        const eventDate = info.event.start; // JS Date object
 
-        console.log("Släppt datum: ", info.event.start.toLocaleTimeString());
 
-        //if(droppedEventId.)
-        // Ta bort eventet från externalEvents-staten
-        //setExternalEvents((prev) => prev.filter(e => e.id !== droppedEventId))
+        console.log("Dropped date: ", eventDate.toLocaleString());
 
+        // Disable the event in externalEvents
         setExternalEvents(prev =>
             prev.map(e =>
-                e.id === droppedEventId ? {...e, disabled: true} : e
+                e.id === droppedEventId ? { ...e, disabled: true } : e
             )
         );
 
+        setExternalEvents(prev =>
+            prev.map(e =>
+                e.id === droppedEventId ? { ...e, disabled: true } : e
+            )
+        );
+    }
+
+    function handleEventDrop(info) {
+        validateEventDrop(info, externalEvents);
     }
 
     function handleEventClick(clickInfo) {
         if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
             const removedEventId = clickInfo.event.id;
 
-            // Ta bort från kalendern
             clickInfo.event.remove();
 
-            // Uppdatera currentEvents så Sidebar renderas om
             setCurrentEvents(prev => prev.filter(event => event.id !== removedEventId));
 
-            // Om eventet fanns i externalEvents, återaktivera det
             setExternalEvents(prev =>
                 prev.map(e =>
-                    e.id === removedEventId ? {...e, disabled: false} : e
+                    e.id === removedEventId ? { ...e, disabled: false } : e
                 )
             );
         }
@@ -77,10 +140,6 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-
-
-
-
             <Sidebar
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
@@ -109,10 +168,9 @@ export default function DemoApp() {
                     weekends={weekendsVisible}
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
-
-                    droppable={true} // Tillåter att man släpper saker på kalendern
-                    eventReceive={handleEventReceive} // Körs när ett externt event släpps här
-
+                    droppable={true}
+                    eventReceive={handleEventReceive}
+                    eventDrop={handleEventDrop}
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
