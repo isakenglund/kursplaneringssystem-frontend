@@ -6,6 +6,10 @@ export const API = {
         method: "GET",
 
     }),
+    courses: () => api('/courses', {
+        method: "GET",
+
+    }),
 
     courseEvents: () => api('/course-events', {
         method: "GET",

@@ -2,30 +2,36 @@ import React, {useState} from "react";
 import {formatDate} from "@fullcalendar/core";
 import TeacherPicker from "./TeacherPicker.jsx";
 import useGetCourses, {useSaveCourseEvent} from "../hooks.js";
+import { useState } from "react";
+import { createEventId } from "../../event-utils.js";
+import { formatDate } from "@fullcalendar/core";
+import useGetCourses, { useSaveCourse, useSaveCourseEvent } from "../hooks.js";
 
 
 export default function CreateEvent({
-                                        draggableContainerRef,
-                                        currentEvents,
-                                        openModal,
-                                        closeModal,
-                                        isModalOpen,
-                                        removeExternalEvent,
-                                    }) {
+    draggableContainerRef,
+    currentEvents,
+    externalEvents,
+    openModal,
+    closeModal,
+    isModalOpen,
+    removeExternalEvent,
+    addExternalEvent,
+}) {
 
     const [categoryId, setCategoryId] = useState('')
     const [categoryName, setCategoryName] = useState('')
-    const {data: listOfCourses, loading: loadingCourses, err: coursesGetErr} = useGetCourses();
-    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourseEvent();
+    const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
+    const { data: savedCourse, loading: savingCourse, err: courseSaveErr, save } = useSaveCourseEvent();
 
     const [description, setDescription] = useState('')
-    const [endDate, setEndDate] = useState(new Date())
+    const [endDate, setEndDate] = useState(new DateTime())
     const [name, setName] = useState('')
-    const [startDate, setStartDate] = useState(new Date())
+    const [startDate, setStartDate] = useState(new DateTime())
     const [courseId, setCourseId] = useState('')
     const [selectedTeachers, setSelectedTeachers] = useState([])
 
-    function SidebarEvent({ event }) {
+  function SidebarEvent({ event }) {
         return (
             <>
             <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
@@ -117,20 +123,21 @@ export default function CreateEvent({
                 </div>
             )}
 
+
             <div className='mb-2 mt-2'>
                 <div id="external-events" ref={draggableContainerRef} className="space-y-2">
                     {listOfCourses.map(course => (
 
-                            <div key={course.id}>
-                                <div className="flex items-center justify-between mb-2">
-                                    <h2 className="text-base font-bold">{course.name}</h2>
+                        <div key={course.id}>
+                            <div className="flex items-center justify-between mb-2">
+                                <h2 className="text-base font-bold">{course.name}</h2>
 
                                     <button
                                         onClick={() => {
-                                            openModal();
                                             setCategoryId(course.id);
                                             setCategoryName(course.name);
                                             setCourseId(course.id);
+                                            openModal();
                                         }}
                                         className="bg-blue-600 text-white font-bold px-3 py-1 rounded shadow hover:bg-blue-700 transition"
                                     >
@@ -138,22 +145,29 @@ export default function CreateEvent({
                                     </button>
 
 
-                                </div>
+                            </div>
 
-                                {course.event && course.event.length > 0 ? (
-                                    <div>
-                                        {course.event.map(event => (
-                                            <div
-                                                key={event.id}
-                                                data-id={event.id}
-                                                style={{borderLeft: `4px solid ${course.colorHex || "#3b82f6"}`}} // fallback to Tailwind blue-500
-                                                className={`mb-1 fc-event-external p-3 rounded border shadow-sm text-sm font-medium transition flex justify-between items-center
+                            {course.event && course.event.length > 0 ? (
+                                <div>
+                                    {course.event.map(event => (
+                                        <div
+                                            key={event.id}
+                                            data-event={JSON.stringify({
+                                                id: event.id,
+                                                title: event.name,
+                                                start: event.startDate,
+                                                end: event.endDate,
+                                                courseId: course.id,
+                                                color: course.colorHex || "#3b82f6",
+                                            })}
+                                            style={{ borderLeft: `4px solid ${course.colorHex || "#3b82f6"}` }} // fallback to Tailwind blue-500
+                                            className={`mb-1 fc-event-external p-3 rounded border shadow-sm text-sm font-medium transition flex justify-between items-center
                                             ${event.disabled
                                                     ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
                                                     : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
                                                 }`}
-                                            >
-                                                <span className="text-sm">{course.event.indexOf(event)} {event.name}</span>
+                                        >
+                                            <span className="text-sm">{course.event.indexOf(event)} {event.name}</span>
 
                                                 {!event.disabled && (
                                                     <button
@@ -223,7 +237,7 @@ export default function CreateEvent({
                 <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
                 <ul className="space-y-2">
                     {currentEvents.map((event) => (
-                        <SidebarEvent key={event.id} event={event}/>
+                        <SidebarEvent key={event.id} event={event} />
                     ))}
                 </ul>
             </div>

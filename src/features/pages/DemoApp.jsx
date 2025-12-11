@@ -11,7 +11,9 @@ import { useGetHolidays } from '../hooks.js'
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const [externalEvents, setExternalEvents] = useState([])
+    const [externalEvents, setExternalEvents] = useState([
+        { id: createEventId(), title: 'FL1' }
+    ])
     const calendarRef = useRef(null)
     const { data: holidays = [] } = useGetHolidays();
 
@@ -89,6 +91,10 @@ export default function DemoApp() {
         const droppedEventId = info.event.id;
         const eventDate = info.event.start; // JS Date object
 
+
+        console.log("Dropped date: ", eventDate.toLocaleString());
+
+        // Disable the event in externalEvents
         setExternalEvents(prev =>
             prev.map(e =>
                 e.id === droppedEventId ? { ...e, disabled: true } : e
@@ -165,6 +171,9 @@ export default function DemoApp() {
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
+                    eventColor={function (info) {
+                        return info.event.extendedProps.color; // use the color you passed
+                    }}
                 />
             </div>
         </div>
