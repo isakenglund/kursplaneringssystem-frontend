@@ -23,6 +23,22 @@ export default function CreateEvent({
     const [startDate, setStartDate] = useState(new Date())
     const [courseId, setCourseId] = useState('')
 
+    const courseEvent = {
+        name: name,
+        description: description,
+        startDate: startDate,
+        endDate: endDate,
+        courseId: courseId,
+    }
+
+    async function handleCreateEvent() {
+        try {
+            await save(courseEvent);
+        } catch (e) {
+            console.error("Kunde inte spara",e);
+        }
+    }
+
     function SidebarEvent({ event }) {
         return (
             <>
@@ -40,14 +56,6 @@ export default function CreateEvent({
         if (!name) {
             alert('Vänligen fyll i en titel');
             return;
-        }
-
-        const courseEvent = {
-            name: name,
-            description: description,
-            startDate: startDate,
-            endDate: endDate,
-            courseId: courseId,
         }
 
         try {
