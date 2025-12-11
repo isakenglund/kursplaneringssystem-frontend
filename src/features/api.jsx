@@ -17,4 +17,5 @@ export const API = {
         })
     }, ),
 
+    holidays: () => api('/holidays'),
 };
