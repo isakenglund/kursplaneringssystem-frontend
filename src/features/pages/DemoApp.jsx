@@ -4,33 +4,40 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
-import { INITIAL_EVENTS, createEventId } from '../../event-utils.js'
+import { INITIAL_EVENTS} from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
-import { useGetHolidays } from '../hooks.js'
+import useGetCourses, { useGetHolidays } from '../hooks.js'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const [externalEvents, setExternalEvents] = useState([
-        { id: createEventId(), title: 'FL1' }
-    ])
     const calendarRef = useRef(null)
+
+    const { data: listOfCourses, loading: loadingCourses, refetch: refetchCourses } = useGetCourses();
     const { data: holidays = [] } = useGetHolidays();
 
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
 
-    function removeExternalEvent(eventId) {
-        if (confirm(`Vill du ta bort eventet?`)) {
-            setExternalEvents(prev => prev.filter(e => e.id !== eventId));
-        }
+    function handleRemoveEventFromSidebar(eventId) {
+
     }
 
-    function validateEventDrop(info, externalEvents) {
+    function validateEventDrop(info) {
         const movedEventId = info.event.id;
+        const courseId = info.event.extendedProps.courseId;
+        const course = listOfCourses.find(c => c.id === courseId);
+
+        if(!course || !course.event) return true;
+
+        const courseEvents = course.event;
+        const index = courseEvents.findIndex(e => e.id === movedEventId);
+
+        const calendar = info.view.calendar;
         const movedEventStart = info.event.start;
         const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
+
         const eventDate = info.event.start; // JS Date object
         const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
         const eventDay = eventDate.getDate();
@@ -48,30 +55,27 @@ export default function DemoApp() {
             return;
         }
 
-        const index = externalEvents.findIndex(e => e.id === movedEventId);
-        const calendar = info.view.calendar;
-
         if (index > 0) {
-            const prevEvent = externalEvents[index - 1];
-            const prevEventOnCalendar = calendar.getEventById(prevEvent.id);
+            const prevEventData = courseEvents[index - 1];
+            const prevEventOnCalendar = calendar.getEventById(prevEventData.id);
 
             if (prevEventOnCalendar) {
                 const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
                 if (movedEventStart < prevEventEndTime) {
-                    alert(`Ogiltig placerin, eventet måste ligga EFTER ${prevEvent.title}.`);
+                    alert(`Ogiltig placering! Måste ligga EFTER ${prevEventData.name}.`);
                     info.revert();
                     return false;
                 }
             }
         }
-        if (index < externalEvents.length - 1) {
-            const nextEvent = externalEvents[index + 1];
-            const nextEventOnCalendar = calendar.getEventById(nextEvent.id);
+        if (index < courseEvents.length - 1) {
+            const nextEventData = courseEvents[index + 1];
+            const nextEventOnCalendar = calendar.getEventById(nextEventData.id);
 
             if (nextEventOnCalendar) {
                 const nextEventStartTime = nextEventOnCalendar.start;
                 if (movedEventEnd > nextEventStartTime) {
-                    alert(`Ogiltig placering! Måste ligga FÖRE ${nextEvent.title}.`);
+                    alert(`Ogiltig placering! Måste ligga FÖRE ${nextEventData.name}.`);
                     info.revert();
                     return false;
                 }
@@ -81,59 +85,28 @@ export default function DemoApp() {
         return true;
     }
 
+
+
     function handleEventReceive(info) {
-        const isValidEventPlacement = validateEventDrop(info, externalEvents);
+        const isValidEventPlacement = validateEventDrop(info);
 
         if (!isValidEventPlacement) {
-            return;
+            info.revert();
         }
-
-        const droppedEventId = info.event.id;
-        const eventDate = info.event.start; // JS Date object
-
-
-        console.log("Dropped date: ", eventDate.toLocaleString());
-
-        // Disable the event in externalEvents
-        setExternalEvents(prev =>
-            prev.map(e =>
-                e.id === droppedEventId ? { ...e, disabled: true } : e
-            )
-        );
-
-        setExternalEvents(prev =>
-            prev.map(e =>
-                e.id === droppedEventId ? { ...e, disabled: true } : e
-            )
-        );
     }
 
     function handleEventDrop(info) {
-        validateEventDrop(info, externalEvents);
+        validateEventDrop(info);
     }
 
     function handleEventClick(clickInfo) {
-        if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
-            const removedEventId = clickInfo.event.id;
-
+        if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
             clickInfo.event.remove();
-
-            setCurrentEvents(prev => prev.filter(event => event.id !== removedEventId));
-
-            setExternalEvents(prev =>
-                prev.map(e =>
-                    e.id === removedEventId ? { ...e, disabled: false } : e
-                )
-            );
         }
     }
 
     function handleEvents(events) {
         setCurrentEvents(events)
-    }
-
-    function addExternalEvent(newEvent) {
-        setExternalEvents(prev => [...prev, newEvent]);
     }
 
     return (
@@ -142,9 +115,10 @@ export default function DemoApp() {
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
                 currentEvents={currentEvents}
-                externalEvents={externalEvents}
-                addExternalEvent={addExternalEvent}
-                removeExternalEvent={removeExternalEvent} // <-- ny prop
+                listOfCourses={listOfCourses || []}
+                loadingCourses={loadingCourses}
+                refetchCourses={refetchCourses}
+                onRemoveEvent={handleRemoveEventFromSidebar}
             />
 
             <div className='demo-app-main flex-grow p-4'>
@@ -167,6 +141,7 @@ export default function DemoApp() {
                     locale={svLocale}
                     droppable={true} // Tillåter att man släpper saker på kalendern
                     eventReceive={handleEventReceive} // Körs när ett externt event släpps här
+                    eventDrop={handleEventDrop}
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
