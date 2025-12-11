@@ -68,18 +68,21 @@ export default function CreateEvent({
     async function handleFormSubmit(e) {
         e.preventDefault();
 
+        console.log(e);
+
         if (!name) {
             alert('Vänligen fyll i en titel');
             return;
         }
 
         const courseEvent = {
-            name: name,
-            description: description,
+            name: e.name,                // use the input directly
+            description: e.description || null,
             startDate: startDate,
             endDate: endDate,
             courseId: courseId,
-        }
+        };
+
 
         try {
             await save(courseEvent);
@@ -133,12 +136,6 @@ export default function CreateEvent({
                                     className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
                                 >
                                     Avbryt
-                                </button>
-                                <button type="submit"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                                    onClick={() => handleCreateEvent(newEventTitle)}
-                                >
-                                    Lägg i lista
                                 </button>
                             </div>
                         </form>
