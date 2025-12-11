@@ -56,12 +56,10 @@ export default function Sidebar({
                 <CreateEvent
                     draggableContainerRef={draggableContainerRef}
                     currentEvents={currentEvents}
-                    externalEvents={externalEvents}
                     openModal={() => setIsModalOpen(true)}
                     closeModal={() => setIsModalOpen(false)}
                     isModalOpen={isModalOpen}
                     removeExternalEvent={removeExternalEvent}
-                    addExternalEvent={addExternalEvent}
                 />
                 {/*
                 <span>
