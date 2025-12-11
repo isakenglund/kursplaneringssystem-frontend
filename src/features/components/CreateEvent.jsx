@@ -20,47 +20,19 @@ export default function CreateEvent({
     const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
     const { data: savedCourse, loading: savingCourse, err: courseSaveErr, save } = useSaveCourseEvent();
 
-    const [description, setDescription] = useState('hej')
-    const [endDate, setEndDate] = useState(new Date())
+    const [description, setDescription] = useState('')
+    const [endDate, setEndDate] = useState(new DateTime())
     const [name, setName] = useState('')
-    const [startDate, setStartDate] = useState(new Date())
+    const [startDate, setStartDate] = useState(new DateTime())
     const [courseId, setCourseId] = useState('')
 
-    const courseEvent = {
-        name: name,
-        description: description,
-        endDate: endDate,
-        startDate: startDate,
-        courseId: courseId,
-    }
-
-    async function handleCreateEvent() {
-        const courseEvent = {
-            name: newEventTitle,                // use the input directly
-            description: description || null,
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-            courseId: courseId,
-        };
-
-        console.log(courseEvent.name);
-        console.log(courseEvent);
-
-        try {
-            await save(courseEvent);
-        } catch (e) {
-            console.error("Kunde inte spara", e);
-        }
-    }
-
-
-    function SidebarEvent({ event }) {
+  function SidebarEvent({ event }) {
         return (
             <>
-                <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
-                    <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
-                    <span className="block italic">{event.title}</span>
-                </li>
+            <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
+                <span className="block italic">{event.title}</span>
+            </li>
             </>
         )
     }
@@ -68,21 +40,18 @@ export default function CreateEvent({
     async function handleFormSubmit(e) {
         e.preventDefault();
 
-        console.log(e);
-
         if (!name) {
             alert('Vänligen fyll i en titel');
             return;
         }
 
         const courseEvent = {
-            name: e.name,                // use the input directly
-            description: e.description || null,
+            name: name,
+            description: description,
             startDate: startDate,
             endDate: endDate,
             courseId: courseId,
-        };
-
+        }
 
         try {
             await save(courseEvent);
@@ -142,6 +111,7 @@ export default function CreateEvent({
                     </div>
                 </div>
             )}
+
 
             <div className='mb-2 mt-2'>
                 <div id="external-events" ref={draggableContainerRef} className="space-y-2">
