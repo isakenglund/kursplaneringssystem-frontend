@@ -42,6 +42,7 @@ export default function CreateEvent({
             return;
         }
 
+        console.log(courseId);
         const courseEvent = {
             name: name,
             description: description,
@@ -119,10 +120,10 @@ export default function CreateEvent({
 
                                     <button
                                         onClick={() => {
-                                            openModal();
                                             setCategoryId(course.id);
                                             setCategoryName(course.name);
                                             setCourseId(course.id);
+                                            openModal();
                                         }}
                                         className="bg-blue-600 text-white font-bold px-3 py-1 rounded shadow hover:bg-blue-700 transition"
                                     >
