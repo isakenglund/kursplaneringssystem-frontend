@@ -11,11 +11,7 @@ import { useGetHolidays } from '../hooks.js'
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const [externalEvents, setExternalEvents] = useState([
-        { id: createEventId(), title: 'FL1' },
-        { id: createEventId(), title: 'FL2' },
-        { id: createEventId(), title: 'FL3' }
-    ])
+    const [externalEvents, setExternalEvents] = useState([])
     const calendarRef = useRef(null)
     const { data: holidays = [] } = useGetHolidays();
 
@@ -93,10 +89,6 @@ export default function DemoApp() {
         const droppedEventId = info.event.id;
         const eventDate = info.event.start; // JS Date object
 
-
-        console.log("Dropped date: ", eventDate.toLocaleString());
-
-        // Disable the event in externalEvents
         setExternalEvents(prev =>
             prev.map(e =>
                 e.id === droppedEventId ? { ...e, disabled: true } : e
@@ -148,7 +140,6 @@ export default function DemoApp() {
                 addExternalEvent={addExternalEvent}
                 removeExternalEvent={removeExternalEvent} // <-- ny prop
             />
-
 
             <div className='demo-app-main flex-grow p-4'>
                 <FullCalendar
