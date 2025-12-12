@@ -76,43 +76,52 @@ export default function DemoApp() {
     }
 
     function validateEventDrop(info) {
+        if(!info.event.extendedProps || !info.event.extendedProps.courseId ) {
+            return true;
+        }
         const movedEventId = parseInt(info.event.id, 10);
+        console.log("Flyttar ID:", movedEventId);
         const courseId = parseInt(info.event.extendedProps.courseId, 10);
         const course = listOfCourses.find(c => c.id === courseId);
 
-        if(!course || !course.event) return true;
+        if (!course) { console.log("Hittade ingen kurs"); return true; }
 
         const courseEvents = course.event;
-        const index = courseEvents.findIndex(e => e.id === movedEventId);
-
-        if(index === -1) return true;
+        const currentIndex = courseEvents.findIndex(e => e.id === movedEventId);
+        console.log("Index i listan:", currentIndex);
+        if(currentIndex === -1) {
+            console.log("Hittade inte eventet i kurslistan. Avbryter validering.");
+            return true;
+        }
 
         const calendar = info.view.calendar;
         const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + 60 * 60 * 1000);
+        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
 
+        for (let i = 0; i < currentIndex; i++) {
+            const earlierEventData = courseEvents[i];
+            const earlierEventOnCalendar = calendar.getEventById(String(earlierEventData.id));
 
-        if (index > 0) {
-            const prevEventData = courseEvents[index - 1];
-            const prevEventOnCalendar = calendar.getEventById(String(prevEventData.id));
+            if (earlierEventOnCalendar) {
+                const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
 
-            if (prevEventOnCalendar) {
-                const prevEventEndTime = prevEventOnCalendar.end || prevEventOnCalendar.start;
-                if (movedEventStart < prevEventEndTime) {
-                    alert(`Ogiltig placering! Måste ligga EFTER ${prevEventData.name}.`);
+                if (movedEventStart < earlierEventEnd) {
+                    console.log("Ogiltig ordning")
                     info.revert();
                     return false;
                 }
             }
         }
-        if (index < courseEvents.length - 1) {
-            const nextEventData = courseEvents[index + 1];
-            const nextEventOnCalendar = calendar.getEventById(String(nextEventData.id));
 
-            if (nextEventOnCalendar) {
-                const nextEventStartTime = nextEventOnCalendar.start;
-                if (movedEventEnd > nextEventStartTime) {
-                    alert(`Ogiltig placering! Måste ligga FÖRE ${nextEventData.name}.`);
+        for (let i = currentIndex + 1; i < courseEvents.length; i++) {
+            const laterEventData = courseEvents[i];
+            const laterEventOnCalendar = calendar.getEventById(String(laterEventData.id));
+
+            if(laterEventOnCalendar) {
+                const laterEventStart = laterEventOnCalendar.start;
+
+                if(movedEventEnd > laterEventStart) {
+                    console.log("Ogiltig ordning")
                     info.revert();
                     return false;
                 }
