@@ -166,3 +166,35 @@ export function useGetHolidays() {
 
     return { data, loading, err };
 }
+
+export function useDeleteCourseEvent() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function remove(eventId) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.deleteCourseEvent(eventId);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return { data, loading, err, remove };
+}
+
