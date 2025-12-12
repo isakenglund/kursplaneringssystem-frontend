@@ -60,4 +60,9 @@ export const API = {
 
     holidays: () => api('/holidays'),
 
+
+    deleteCourseEvent: (eventId) =>
+    api(`/course-events/${eventId}`, {
+        method: "DELETE"
+    }),
 };
