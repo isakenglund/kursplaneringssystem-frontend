@@ -33,9 +33,20 @@ export const API = {
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
-            teachers: courseEvent.teachers,
+            teachers: courseEvent.teachers.map(t => t.id),
         })
     }),
 
+    teachers: () => api('/persons'),
+
+    addTeacherToEvent: (eventId, personId) => api(`/course-events/${eventId}/teachers/${personId}`, {
+        method: "PUT",
+    }),
+
+    removeTeacherFromEvent: (eventId, personId) => api(`/course-events/${eventId}/teachers/${personId}`, {
+        method: "DELETE",
+    }),
+
     holidays: () => api('/holidays'),
+
 };
