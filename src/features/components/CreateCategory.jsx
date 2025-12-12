@@ -14,9 +14,8 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
 
 
     const [name, setName] = useState("");
-    const [colorHex, setColorHex] = useState("");
+    const [colorHex, setColorHex] = useState("#0077ff");
     const [categoryType, setCategoryType] = useState("course")
-    const [hp, setHp] = useState(0);
     const [numOfStudents, setNumOfStudents] = useState(0);
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
@@ -25,7 +24,6 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
         type: categoryType,
         name: name,
         colorHex: colorHex,
-        hp: hp,
         numOfStudents: numOfStudents,
         startDate: startDate,
         endDate: endDate
@@ -38,6 +36,7 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
     }
 
     async function handleCreateClick() {
+        console.log(course)
         try {
             await save(course);
             setIsCategoryModalOpen(false);
@@ -99,63 +98,6 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                 {/* Extra fält för kurs */}
                 {categoryType === "course" && (
                     <div className="space-y-3">
-                        {/* HP */}
-                        <div className="space-y-1">
-                            <label className="block text-sm font-medium text-gray-700">HP:</label>
-                            <input
-                                type="text"
-                                inputMode={"numeric"}
-                                value={hp}
-                                min={0}    // min HP
-                                max={180}   // max HP
-                                step={0.5} // increment
-                                onFocus={(e) => {
-                                    let value = e.target.value;
-                                    let numberValue = parseInt(value);
-                                    if(numberValue === 0) {
-                                        numberValue = "";
-                                    }
-                                    setHp(numberValue);
-                                }}
-                                onChange={(e) => {
-                                    let value = e.target.value;
-
-                                    value = value.replace(/[^0-9,.]/g, "");
-
-                                    const dotCount = (value.match(/\./g) || []).length;
-                                    const commaCount = (value.match(/,/g) || []).length;
-
-                                    if (dotCount + commaCount > 1) {
-                                        value = value.slice(0, -1);
-                                    }
-
-                                    if (value === "") {
-                                        setHp("");
-                                        return;
-                                    }
-                                    const numberValue = parseInt(value);
-                                    if (isNaN(numberValue)) return;
-                                    setHp(numberValue);
-                                }} onBlur={(e) => {
-                                const max = 300;
-                                if (e.target.value.trim() === "") {
-                                    setHp(0);
-                                    return;
-                                }
-                                const normalized = hp.replace(",", ".");
-                                let numberValue = parseFloat(normalized);
-
-                                if (isNaN(numberValue)) {
-                                    return;
-                                }
-                                if (numberValue > max) numberValue = max;
-
-                                setHp(String(numberValue));
-                            }}
-                                className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm
-                                   focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
                         {/* Antal studenter */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Antal studenter:</label>

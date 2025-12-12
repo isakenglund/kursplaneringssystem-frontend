@@ -200,7 +200,7 @@ export default function DemoApp() {
             />
 
             <div className='demo-app-main flex-grow p-4'>
-                <div class="fc">
+                <div className="fc">
                     {showDateInputs && (
                     <div className="flex ml-auto">
                         <input
