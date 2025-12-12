@@ -162,7 +162,9 @@ export default function CreateEvent({
                                                             onClick={() => {
                                                                 setEditEventData(event);
                                                                 setShowEditModal(true);
-                                                            }}
+                                                            }
+                                                        }
+                                                            
                                                             className="w-5 h-5 text-gray-700 hover:text-green-500"
                                                         >
 
