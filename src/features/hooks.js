@@ -114,6 +114,40 @@ export function useGetTeachers() {
 
 }
 
+export function useEventTeacherUpdater() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const addTeacher = async (eventId, personId) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const updatedEvent = await API.addTeacherToEvent(eventId, personId);
+            return updatedEvent;
+        } catch (e) {
+            setError(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const removeTeacher = async (eventId, personId) => {
+        setLoading(true);
+        setError(null);
+        try {
+            await API.removeTeacherFromEvent(eventId, personId);
+        } catch (e) {
+            setError(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { addTeacher, removeTeacher, loading, error };
+}
+
 export function useSaveCourseEvent() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
