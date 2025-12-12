@@ -268,7 +268,6 @@ export default function DemoApp() {
 
                     editable={true}
                     firstDay={1}
-                    selectable={true}
                     selectMirror={true}
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
