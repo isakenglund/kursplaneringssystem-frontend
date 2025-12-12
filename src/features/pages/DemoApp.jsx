@@ -71,7 +71,7 @@ export default function DemoApp() {
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
-    
+
     function validateEventDrop(info) {
         if(!info.event.extendedProps || !info.event.extendedProps.courseId ) {
             return true;

@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {formatDate} from "@fullcalendar/core";
+import {useSaveCourseEvent} from "../hooks.js";
+import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
 import useGetCourses, {useDeleteCourseEvent, useSaveCourseEvent} from "../hooks.js";
 
@@ -74,6 +76,12 @@ export default function CreateEvent({
     async function handleFormSubmit(e) {
         e.preventDefault();
 
+        if (!name) {
+            alert('Vänligen fyll i en titel');
+            return;
+        }
+
+        console.log(courseId);
         const courseEvent = {
             name: name,
             description: description,
