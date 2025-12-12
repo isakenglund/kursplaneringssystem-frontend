@@ -6,9 +6,10 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import { INITIAL_EVENTS, createEventId } from '../../event-utils.js'
-import Sidebar from "../components/Sidebar.jsx";
+import LeftSidebar from "../components/LeftSidebar.jsx";
 import { useGetHolidays } from '../hooks.js'
 import '../Calendar.css'
+import RightSideBar from "../components/RightSideBar.jsx";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -190,9 +191,7 @@ export default function DemoApp() {
     return (
         <div className='demo-app relative h-screen flex'>
 
-            <Sidebar
-                weekendsVisible={weekendsVisible}
-                handleWeekendsToggle={handleWeekendsToggle}
+            <LeftSidebar
                 currentEvents={currentEvents}
                 externalEvents={externalEvents}
                 addExternalEvent={addExternalEvent}
@@ -297,6 +296,12 @@ export default function DemoApp() {
                     }}
                 />
             </div>
+
+            <RightSideBar
+            currentEvents={currentEvents}
+            setCurrentEvents={setCurrentEvents}
+            weekendsVisible={weekendsVisible}
+            handleWeekendsToggle={handleWeekendsToggle}/>
         </div>
     )
 }

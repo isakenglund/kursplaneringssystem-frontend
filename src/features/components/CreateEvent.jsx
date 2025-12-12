@@ -7,7 +7,6 @@ import useGetCourses, {useSaveCourseEvent} from "../hooks.js";
 
 export default function CreateEvent({
     draggableContainerRef,
-    currentEvents,
     openModal,
     closeModal,
     isModalOpen,
@@ -25,17 +24,6 @@ export default function CreateEvent({
     const [startDate, setStartDate] = useState(new Date())
     const [courseId, setCourseId] = useState('')
     const [selectedTeachers, setSelectedTeachers] = useState([])
-
-  function SidebarEvent({ event }) {
-        return (
-            <>
-            <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
-                <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
-                <span className="block italic">{event.title}</span>
-            </li>
-            </>
-        )
-    }
 
     async function handleFormSubmit(e) {
         e.preventDefault();
@@ -190,16 +178,6 @@ export default function CreateEvent({
                         ))}
                 </div>
             </div>
-
-            <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
-                <ul className="space-y-2">
-                    {currentEvents.map((event) => (
-                        <SidebarEvent key={event.id} event={event} />
-                    ))}
-                </ul>
-            </div>
-
         </div>
     )
 }
