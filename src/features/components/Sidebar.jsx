@@ -12,6 +12,7 @@ export default function Sidebar({
                                     loadingCourses,
                                     refetchCourses,
                                     onRemoveEvent,
+                                    onEditEvent,
                                 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -62,6 +63,7 @@ export default function Sidebar({
                     listOfCourses={listOfCourses}
                     refetchCourses={refetchCourses}
                     onRemoveEvent={onRemoveEvent}
+                    onEditEvent={onEditEvent}
                     ref={refetchCourses}
                 />
             </div>

@@ -24,6 +24,10 @@ export default function DemoApp() {
 
     }
 
+    function handleEditEventFromSidebar(eventId) {
+
+    }
+
     function validateEventDrop(info) {
         const movedEventId = parseInt(info.event.id, 10);
         const courseId = parseInt(info.event.extendedProps.courseId, 10);
@@ -130,7 +134,7 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 refetchCourses={refetchCourses}
                 onRemoveEvent={handleRemoveEventFromSidebar}
-                refetchCourses={refetchCourses}
+                onEditEvent={handleEditEventFromSidebar}
             />
 
             <div className='demo-app-main flex-grow p-4'>

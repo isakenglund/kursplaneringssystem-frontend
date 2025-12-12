@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {formatDate} from "@fullcalendar/core";
 import {useSaveCourseEvent} from "../hooks.js";
+import EditEventModal from "./EditEventModal.jsx";
 
 
 export default function CreateEvent({
@@ -12,6 +13,7 @@ export default function CreateEvent({
                                         listOfCourses,
                                         refetchCourses,
                                         onRemoveEvent,
+                                        onEditEvent
                                     }) {
     const { save } = useSaveCourseEvent();
     const [categoryId, setCategoryId] = useState('')
@@ -22,6 +24,9 @@ export default function CreateEvent({
     const [name, setName] = useState('')
     const [startDate, setStartDate] = useState(new Date())
     const [courseId, setCourseId] = useState('')
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editEventData, setEditEventData] = useState({})
+
 
     const isEventOnCalendar = (eventId) => {
         return currentEvents.some(ce => String(ce.id) === String(eventId));
@@ -46,7 +51,6 @@ export default function CreateEvent({
             return;
         }
 
-        console.log(courseId);
         const courseEvent = {
             name: name,
             description: description,
@@ -110,7 +114,6 @@ export default function CreateEvent({
 
             <div className='mb-2 mt-2'>
                 <div id="external-events" ref={draggableContainerRef} className="space-y-2">
-                    {/* Rendera Courses och deras events */}
                     {listOfCourses && listOfCourses.map(course => (
                         <div key={course.id}>
                             <div className="flex items-center justify-between mb-2">
@@ -132,8 +135,6 @@ export default function CreateEvent({
                                 <div className="space-y-1">
                                     {course.event.map((event, index) => {
                                         const disabled = isEventOnCalendar(event.id);
-                                        console.log(`Check event ${event.id}:`, disabled, currentEvents.map(e => e.id));
-
                                         return (
                                             <div
                                                 key={event.id}
@@ -146,7 +147,7 @@ export default function CreateEvent({
                                                     color: course.colorHex || "#3b82f6",
                                                 })}
                                                 style={{ borderLeft: `4px solid ${course.colorHex || "#3b82f6"}` }}
-                                                className={`p-3 rounded border shadow-sm text-sm font-medium transition flex justify-between items-center fc-event-external
+                                                className={`p-3 rounded border shadow-sm text-sm font-medium justify-between transition flex items-center fc-event-external
                                                 ${disabled
                                                     ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
                                                     : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
@@ -155,18 +156,37 @@ export default function CreateEvent({
                                                 <span className="text-sm">{index + 1}. {event.name}</span>
 
                                                 {!disabled && (
-                                                    <button
-                                                        style={{cursor: "pointer"}}
-                                                        onClick={() => onRemoveEvent(event.id)}
-                                                        className="flex items-center justify-center w-5 h-5 text-sm text-gray-700 hover:text-red-500"
-                                                    >
-                                                        {/* Papperskorg-ikon */}
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                             strokeWidth={1.5} stroke="currentColor" className="w-full h-full">
-                                                            <path strokeLinecap="round" strokeLinejoin="round"
-                                                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
-                                                        </svg>
-                                                    </button>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            style={{ cursor: "pointer" }}
+                                                            onClick={() => {
+                                                                setEditEventData(event);
+                                                                setShowEditModal(true);
+                                                            }}
+                                                            className="w-5 h-5 text-gray-700 hover:text-green-500"
+                                                        >
+
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                 viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+                                                                 className="w-full h-full">
+                                                                <path strokeLinecap="round" strokeLinejoin="round"
+                                                                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
+                                                            </svg>
+                                                        </button>
+
+                                                        <button
+                                                            style={{ cursor: "pointer" }}
+                                                            onClick={() => onRemoveEvent(event.id)}
+                                                            className="w-5 h-5 text-gray-700 hover:text-red-500"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                 viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+                                                                 className="w-full h-full">
+                                                                <path strokeLinecap="round" strokeLinejoin="round"
+                                                                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
                                         )
@@ -188,6 +208,17 @@ export default function CreateEvent({
                     ))}
                 </ul>
             </div>
+
+            {showEditModal && (
+                <EditEventModal
+                    event={editEventData}
+                    onClose={() => setShowEditModal(false)}
+                />
+            )}
+
+
         </div>
     )
+
+
 }
