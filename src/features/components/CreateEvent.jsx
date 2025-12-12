@@ -2,7 +2,7 @@
     import { createEventId } from "../../event-utils.js";
     import { formatDate } from "@fullcalendar/core";
     import useGetCourses, { useSaveCourse, useSaveCourseEvent, useDeleteCourseEvent } from "../hooks.js";
-import TeacherPicker from "./TeacherPicker.jsx";
+    import TeacherPicker from "./TeacherPicker.jsx";
 
 
 
