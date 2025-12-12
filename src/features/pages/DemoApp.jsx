@@ -6,7 +6,6 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { useGetHolidays } from '../hooks.js'
 import { INITIAL_EVENTS} from '../../event-utils.js'
 import useGetCourses, { useGetHolidays } from '../hooks.js'
 import '../Calendar.css'
@@ -72,11 +71,7 @@ export default function DemoApp() {
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
-
-    function handleRemoveEventFromSidebar(eventId) {
-
-    }
-
+    
     function validateEventDrop(info) {
         if(!info.event.extendedProps || !info.event.extendedProps.courseId ) {
             return true;
@@ -184,11 +179,10 @@ export default function DemoApp() {
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
                 loadingCourses={loadingCourses}
-                onRemoveEvent={handleRemoveEventFromSidebar}
             />
 
             <div className='demo-app-main flex-grow p-4'>
-                <div class="fc">
+                <div className="fc">
                     {showDateInputs && (
                     <div className="flex ml-auto">
                         <input
