@@ -80,17 +80,14 @@ export default function DemoApp() {
             return true;
         }
         const movedEventId = parseInt(info.event.id, 10);
-        console.log("Flyttar ID:", movedEventId);
         const courseId = parseInt(info.event.extendedProps.courseId, 10);
         const course = listOfCourses.find(c => c.id === courseId);
 
-        if (!course) { console.log("Hittade ingen kurs"); return true; }
+        if (!course) { return true; }
 
         const courseEvents = course.event;
         const currentIndex = courseEvents.findIndex(e => e.id === movedEventId);
-        console.log("Index i listan:", currentIndex);
         if(currentIndex === -1) {
-            console.log("Hittade inte eventet i kurslistan. Avbryter validering.");
             return true;
         }
 
