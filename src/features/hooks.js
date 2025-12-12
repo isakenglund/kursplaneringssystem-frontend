@@ -80,39 +80,38 @@ export function useSaveCourse(){
     return { data, loading, err, save };
 }
 
-export function useGetCourseEvents() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
+export function useGetTeachers() {
+    const [teachers, setTeachers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [err, setErr] = useState(null);
 
     useEffect(() => {
         let live = true;
-
         (async () => {
             try {
                 setLoading(true);
                 setErr(null);
 
-                if (USE_MOCK) {
-                    await delay(150);
-                    if (!live) return;
-                    setData(MOCK.courses() ?? []);
-                } else {
-                    const res = await API.courseEvents();
-                    if (!live) return;
-                    setData(pickList(res, 'type'));
-                }
+                const data = await API.teachers();
+                if (!live) return;
+
+                setTeachers(data);
+
             } catch (e) {
-                if (live) setErr(e);
+                if (live) {
+                    setErr(e);
+                    setTeachers([]);
+                }
             } finally {
-                if (live) setLoading(false);
+                if(live) setLoading(false);
             }
         })();
-
         return () => { live = false; };
+
     }, []);
 
-    return { data, loading, err };
+    return {teachers, loading, err};
+
 }
 
 export function useSaveCourseEvent() {

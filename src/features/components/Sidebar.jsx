@@ -2,15 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
-import useGetCourses, { useSaveCourse } from "../hooks.js";
+
 
 
 export default function Sidebar({
     weekendsVisible,
     handleWeekendsToggle,
     currentEvents,
-    externalEvents,
-    addExternalEvent,
     removeExternalEvent,
 
 }) {
@@ -102,10 +100,10 @@ export default function Sidebar({
                         checked={weekendsVisible}
                         onChange={handleWeekendsToggle}
                         className="
-                            h-5 w-5 rounded-md 
-                            appearance-none 
-                            border border-gray-400 
-                            checked:bg-blue-600 
+                            h-5 w-5 rounded-md
+                            appearance-none
+                            border border-gray-400
+                            checked:bg-blue-600
                             checked:border-blue-600
                             flex items-center justify-center
                             "

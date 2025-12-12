@@ -2,15 +2,66 @@ import React, { useState, useRef } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import { INITIAL_EVENTS, createEventId } from '../../event-utils.js'
 import Sidebar from "../components/Sidebar.jsx";
 import { useGetHolidays } from '../hooks.js'
+import '../Calendar.css'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const todayDate = `${yyyy}-${mm}-${dd}`;
+
+    const [dateRange, setDateRange] = useState({
+        start: todayDate,
+        end: todayDate,
+    })
+    const [showDateInputs, setShowDateInputs] = useState(false);
+
+    const handleDatesSet = (dateInfo) => {
+        if (dateInfo.view.type === 'customInterval') {
+            setShowDateInputs(true);
+        } else {
+            setShowDateInputs(false);
+        }
+    }
+
+    const handleCustomDateChange = (direction) =>{
+
+        const calendarApi = calendarRef.current.getApi();
+
+        if(calendarApi.view.type === 'customInterval') {
+            const newStart = new Date(dateRange.start)
+            const newEnd = new Date(dateRange.end)
+
+            const diffTime = Math.abs(newEnd.getTime() - newStart.getTime())
+            const diffDays = Math.ceil(diffTime / (1000*60*60*24)+1);
+
+            const sign = direction === 'next' ? 1 : -1;
+
+            newStart.setDate(newStart.getDate() + diffDays * sign);
+            newEnd.setDate(newEnd.getDate() + diffDays * sign);
+
+            setDateRange({start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0]});
+        }
+        else{
+            calendarApi[direction]();
+        }
+
+    }
+
+    const updateDateRange = (e) => {
+        setDateRange({...dateRange, [e.target.name]: e.target.value});
+    }
+
     const [externalEvents, setExternalEvents] = useState([
         { id: createEventId(), title: 'FL1' }
     ])
@@ -138,6 +189,7 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
+
             <Sidebar
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
@@ -148,15 +200,84 @@ export default function DemoApp() {
             />
 
             <div className='demo-app-main flex-grow p-4'>
+                <div class="fc">
+                    {showDateInputs && (
+                    <div className="flex ml-auto">
+                        <input
+                            className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
+                            focus:ring-blue-500 focus:border-blue-500"
+                            type="date"
+                            name="start"
+                            value={dateRange.start}
+                            onChange={updateDateRange}
+                        />
+                        <input
+                            className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
+                            focus:ring-blue-500 focus:border-blue-500"
+                            type="date"
+                            name="end"
+                            value={dateRange.end}
+                            onChange={updateDateRange}
+                        />
+                    </div>
+                        )}
+                </div>
+
+
                 <FullCalendar
                     ref={calendarRef}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                    headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
+                    views={{
+                        customTwoWeeks: {
+                            type: 'timeGrid',
+                            duration: { weeks: 2 },
+                            buttonText: '2 Veckor',
+                        },
+                        customInterval: {
+                            type: 'timeGrid',
+                            buttonText: 'Intervall',
+                        },
+                        customMultiMonth: {
+                            type: 'multiMonthYear',
+                            buttonText: 'Months',
+                        }
                     }}
-                    initialView='timeGridWeek'
+
+                    customButtons={{
+                        smartPrev: {
+                            icon: 'chevron-left',
+                            click: () => handleCustomDateChange('prev')
+                        },
+                        smartNext: {
+                            icon: 'chevron-right',
+                            click: () => handleCustomDateChange('next')
+                        }
+                    }}
+                    dayHeaderFormat={{
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'numeric',
+                        omitCommas: true
+                    }}
+                    headerToolbar={{
+                        left: 'smartPrev,smartNext,today',
+                        center: 'title',
+                        right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
+                    }}
+                    height="100%"
+
+                    datesSet={handleDatesSet}
+
+                    initialView='multiMonthYear'
+                    multiMonthMaxColumns={1}
+
+                    visibleRange={showDateInputs
+                        ? { start: dateRange.start, end: new Date(dateRange.end) }
+                        : undefined}
+
+                    slotMinTime={'06:00:00'}
+                    slotMaxTime={'18:00:00'}
+
                     editable={true}
                     firstDay={1}
                     selectable={true}
@@ -165,8 +286,9 @@ export default function DemoApp() {
                     weekends={weekendsVisible}
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
-                    droppable={true} // Tillåter att man släpper saker på kalendern
-                    eventReceive={handleEventReceive} // Körs när ett externt event släpps här
+                    droppable={true}
+                    eventReceive={handleEventReceive}
+                    eventDrop={handleEventDrop}
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}

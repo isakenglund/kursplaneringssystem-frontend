@@ -6,15 +6,6 @@ export const API = {
         method: "GET",
 
     }),
-    courses: () => api('/courses', {
-        method: "GET",
-
-    }),
-
-    courseEvents: () => api('/course-events', {
-        method: "GET",
-
-    }),
 
     saveCourse: (course) => api('/courses', {
         method: "POST",
@@ -37,12 +28,9 @@ export const API = {
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
+            teachers: courseEvent.teachers,
         })
     }),
 
     holidays: () => api('/holidays'),
-
-     deleteCourseEvent: (eventId) => api(`/course-events/${eventId}`, {
-            method: "DELETE"
-        }),
 };

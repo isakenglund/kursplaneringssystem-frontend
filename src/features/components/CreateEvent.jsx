@@ -2,6 +2,8 @@
     import { createEventId } from "../../event-utils.js";
     import { formatDate } from "@fullcalendar/core";
     import useGetCourses, { useSaveCourse, useSaveCourseEvent, useDeleteCourseEvent } from "../hooks.js";
+import TeacherPicker from "./TeacherPicker.jsx";
+
 
 
     export default function CreateEvent({
@@ -21,6 +23,7 @@
         // const { data: savedCourse, loading: savingCourse, err: courseSaveErr, save } = useSaveCourseEvent();
         const { remove: deleteEvent, loading: deletingEvent, err: deleteErr } = useDeleteCourseEvent();
 
+        const [selectedTeachers, setSelectedTeachers] = useState([])
         const [description, setDescription] = useState('');
         const [endDate, setEndDate] = useState(new Date());
         const [name, setName] = useState('');
@@ -80,7 +83,7 @@
                 startTime: startDate,
                 endTime: endDate,
                 courseId: courseId, // send the foreign key
-                teachers: selectedTeachers // can be empty array
+                teachers: selectedTeachers.map(teacher => teacher.id),
             };
 
             console.log(courseEvent)
@@ -100,7 +103,7 @@
                 setDescription('');
                 setStartDate(new Date());
                 setEndDate(new Date());
-                setSelectedTeachers([]);
+               setSelectedTeachers([]);
                 closeModal();
             } catch (e) {
                 console.error("Kunde inte spara eventet:", e);
@@ -180,6 +183,12 @@
                                     />
                                 </div>
                                 <div className="flex justify-end gap-2 mt-4">
+                                    <div className='mr-auto'>
+                                    <TeacherPicker
+                                        selectedTeachers={selectedTeachers}
+                                        setSelectedTeachers={setSelectedTeachers}
+                                    />
+                                </div>
                                     <button type="submit"
                                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                                     >
