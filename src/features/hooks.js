@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import { API } from './api';
 
 const USE_MOCK = (import.meta.env?.VITE_USE_MOCK ?? 'true') === 'false';
@@ -27,12 +27,6 @@ export default function useGetCourses() {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
 
-    const [trigger, setTrigger] = useState(0);
-
-    const refetch = useCallback(() => {
-        setTrigger(prev => prev + 1);
-    }, []);
-
     useEffect(() => {
         let live = true;
 
@@ -58,9 +52,9 @@ export default function useGetCourses() {
         })();
 
         return () => { live = false; };
-    }, [trigger]);
+    }, []);
 
-    return { data, loading, err ,refetch};
+    return { data, loading, err};
 }
 
 export function useSaveCourse(){

@@ -10,13 +10,11 @@ export default function Sidebar({
                                     currentEvents,
                                     listOfCourses,
                                     loadingCourses,
-                                    refetchCourses,
                                     onRemoveEvent,
                                 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-
 
     useEffect(() => {
         let draggable = null;
@@ -35,7 +33,6 @@ export default function Sidebar({
         }
     }, [listOfCourses]);
 
-
     return (
         <div
             className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
@@ -43,7 +40,6 @@ export default function Sidebar({
             {isCategoryModalOpen && (
                 <CreateCategory
                     setIsCategoryModalOpen={setIsCategoryModalOpen}
-                    refetchCourses={refetchCourses}
                 />
             )}
 
@@ -60,9 +56,7 @@ export default function Sidebar({
                     closeModal={() => setIsModalOpen(false)}
                     isModalOpen={isModalOpen}
                     listOfCourses={listOfCourses}
-                    refetchCourses={refetchCourses}
                     onRemoveEvent={onRemoveEvent}
-                    ref={refetchCourses}
                 />
             </div>
 

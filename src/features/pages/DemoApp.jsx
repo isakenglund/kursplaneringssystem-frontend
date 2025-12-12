@@ -13,7 +13,7 @@ export default function DemoApp() {
     const [currentEvents, setCurrentEvents] = useState([])
     const calendarRef = useRef(null)
 
-    const { data: listOfCourses, loading: loadingCourses, refetch: refetchCourses } = useGetCourses();
+    const { data: listOfCourses, loading: loadingCourses} = useGetCourses();
     const { data: holidays = [] } = useGetHolidays();
 
     function handleWeekendsToggle() {
@@ -72,12 +72,10 @@ export default function DemoApp() {
     }
 
     function checkForHoliday(info) {
-        const eventDate = info.event.start; // JS Date object
-        const eventMonth = eventDate.getMonth() + 1; // JS months are 0-indexed
+        const eventDate = info.event.start;
+        const eventMonth = eventDate.getMonth() + 1;
         const eventDay = eventDate.getDate();
 
-        // Check if the date is a holiday
-        // Find the holiday that matches the event date
         const matchingHoliday = holidays.find(
             h => h.month === eventMonth && h.day === eventDay
         );
@@ -85,7 +83,7 @@ export default function DemoApp() {
         if (matchingHoliday) {
             const holidayName = matchingHoliday.name;
             alert(`You cannot drop events on a holiday: ${holidayName}`);
-            info.revert(); // Undo the drop
+            info.revert();
             return true;
         }
 
@@ -128,9 +126,7 @@ export default function DemoApp() {
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
                 loadingCourses={loadingCourses}
-                refetchCourses={refetchCourses}
                 onRemoveEvent={handleRemoveEventFromSidebar}
-                refetchCourses={refetchCourses}
             />
 
             <div className='demo-app-main flex-grow p-4'>
