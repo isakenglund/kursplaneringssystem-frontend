@@ -235,7 +235,7 @@ export default function CreateEvent({
                                     +
                                 </button>
                             </div>
-
+                        
                             {course.event && course.event.length > 0 ? (
                                 <div className="space-y-1">
                                     {course.event.map((event, index) => {
@@ -302,7 +302,6 @@ export default function CreateEvent({
                             ) : (
                                 <p className="text-sm text-gray-400 italic">Inga events.</p>
                             )}
-                            {renderCourseEvents(course.event, course)}
                         </div>
                     ))}
                 </div>
