@@ -1,7 +1,8 @@
-    import { useState, useEffect } from "react";
-    import {  formatDate } from "@fullcalendar/core";
-    import useGetCourses, { useSaveCourseEvent, useDeleteCourseEvent } from "../hooks.js";
-    import TeacherPicker from "./TeacherPicker.jsx";
+import React, {useState} from "react";
+import {formatDate} from "@fullcalendar/core";
+import TeacherPicker from "./TeacherPicker.jsx";
+import useGetCourses, {useSaveCourseEvent} from "../hooks.js";
+
 
 
 export default function CreateEvent({
@@ -74,6 +75,8 @@ export default function CreateEvent({
 
         async function handleFormSubmit(e) {
             e.preventDefault();
+    async function handleFormSubmit(e) {
+        e.preventDefault();
 
             const courseEvent = {
                 name: name,
@@ -233,16 +236,7 @@ export default function CreateEvent({
                         ))}
                     </div>
                 </div>
-
-                {/* Sidebar with current events */}
-                <div className='demo-app-sidebar-section'>
-                    <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
-                    <ul className="space-y-2">
-                        {currentEvents.map((event) => (
-                            <SidebarEvent key={event.id} event={event} />
-                        ))}
-                    </ul>
-                </div>
             </div>
-        );
-    }
+        </div>
+    )
+}
