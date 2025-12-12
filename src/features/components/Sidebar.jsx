@@ -1,21 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Draggable } from "@fullcalendar/interaction";
+import React, {useEffect, useRef, useState} from "react";
+import {Draggable} from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
 
 
-
 export default function Sidebar({
-    weekendsVisible,
-    handleWeekendsToggle,
-    currentEvents,
-    removeExternalEvent,
-
-}) {
+                                    weekendsVisible,
+                                    handleWeekendsToggle,
+                                    currentEvents,
+                                    listOfCourses,
+                                    loadingCourses,
+                                    onRemoveEvent,
+                                }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-
 
     useEffect(() => {
         let draggable = null;
@@ -32,17 +31,16 @@ export default function Sidebar({
         return () => {
             if (draggable) draggable.destroy();
         }
-    }, []);
-
-
-
+    }, [listOfCourses]);
 
     return (
         <div
             className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
 
             {isCategoryModalOpen && (
-                <CreateCategory setIsCategoryModalOpen={setIsCategoryModalOpen} />
+                <CreateCategory
+                    setIsCategoryModalOpen={setIsCategoryModalOpen}
+                />
             )}
 
             <div className='demo-app-sidebar-section mb-8'>
@@ -57,40 +55,9 @@ export default function Sidebar({
                     openModal={() => setIsModalOpen(true)}
                     closeModal={() => setIsModalOpen(false)}
                     isModalOpen={isModalOpen}
-                    removeExternalEvent={removeExternalEvent}
+                    listOfCourses={listOfCourses}
+                    onRemoveEvent={onRemoveEvent}
                 />
-                {/*
-                <span>
-                  <ul>
-                    {listOfCourses.map(course => (
-                        <>
-
-                            <li key={course.id}>
-                                <h2>{course.name}</h2>
-                                {course.event && course.event.length > 0 ? (
-                                    <ul>
-                                        {course.event.map(ev => (
-                                            <li key={ev.id}>
-                                                <strong>{ev.name}</strong>
-                                                <div>Start: {new Date(ev.startTime).toLocaleString()}</div>
-                                                <div>End: {new Date(ev.endTime).toLocaleString()}</div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No events</p>
-                                )}
-                            </li>
-
-                        </>
-
-
-                    ))}
-                  </ul>
-                </span>
-                */}
-
-
             </div>
 
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
@@ -111,10 +78,6 @@ export default function Sidebar({
                     <span className="text-lg font-bold text-gray-600">Visa helger</span>
                 </label>
             </div>
-
-
-
-
 
         </div>
     )

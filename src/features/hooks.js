@@ -54,8 +54,7 @@ export default function useGetCourses() {
         return () => { live = false; };
     }, []);
 
-    return { data, loading, err };
-
+    return { data, loading, err};
 }
 
 export function useSaveCourse(){

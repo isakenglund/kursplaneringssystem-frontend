@@ -40,6 +40,7 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
     async function handleCreateClick() {
         try {
             await save(course);
+
             setIsCategoryModalOpen(false);
         } catch (e) {
             console.error("Kunde inte spara", e);

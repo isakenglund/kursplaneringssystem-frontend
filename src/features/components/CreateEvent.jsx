@@ -1,22 +1,18 @@
     import { useState, useEffect } from "react";
-    import { createEventId } from "../../event-utils.js";
-    import { formatDate } from "@fullcalendar/core";
-    import useGetCourses, { useSaveCourse, useSaveCourseEvent, useDeleteCourseEvent } from "../hooks.js";
+    import {  formatDate } from "@fullcalendar/core";
+    import useGetCourses, { useSaveCourseEvent, useDeleteCourseEvent } from "../hooks.js";
     import TeacherPicker from "./TeacherPicker.jsx";
 
 
-
-    export default function CreateEvent({
-        draggableContainerRef,
-        currentEvents,
-        externalEvents,
-        openModal,
-        closeModal,
-        isModalOpen,
-        removeExternalEvent,
-        addExternalEvent,
-    }) {
-
+export default function CreateEvent({
+                                        draggableContainerRef,
+                                        currentEvents,
+                                        openModal,
+                                        closeModal,
+                                        isModalOpen,
+                                        listOfCourses,
+                                        onRemoveEvent,
+                                    }) {
         const [categoryId, setCategoryId] = useState('')
         const [categoryName, setCategoryName] = useState('')
         const { data: fetchedCourses } = useGetCourses();
@@ -62,7 +58,10 @@
             }
         }
 
-        function SidebarEvent({ event }) {
+        const isEventOnCalendar = (eventId) => {
+        return currentEvents.some(ce => String(ce.id) === String(eventId));
+    }
+    function SidebarEvent({ event }) {
             return (
                 <>
                     <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
@@ -137,7 +136,6 @@
                                 <button
                                     onClick={() => {
                                         removeCourseEvent(course.id, event.id);
-                                        removeExternalEvent(event.id); // if you also use external events
                                     }}
                                     className="flex items-center justify-center w-5 h-5 text-sm text-gray-700 hover:text-red-500"
                                 >
@@ -178,8 +176,8 @@
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="T.ex. Föreläsning om"
-                                    />
+                                        placeholder="T.ex. Föreläsning om..."
+                                />
                                 </div>
                                 <div className="flex justify-end gap-2 mt-4">
                                     <div className='mr-auto'>
