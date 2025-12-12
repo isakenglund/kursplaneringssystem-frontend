@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {formatDate} from "@fullcalendar/core";
-import {useSaveCourseEvent} from "../hooks.js";
 import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
 import useGetCourses, {useDeleteCourseEvent, useSaveCourseEvent} from "../hooks.js";
