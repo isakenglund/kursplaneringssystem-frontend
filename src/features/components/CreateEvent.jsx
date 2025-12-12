@@ -29,7 +29,6 @@ import TeacherPicker from "./TeacherPicker.jsx";
         const [name, setName] = useState('');
         const [startDate, setStartDate] = useState(new Date());
         const [courseId, setCourseId] = useState('');
-        const [selectedTeachers, setSelectedTeachers] = useState([]);
 
         const [courses, setCourses] = useState([]);
 
