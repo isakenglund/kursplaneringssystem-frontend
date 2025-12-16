@@ -1,9 +1,10 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import ColorPicker from "./ColorPicker.jsx";
-import {useSaveCourse} from "../hooks.js";
+import { useSaveCourse } from "../hooks.js";
+import DatePicker from "react-datepicker";
 
 
-export default function CreateCategory({setIsCategoryModalOpen}) {
+export default function CreateCategory({ setIsCategoryModalOpen }) {
 
 
     const today = new Date();
@@ -12,13 +13,13 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
     const dd = String(today.getDate()).padStart(2, "0");
     const todayDate = `${yyyy}-${mm}-${dd}`;
 
-
     const [name, setName] = useState("");
     const [colorHex, setColorHex] = useState("#0077ff");
     const [categoryType, setCategoryType] = useState("course")
     const [numOfStudents, setNumOfStudents] = useState(0);
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
+    
 
     const course = {
         type: categoryType,
@@ -29,7 +30,7 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
         endDate: endDate
     }
 
-    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourse();
+    const { data: savedCourse, loading: savingCourse, err: courseSaveErr, save } = useSaveCourse();
 
     const handleColorHex = (colorHex) => {
         setColorHex(colorHex);
@@ -52,7 +53,8 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
             <div className="bg-white p-6 rounded-lg shadow-xl w-96 gap-y-4">
                 <h3 className="text-xl font-bold mb-4">Skapa category</h3>
                 {/* Kategorinamn */}
-                <div className="space-y-1">
+                {categoryType !== "semester" && (
+                    <div className="space-y-1">
                     <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
                     <input
                         type="text"
@@ -64,6 +66,12 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                         }}
                     />
                 </div>
+                )}
+                {categoryType === "semester" && (
+                    <VacationPicker 
+                        
+                    />
+                )}
                 {/* Radioknappar */}
                 <div className="flex gap-6 items-center text-sm text-gray-700 my-3">
                     <label className="flex items-center gap-2">
@@ -92,9 +100,24 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                             }}
                         /> Övrigt
                     </label>
+                    <label className="flex items-center gap-2">
+                        <input
+                            type='radio'
+                            name='categoryType'
+                            value='semester'
+                            checked={categoryType === "semester"}
+                            onChange={(e) => {
+                                setCategoryType(e.target.value);
+                                setStartDate(todayDate);
+                                setEndDate(todayDate)
+                            }}
+                        /> Semester
+                    </label>
                 </div>
 
-                <ColorPicker handleColorHex={handleColorHex}/>
+                {categoryType !== "semester" && (
+                    <ColorPicker handleColorHex={handleColorHex} />
+                )}
 
                 {/* Extra fält för kurs */}
                 {categoryType === "course" && (
@@ -112,7 +135,7 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                                 onFocus={(e) => {
                                     let value = e.target.value;
                                     let numberValue = parseInt(value);
-                                    if(numberValue === 0) {
+                                    if (numberValue === 0) {
                                         numberValue = "";
                                     }
                                     setNumOfStudents(numberValue);
@@ -179,10 +202,10 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                 )}
                 <div className="flex justify-end gap-2 mt-4">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                            onClick={handleCreateClick}>Skapa
+                        onClick={handleCreateClick}>Skapa
                     </button>
                     <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
-                            onClick={() => setIsCategoryModalOpen(false)}>Avbryt
+                        onClick={() => setIsCategoryModalOpen(false)}>Avbryt
                     </button>
                 </div>
             </div>
