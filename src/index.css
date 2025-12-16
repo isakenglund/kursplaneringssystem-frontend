@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 html,
 body,
 body > div { /* the react root */
@@ -53,4 +54,20 @@ b { /* used for event dates/times */
 .fc { /* the calendar root */
   max-width: 1100px;
   margin: 0 auto;
+}
+@layer components {
+  /* Wrap normal events */
+  .fc-event-title {
+    @apply whitespace-normal break-words;
+  }
+
+  /* Wrap background events (holidays) */
+  .fc-bg-event {
+    @apply whitespace-normal break-words;
+  }
+
+  /* Optional: make the height auto for multi-line events */
+  .fc-daygrid-event {
+    height: auto !important;
+  }
 }
