@@ -10,6 +10,7 @@ import { INITIAL_EVENTS} from '../../event-utils.js'
 import useGetCourses, { useGetHolidays } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
+import {Snowfall} from "react-snowfall";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -174,7 +175,7 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-
+            <Snowfall snowflakeCount={400} radius={[0.5,4]}/>
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
