@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -6,7 +6,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { INITIAL_EVENTS} from '../../event-utils.js'
+import { INITIAL_EVENTS } from '../../event-utils.js'
 import useGetCourses, { useGetHolidays } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
@@ -20,60 +20,97 @@ export default function DemoApp() {
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
     const todayDate = `${yyyy}-${mm}-${dd}`;
+    const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear()+1]);
 
+    const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
+    const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
         start: todayDate,
         end: todayDate,
     })
     const [showDateInputs, setShowDateInputs] = useState(false);
 
+
+   const { holidayEvents, holidaySet } = useMemo(() => {
+  if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
+
+  const events = [];
+  const set = new Set();
+
+  visibleYears.forEach(year => {
+    holidays.forEach(h => {
+      const start = new Date(year, h.month - 1, h.day);
+
+      events.push({
+        id: `holiday-${h.id}-${year}`,
+        title: h.name,
+        start,
+        end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
+        allDay: true,
+        editable: false,
+        selectable: false,
+        extendedProps: { wrapText: true },
+        color: "#ff83ae"
+      });
+
+      set.add(`${h.month}-${h.day}`);
+    });
+  });
+
+  return { holidayEvents: events, holidaySet: set };
+}, [holidays, visibleYears]);
+
     const handleDatesSet = (dateInfo) => {
+        const startYear = dateInfo.start.getFullYear();
+        const endYear = dateInfo.end.getFullYear();
+
+        setVisibleYears([startYear, endYear]); // e.g., [2025, 2026]
+
         if (dateInfo.view.type === 'customInterval') {
-            setShowDateInputs(true);
+            setShowDateInputs(true)
         } else {
-            setShowDateInputs(false);
+            setShowDateInputs(false)
         }
+        const year = dateInfo.start.getFullYear()
     }
 
-    const handleCustomDateChange = (direction) =>{
+
+    const handleCustomDateChange = (direction) => {
 
         const calendarApi = calendarRef.current.getApi();
 
-        if(calendarApi.view.type === 'customInterval') {
+        if (calendarApi.view.type === 'customInterval') {
             const newStart = new Date(dateRange.start)
             const newEnd = new Date(dateRange.end)
 
             const diffTime = Math.abs(newEnd.getTime() - newStart.getTime())
-            const diffDays = Math.ceil(diffTime / (1000*60*60*24)+1);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24) + 1);
 
             const sign = direction === 'next' ? 1 : -1;
 
             newStart.setDate(newStart.getDate() + diffDays * sign);
             newEnd.setDate(newEnd.getDate() + diffDays * sign);
 
-            setDateRange({start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0]});
+            setDateRange({ start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0] });
         }
-        else{
+        else {
             calendarApi[direction]();
         }
 
     }
 
     const updateDateRange = (e) => {
-        setDateRange({...dateRange, [e.target.name]: e.target.value});
+        setDateRange({ ...dateRange, [e.target.name]: e.target.value });
     }
 
     const calendarRef = useRef(null)
-
-    const { data: listOfCourses, loading: loadingCourses} = useGetCourses();
-    const { data: holidays = [] } = useGetHolidays();
 
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
 
     function validateEventDrop(info) {
-        if(!info.event.extendedProps || !info.event.extendedProps.courseId ) {
+        if (!info.event.extendedProps || !info.event.extendedProps.courseId) {
             return true;
         }
         const movedEventId = parseInt(info.event.id, 10);
@@ -84,7 +121,7 @@ export default function DemoApp() {
 
         const courseEvents = course.event;
         const currentIndex = courseEvents.findIndex(e => e.id === movedEventId);
-        if(currentIndex === -1) {
+        if (currentIndex === -1) {
             return true;
         }
 
@@ -100,6 +137,7 @@ export default function DemoApp() {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
 
                 if (movedEventStart < earlierEventEnd) {
+                    alert("ogiltig ordning")
                     console.log("Ogiltig ordning")
                     info.revert();
                     return false;
@@ -111,10 +149,11 @@ export default function DemoApp() {
             const laterEventData = courseEvents[i];
             const laterEventOnCalendar = calendar.getEventById(String(laterEventData.id));
 
-            if(laterEventOnCalendar) {
+            if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
 
-                if(movedEventEnd > laterEventStart) {
+                if (movedEventEnd > laterEventStart) {
+                    alert("ogiltig ordning")
                     console.log("Ogiltig ordning")
                     info.revert();
                     return false;
@@ -148,7 +187,7 @@ export default function DemoApp() {
         const isValidEventPlacement = validateEventDrop(info);
         const isHoliday = checkForHoliday(info);
 
-        if(isHoliday) {
+        if (isHoliday) {
             return;
         }
 
@@ -159,12 +198,14 @@ export default function DemoApp() {
 
     function handleEventDrop(info) {
         validateEventDrop(info);
-        if(checkForHoliday(info)) return;
+        if (checkForHoliday(info)) return;
     }
 
     function handleEventClick(clickInfo) {
-        if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
-            clickInfo.event.remove();
+        if (!clickInfo.event.extendedProps?.wrapText) {
+            if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
+                clickInfo.event.remove();
+            }
         }
     }
 
@@ -184,25 +225,25 @@ export default function DemoApp() {
             <div className='demo-app-main flex-grow p-4'>
                 <div className="fc">
                     {showDateInputs && (
-                    <div className="flex ml-auto">
-                        <input
-                            className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
+                        <div className="flex ml-auto">
+                            <input
+                                className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
                             focus:ring-blue-500 focus:border-blue-500"
-                            type="date"
-                            name="start"
-                            value={dateRange.start}
-                            onChange={updateDateRange}
-                        />
-                        <input
-                            className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
+                                type="date"
+                                name="start"
+                                value={dateRange.start}
+                                onChange={updateDateRange}
+                            />
+                            <input
+                                className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
                             focus:ring-blue-500 focus:border-blue-500"
-                            type="date"
-                            name="end"
-                            value={dateRange.end}
-                            onChange={updateDateRange}
-                        />
-                    </div>
-                        )}
+                                type="date"
+                                name="end"
+                                value={dateRange.end}
+                                onChange={updateDateRange}
+                            />
+                        </div>
+                    )}
                 </div>
 
 
@@ -262,11 +303,25 @@ export default function DemoApp() {
 
                     editable={true}
                     firstDay={1}
-                    selectable={true}
+                    //selectable={true}
                     selectMirror={true}
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
-                    initialEvents={INITIAL_EVENTS}
+                    //initialEvents={INITIAL_EVENTS}
+                    events={[...INITIAL_EVENTS, ...holidayEvents]}
+                    dayCellClassNames={(arg) => {
+                        const day = arg.date.getDate();
+                        const month = arg.date.getMonth() + 1;
+
+                        const classes = [];
+                        if (arg.date.getDay() === 0 || arg.date.getDay() === 6) {
+                            classes.push('bg-[#EAF2FF]');
+                        }
+                        if (holidaySet.has(`${month}-${day}`)) {
+                            classes.push('bg-[#FBE7EE]');
+                        }
+                        return classes;
+                    }}
                     locale={svLocale}
                     droppable={true}
                     eventReceive={handleEventReceive}
@@ -281,20 +336,27 @@ export default function DemoApp() {
             </div>
 
             <RightSideBar
-            currentEvents={currentEvents}
-            setCurrentEvents={setCurrentEvents}
-            weekendsVisible={weekendsVisible}
-            handleWeekendsToggle={handleWeekendsToggle}/>
+                currentEvents={currentEvents}
+                setCurrentEvents={setCurrentEvents}
+                weekendsVisible={weekendsVisible}
+                handleWeekendsToggle={handleWeekendsToggle} />
         </div>
     )
 }
 
 function renderEventContent(eventInfo) {
+    const isHoliday = eventInfo.event.extendedProps.wrapText;
+
+    const titleClass = isHoliday
+        ? 'ml-1 whitespace-normal break-words text-sm'
+        : 'ml-1';
+
     return (
         <>
             <b>{eventInfo.timeText}</b>
-            <i className="ml-1">{eventInfo.event.title}</i>
+            <i className={titleClass}>{eventInfo.event.title}</i>
         </>
-    )
+    );
 }
+
 
