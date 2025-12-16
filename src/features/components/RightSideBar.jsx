@@ -29,7 +29,7 @@ export default function RightSideBar({
     }
 
     return (
-        <div className='demo-app-sidebarw-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+        <div className='w-96 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
