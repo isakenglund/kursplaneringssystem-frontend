@@ -1,21 +1,25 @@
 import React, {useState} from "react";
 import {formatDate} from "@fullcalendar/core";
 import useGetCourses from "../hooks.js";
+import Select from "react-select";
+import makeAnimated from 'react-select/animated'
 
 export default function RightSideBar({
     currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle
                                      }) {
 
-    //Hämta från leftSideBar sedan när det är refaktorerat
-    const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
+    const { data: listOfCourses, loading: loadingCourses} = useGetCourses();
+    const [selectedCourses, setSelectedCourses] = useState([]);
 
-    const [selectedVal, setSelectedVal] = useState('');
+    const animatedComponents = makeAnimated();
 
-    /*
-    const filteredList = !selectedVal
-        ? currentEvents // Om inget valt: Visa alla
-        : currentEvents.filter(event => event.courseId === selectedVal);
-    */
+    const filteredEvents = currentEvents.filter(event => {
+        if (selectedCourses.length === 0) return true;
+
+        const eventCourseId = event.extendedProps?.courseId;
+        return selectedCourses.some(choice => choice.value === eventCourseId);
+    })
+
 
     function SidebarEvent({ event }) {
         return (
@@ -50,24 +54,21 @@ export default function RightSideBar({
             </div>
 
             <div>
-                <select
-                    id="courseSelector"
-                    name="courseSelector"
-                    value={selectedVal}
-                    onChange={(e) => setSelectedVal(e.target.value)}
-                    className="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 shadow-sm"
-                >
-                    <option value="" disabled>Välj filtrerings alternativ...</option>
-                    {listOfCourses.map((course) => (
-                        <option key={course.id} value={course.id}>{course.name}</option>
-                    ))}
-                </select>
+                <Select
+                    closeMenyOnSelect={false}
+                    components={animatedComponents}
+                    isMulti
+                    isLoading={loadingCourses}
+                    onChange={(selectedOptions) => setSelectedCourses(selectedOptions)}
+                    options={listOfCourses.map(category => ({value: category.id, label: category.name}))}
+                    placeholder = "Filtrera på kategorier..."
+                    />
             </div>
 
             <div className='demo-app-sidebar-section'>
                 <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
                 <ul className="space-y-2">
-                    {currentEvents.map((event) => (
+                    {filteredEvents.map((event) => (
                         <SidebarEvent key={event.id} event={event} />
                     ))}
                 </ul>

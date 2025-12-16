@@ -283,7 +283,6 @@ export default function DemoApp() {
 
             <RightSideBar
             currentEvents={currentEvents}
-            setCurrentEvents={setCurrentEvents}
             weekendsVisible={weekendsVisible}
             handleWeekendsToggle={handleWeekendsToggle}/>
         </div>
