@@ -121,6 +121,7 @@ export default function CreateEvent({
                                 end: event.endDate || event.endTime,
                                 courseId: course.id,
                                 color: course.colorHex || "#3b82f6",
+                                teachers: event.teachers,
                             })}
                             style={{ borderLeft: `4px solid ${course.colorHex || "#3b82f6"}` }}
                             className={`p-3 rounded border shadow-sm text-sm font-medium flex justify-between items-center transition fc-event-external
@@ -130,7 +131,7 @@ export default function CreateEvent({
                                         : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
                                 }`}
                         >
-                            <span className="text-sm">{index + 1}. {event.name}</span>
+                            <span className="text-sm">{index + 1}.{event.teachers} {event.name}</span>
 
                             {!disabled && (
                                 <div className="flex gap-2">

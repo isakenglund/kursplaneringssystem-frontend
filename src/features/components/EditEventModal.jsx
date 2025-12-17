@@ -8,13 +8,15 @@ export default function EditEventModal({ event, onClose, onSaved }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState('')
     const [selectedTeachers, setSelectedTeachers] = useState([]);
+    const [teachers, setTeachers] = useState([])
 
     useEffect(() => {
         if (event) {
             setName(event.name ?? "");
             setDescription(event.description ?? "");
+            setTeachers(teachers ?? [])
         }
-    }, [event]);
+    }, [event, teachers]);
 
     async function handleFormSubmit(e) {
         e.preventDefault();
@@ -26,9 +28,11 @@ export default function EditEventModal({ event, onClose, onSaved }) {
             startDate: event.startDate,
             endDate: event.endDate,
             courseId: event.courseId,
+            teachers: selectedTeachers.map((t) => t.id),
         }
 
         try {
+            console.log(courseEvent.teachers)
             const updatedEvent = await save(courseEvent);
             onSaved(updatedEvent);
             onClose();
@@ -60,8 +64,9 @@ export default function EditEventModal({ event, onClose, onSaved }) {
                             onChange={(e) => setDescription(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
+                        <label className="block text-sm font-medium text-gray-700">Lärare</label>
                         <label className="block text-sm font-medium text-gray-700">
-                            {selectedTeachers.map(teacher => (
+                            {teachers.map(teacher => (
                                 <span key={teacher.id}>{teacher.name} </span>
                             ))}
                         </label>

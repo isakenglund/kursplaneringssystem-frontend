@@ -34,7 +34,7 @@ export const API = {
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
-            teachers: courseEvent.teachers.map(t => t.id),
+            teachers: courseEvent.teachers,
         })
     }),
 
@@ -57,6 +57,7 @@ export const API = {
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
+            teachers: courseEvent.teachers,
         })
     }),
 
