@@ -317,7 +317,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...INITIAL_EVENTS, ...holidayEvents]}
+                    events={[...filteredCalendarEvents, ...holidayEvents]}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -333,7 +333,6 @@ export default function DemoApp() {
                     }}
                     locale={svLocale}
                     droppable={true}
-                    events={filteredCalendarEvents}
                     eventReceive={handleEventReceive}
                     eventDrop={handleEventDrop}
                     eventContent={renderEventContent}
