@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { formatDate } from "@fullcalendar/core";
 import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
 import useGetCourses, { useDeleteCourseEvent, useSaveCourseEvent } from "../hooks.js";
@@ -11,7 +10,6 @@ export default function CreateEvent({
     closeModal,
     isModalOpen,
 }) {
-    const [categoryId, setCategoryId] = useState("");
     const [categoryName, setCategoryName] = useState("");
     const { data: fetchedCourses } = useGetCourses();
     const { remove: deleteEvent } = useDeleteCourseEvent();
@@ -20,6 +18,7 @@ export default function CreateEvent({
     const [description, setDescription] = useState("");
     const [endDate, setEndDate] = useState(new Date());
     const [name, setName] = useState("");
+    const [id, setId] = useState("");
     const [startDate, setStartDate] = useState(new Date());
     const [courseId, setCourseId] = useState("");
     const [courses, setCourses] = useState([]);
@@ -70,6 +69,7 @@ export default function CreateEvent({
         }
 
         const courseEvent = {
+            id,
             name,
             description,
             startTime: startDate,
@@ -80,7 +80,6 @@ export default function CreateEvent({
 
         try {
             const savedEvent = await save(courseEvent);
-
             setCourses((prev) =>
                 prev.map((c) =>
                     c.id === courseId ? { ...c, event: [...c.event, savedEvent] } : c
@@ -112,7 +111,6 @@ export default function CreateEvent({
             <div className="space-y-1">
                 {eventsArray.map((event, index) => {
                     const disabled = isEventOnCalendar(event.id);
-
                     return (
                         <div
                             key={event.id}
@@ -139,7 +137,10 @@ export default function CreateEvent({
                                     {/* EDIT */}
                                     <button
                                         onClick={() => {
-                                            setEditEventData(event);
+                                            setEditEventData({
+                                                ...event,
+                                                courseId: course.id, // ← explicit här
+                                            });
                                             setShowEditModal(true);
                                         }}
                                         className="w-5 h-5 text-gray-700 hover:text-green-500"
@@ -233,8 +234,26 @@ export default function CreateEvent({
             {/* EDIT MODAL */}
             {showEditModal && (
                 <EditEventModal
+                    selectedTeachers = {selectedTeachers}
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
+                    onSaved={(updatedEvent) => {
+                        const courseId = updatedEvent.courseId ?? editEventData.courseId;
+
+                        setCourses(prev =>
+                            prev.map(course =>
+                                String(course.id) === String(courseId)
+                                    ? {
+                                        ...course,
+                                        event: course.event.map(ev =>
+                                            ev.id === updatedEvent.id ? { ...ev, ...updatedEvent } : ev
+                                        ),
+                                    }
+                                    : course
+                            )
+                        );
+                    }}
+
                 />
             )}
 
@@ -249,9 +268,9 @@ export default function CreateEvent({
 
                                 <button
                                     onClick={() => {
-                                        setCategoryId(course.id);
+                                        setId(course.id);
                                         setCategoryName(course.name);
-                                        setCourseId(course.id);
+                                        setCourseId(course.courseId);
                                         openModal();
                                     }}
                                     className="bg-blue-600 text-white font-bold px-3 py-1 rounded"

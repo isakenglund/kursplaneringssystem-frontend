@@ -179,7 +179,6 @@ export function useUpdateCourseEvent() {
         setLoading(true);
         setErr(null);
         try {
-            console.log(courseEvent)
             const res = await API.updateCourseEvent(courseEvent);
             setData(pickList(res));
             return res;

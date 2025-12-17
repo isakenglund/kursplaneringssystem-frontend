@@ -28,6 +28,7 @@ export const API = {
     saveCourseEvent: (courseEvent) => api ('/course-events', {
         method: "POST",
         body: JSON.stringify({
+            id: courseEvent.id,
             description: courseEvent.description,
             endDate: courseEvent.endDate,
             name: courseEvent.name,
@@ -48,8 +49,9 @@ export const API = {
     }),
 
     updateCourseEvent: (courseEvent) => api ('/course-events', {
-        method: "POST",
+        method: "PUT",
         body: JSON.stringify({
+            id: courseEvent.id,
             description: courseEvent.description,
             endDate: courseEvent.endDate,
             name: courseEvent.name,
@@ -61,8 +63,7 @@ export const API = {
     holidays: () => api('/holidays'),
 
 
-    deleteCourseEvent: (eventId) =>
-    api(`/course-events/${eventId}`, {
+    deleteCourseEvent: (eventId) => api(`/course-events/${eventId}`, {
         method: "DELETE"
     }),
 };
