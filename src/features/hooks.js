@@ -386,3 +386,37 @@ export function useDeleteMiscEvent() {
     return { data, loading, err, remove };
 }
 
+export function useGetAllEvents(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    useEffect(() => {
+        let live = true;
+
+        (async () => {
+            try {
+                setLoading(true);
+                setErr(null);
+
+                const [courses, misc] = await Promise.all([
+                    API.courseEvents(),
+                    API.miscEvents()
+                ]);
+
+                const allEvents = [...courses, ...misc];
+                if (!live) return;
+                setData(allEvents);
+            } catch (e) {
+                if (live) setErr(e);
+            } finally {
+                if (live) setLoading(false);
+            }
+        })();
+
+        return () => { live = false; };
+    }, []);
+
+    return { data, loading, err };
+}
+

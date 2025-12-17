@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react'
+import React, {useState, useRef, useMemo} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -7,14 +7,27 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import { INITIAL_EVENTS } from '../../event-utils.js'
-import useGetCourses, { useGetHolidays } from '../hooks.js'
+import useGetCourses, {useGetAllEvents, useGetHolidays} from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import {Snowfall} from "react-snowfall";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
+
     const [currentEvents, setCurrentEvents] = useState([])
+    const [selectedCourses, setSelectedCourses] = useState([]);
+    const {data: allEvents} = useGetAllEvents();
+
+    const filteredCalendarEvents = useMemo(() => {
+        if (selectedCourses.length === 0) return allEvents;
+
+        return allEvents.filter(event => {
+            const props = event.extendedProps || event;
+            const courseId = props.courseId;
+            return selectedCourses.some(choice => choice.value === courseId);
+        });
+    }, [allEvents, selectedCourses]);
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -203,10 +216,9 @@ export default function DemoApp() {
     }
 
     function handleEventClick(clickInfo) {
-        if (!clickInfo.event.extendedProps?.wrapText) {
-            if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
-                clickInfo.event.remove();
-            }
+        if (!clickInfo.event.extendedProps?.wrapText) {if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
+            clickInfo.event.remove();
+}
         }
     }
 
@@ -266,7 +278,6 @@ export default function DemoApp() {
                             buttonText: 'Months',
                         }
                     }}
-
                     customButtons={{
                         smartPrev: {
                             icon: 'chevron-left',
@@ -289,12 +300,9 @@ export default function DemoApp() {
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
-
                     datesSet={handleDatesSet}
-
                     initialView='multiMonthYear'
                     multiMonthMaxColumns={1}
-
                     visibleRange={showDateInputs
                         ? { start: dateRange.start, end: new Date(dateRange.end) }
                         : undefined}
@@ -309,7 +317,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...INITIAL_EVENTS, ...holidayEvents]}
+                    events={[...filteredCalendarEvents, ...holidayEvents]}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -338,9 +346,12 @@ export default function DemoApp() {
 
             <RightSideBar
                 currentEvents={currentEvents}
-                setCurrentEvents={setCurrentEvents}
                 weekendsVisible={weekendsVisible}
-                handleWeekendsToggle={handleWeekendsToggle} />
+            handleWeekendsToggle={handleWeekendsToggle}
+            selectedCourses={selectedCourses}
+            setSelectedCourses={setSelectedCourses}
+            listOfCourses={listOfCourses}
+            loadingCourses={loadingCourses}/>
         </div>
     )
 }

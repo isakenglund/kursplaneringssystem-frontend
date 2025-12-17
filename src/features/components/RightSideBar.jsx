@@ -1,16 +1,31 @@
-import React, {useState} from "react";
+import React from "react";
 import {formatDate} from "@fullcalendar/core";
-import useGetCourses,{ useGetHolidays} from "../hooks.js";
+import Select from "react-select";
+import makeAnimated from 'react-select/animated'
+import{ useGetHolidays} from "../hooks.js";
 
 export default function RightSideBar({
-    currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle
+                                         currentEvents,
+                                         weekendsVisible,
+                                         handleWeekendsToggle,
+                                         selectedCourses,
+                                         setSelectedCourses,
+                                         listOfCourses,
+                                         loadingCourses
                                      }) {
 
-    //Hämta från leftSideBar sedan när det är refaktorerat
-    const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
+    const animatedComponents = makeAnimated();
 
-    const [selectedVal, setSelectedVal] = useState('');
-const { data: holidays = [] } = useGetHolidays();
+    const filteredEvents = currentEvents.filter(event => {
+
+        if (selectedCourses.length === 0) return true;
+        const eventCourseId = event.extendedProps?.courseId;
+        return selectedCourses.some(choice => choice.value === eventCourseId);
+    }).sort((a, b) => {
+        return new Date(a.start) - new Date(b.start);
+    });
+
+    const { data: holidays = [] } = useGetHolidays();
     /*
     const filteredList = !selectedVal
         ? currentEvents // Om inget valt: Visa alla
@@ -20,7 +35,8 @@ const { data: holidays = [] } = useGetHolidays();
     function SidebarEvent({ event }) {
         return (
             <>
-                <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                <li className="text-xs text-gray-600 p-2 rounded border-l-4"
+                    style={{borderLeftColor: event.backgroundColor}}>
                     <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
                     <span className="block italic">{event.title}</span>
                 </li>
@@ -30,7 +46,7 @@ const { data: holidays = [] } = useGetHolidays();
 
     return (
         <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
-            <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
+            <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
                         type='checkbox'
@@ -49,30 +65,24 @@ const { data: holidays = [] } = useGetHolidays();
                 </label>
             </div>
 
-            <div>
-                <select
-                    id="courseSelector"
-                    name="courseSelector"
-                    value={selectedVal}
-                    onChange={(e) => setSelectedVal(e.target.value)}
-                    className="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 shadow-sm"
-                >
-                    <option value="" disabled>Välj filtrerings alternativ...</option>
-                    {listOfCourses.map((course) => (
-                        <option key={course.id} value={course.id}>{course.name}</option>
-                    ))}
-                </select>
+            <div className='pt-6 border-t border-gray-200'>
+                <Select
+                    closeMenyOnSelect={false}
+                    components={animatedComponents}
+                    isMulti
+                    isLoading={loadingCourses}
+                    onChange={(selectedOptions) => setSelectedCourses(selectedOptions)}
+                    options={listOfCourses.map(category => ({value: category.id, label: category.name}))}
+                    placeholder = "Filtrera på kategorier..."
+                    />
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-holidays.length})</h2>
+                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-(2*holidays.length)})</h2>
                 <ul className="space-y-2">
-                    {currentEvents
-  .filter((event) => !event.extendedProps?.wrapText) 
-  .map((event) => (
-    <SidebarEvent key={event.id} event={event} />
-  ))}
-
+                    {currentEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
+                        <SidebarEvent key={event.id} event={event} />
+                    ))}
                 </ul>
             </div>
         </div>
