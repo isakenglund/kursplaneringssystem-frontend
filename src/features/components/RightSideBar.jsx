@@ -5,26 +5,29 @@ import Select from "react-select";
 import makeAnimated from 'react-select/animated'
 
 export default function RightSideBar({
-    currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle
+    currentEvents , weekendsVisible, handleWeekendsToggle,selectedCourses,
+                                     setSelectedCourses,
+                                     listOfCourses,
+                                     loadingCourses
                                      }) {
-
-    const { data: listOfCourses, loading: loadingCourses} = useGetCourses();
-    const [selectedCourses, setSelectedCourses] = useState([]);
 
     const animatedComponents = makeAnimated();
 
     const filteredEvents = currentEvents.filter(event => {
-        if (selectedCourses.length === 0) return true;
 
+        if (selectedCourses.length === 0) return true;
         const eventCourseId = event.extendedProps?.courseId;
         return selectedCourses.some(choice => choice.value === eventCourseId);
-    })
+    }).sort((a, b) => {
+        return new Date(a.start) - new Date(b.start);
+    });
 
 
     function SidebarEvent({ event }) {
         return (
             <>
-                <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                <li className="text-xs text-gray-600 p-2 rounded border-l-4"
+                    style={{borderLeftColor: event.backgroundColor}}>
                     <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
                     <span className="block italic">{event.title}</span>
                 </li>
@@ -34,7 +37,7 @@ export default function RightSideBar({
 
     return (
         <div className='demo-app-sidebarw-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
-            <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
+            <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
                         type='checkbox'
@@ -53,7 +56,7 @@ export default function RightSideBar({
                 </label>
             </div>
 
-            <div>
+            <div className='pt-6 border-t border-gray-200'>
                 <Select
                     closeMenyOnSelect={false}
                     components={animatedComponents}
@@ -67,7 +70,7 @@ export default function RightSideBar({
 
             <div className='demo-app-sidebar-section'>
                 <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
-                <ul className="space-y-2">
+                <ul className="space-y-2 ">
                     {filteredEvents.map((event) => (
                         <SidebarEvent key={event.id} event={event} />
                     ))}

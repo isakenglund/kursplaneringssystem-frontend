@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, {useState, useRef, useMemo} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -14,7 +14,19 @@ import {Snowfall} from "react-snowfall";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
+
     const [currentEvents, setCurrentEvents] = useState([])
+    const [selectedCourses, setSelectedCourses] = useState([]);
+
+    const getEventClassNames = (arg) => {
+        if (selectedCourses.length === 0) return [];
+
+        const courseId = arg.event.extendedProps?.courseId;
+        // Kolla om eventets ID finns i de valda kurserna
+        const isMatch = selectedCourses.some(choice => choice.value === courseId);
+
+        return isMatch ? [] : ['hidden-event'];
+    };
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -171,6 +183,7 @@ export default function DemoApp() {
 
     function handleEvents(events) {
         setCurrentEvents(events)
+        console.log(events)
     }
 
     return (
@@ -225,7 +238,6 @@ export default function DemoApp() {
                             buttonText: 'Months',
                         }
                     }}
-
                     customButtons={{
                         smartPrev: {
                             icon: 'chevron-left',
@@ -248,12 +260,9 @@ export default function DemoApp() {
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
-
                     datesSet={handleDatesSet}
-
                     initialView='multiMonthYear'
                     multiMonthMaxColumns={1}
-
                     visibleRange={showDateInputs
                         ? { start: dateRange.start, end: new Date(dateRange.end) }
                         : undefined}
@@ -278,13 +287,18 @@ export default function DemoApp() {
                     eventColor={function (info) {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
+                    eventClassNames={getEventClassNames}
                 />
             </div>
 
             <RightSideBar
             currentEvents={currentEvents}
             weekendsVisible={weekendsVisible}
-            handleWeekendsToggle={handleWeekendsToggle}/>
+            handleWeekendsToggle={handleWeekendsToggle}
+            selectedCourses={selectedCourses}
+            setSelectedCourses={setSelectedCourses}
+            listOfCourses={listOfCourses}
+            loadingCourses={loadingCourses}/>
         </div>
     )
 }
