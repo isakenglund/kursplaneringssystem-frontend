@@ -57,6 +57,41 @@ export default function useGetCourses() {
     return { data, loading, err};
 }
 
+export function useGetMiscs() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    useEffect(() => {
+        let live = true;
+
+        (async () => {
+            try {
+                setLoading(true);
+                setErr(null);
+
+                if (USE_MOCK) {
+                    await delay(150);
+                    if (!live) return;
+                    setData(MOCK.courses() ?? []);
+                } else {
+                    const res = await API.miscs();
+                    if (!live) return;
+                    setData(pickList(res, 'type'));
+                }
+            } catch (e) {
+                if (live) setErr(e);
+            } finally {
+                if (live) setLoading(false);
+            }
+        })();
+
+        return () => { live = false; };
+    }, []);
+
+    return { data, loading, err};
+}
+
 export function useSaveCourse(){
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -76,6 +111,28 @@ export function useSaveCourse(){
              setLoading(false);
             }
         }
+    return { data, loading, err, save: save };
+}
+
+export function useSaveMisc(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function save(misc) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.saveMisc(misc);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
     return { data, loading, err, save };
 }
 
@@ -170,6 +227,29 @@ export function useSaveCourseEvent() {
     return { data, loading, err, save };
 }
 
+export function useSaveMiscEvent() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function save(miscEvent) {
+        setLoading(true);
+        setErr(null);
+        try {
+            console.log(miscEvent)
+            const res = await API.saveMiscEvent(miscEvent);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+    return { data, loading, err, save };
+}
+
 export function useUpdateCourseEvent() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -180,6 +260,29 @@ export function useUpdateCourseEvent() {
         setErr(null);
         try {
             const res = await API.updateCourseEvent(courseEvent);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+    return { data, loading, err, save };
+}
+
+export function useUpdateMiscEvent() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function save(miscEvent) {
+        setLoading(true);
+        setErr(null);
+        try {
+            console.log(miscEvent)
+            const res = await API.updateMiscEvent(miscEvent);
             setData(pickList(res));
             return res;
         } catch (e) {
@@ -238,6 +341,37 @@ export function useDeleteCourseEvent() {
             }
 
             const res = await API.deleteCourseEvent(eventId);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return { data, loading, err, remove };
+}
+
+export function useDeleteMiscEvent() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function remove(eventId) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.deleteMiscEvent(eventId);
             setData(res ?? true);
             return true;
 

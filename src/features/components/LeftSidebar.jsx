@@ -32,12 +32,9 @@ export default function LeftSidebar({
         }
     }, []);
 
-
-
-
     return (
         <div
-            className='demo-app-sidebarw-80 bg-slate-50 border-r border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+            className='w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto'>
 
             {isCategoryModalOpen && (
                 <CreateCategory setIsCategoryModalOpen={setIsCategoryModalOpen} />

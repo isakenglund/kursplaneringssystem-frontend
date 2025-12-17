@@ -7,6 +7,11 @@ export const API = {
 
     }),
 
+    miscs: () => api('/miscs', {
+        method: "GET",
+
+    }),
+
     courseEvents: () => api('/course-events', {
         method: "GET",
 
@@ -18,10 +23,20 @@ export const API = {
             type: course.type,
             name: course.name,
             colorHex: course.colorHex,
-            hp: course.hp,
             numOfStudents: course.numOfStudents,
             startDate: course.startDate,
             endDate: course.endDate,
+        })
+    },),
+
+    saveMisc: (misc) => api('/miscs', {
+        method: "POST",
+        body: JSON.stringify({
+            type: misc.type,
+            name: misc.name,
+            colorHex: misc.colorHex,
+            startDate: misc.startDate,
+            endDate: misc.endDate,
         })
     },),
 
@@ -35,6 +50,17 @@ export const API = {
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
             teachers: courseEvent.teachers,
+        })
+    }),
+
+    saveMiscEvent: (miscEvent) => api ('/misc-events', {
+        method: "POST",
+        body: JSON.stringify({
+            description: miscEvent.description,
+            endDate: miscEvent.endDate,
+            name: miscEvent.name,
+            startDate: miscEvent.startDate,
+            miscId: miscEvent.miscId,
         })
     }),
 
@@ -61,10 +87,27 @@ export const API = {
         })
     }),
 
+    updateMiscEvent: (miscEvent) => api ('/misc-events', {
+        method: "POST",
+        body: JSON.stringify({
+            description: miscEvent.description,
+            endDate: miscEvent.endDate,
+            name: miscEvent.name,
+            startDate: miscEvent.startDate,
+            miscId: miscEvent.courseId,
+        })
+    }),
+
+
     holidays: () => api('/holidays'),
 
 
     deleteCourseEvent: (eventId) => api(`/course-events/${eventId}`, {
         method: "DELETE"
     }),
+
+    deleteMiscEvent: (eventId) =>
+        api(`/misc-events/${eventId}`, {
+            method: "DELETE"
+        }),
 };

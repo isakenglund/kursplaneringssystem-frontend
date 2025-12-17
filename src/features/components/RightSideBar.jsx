@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {formatDate} from "@fullcalendar/core";
-import useGetCourses from "../hooks.js";
+import useGetCourses,{ useGetHolidays} from "../hooks.js";
 
 export default function RightSideBar({
     currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle
@@ -10,7 +10,7 @@ export default function RightSideBar({
     const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
 
     const [selectedVal, setSelectedVal] = useState('');
-
+const { data: holidays = [] } = useGetHolidays();
     /*
     const filteredList = !selectedVal
         ? currentEvents // Om inget valt: Visa alla
@@ -29,7 +29,7 @@ export default function RightSideBar({
     }
 
     return (
-        <div className='demo-app-sidebarw-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+        <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
@@ -65,11 +65,14 @@ export default function RightSideBar({
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
+                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-holidays.length})</h2>
                 <ul className="space-y-2">
-                    {currentEvents.map((event) => (
-                        <SidebarEvent key={event.id} event={event} />
-                    ))}
+                    {currentEvents
+  .filter((event) => !event.extendedProps?.wrapText) 
+  .map((event) => (
+    <SidebarEvent key={event.id} event={event} />
+  ))}
+
                 </ul>
             </div>
         </div>
