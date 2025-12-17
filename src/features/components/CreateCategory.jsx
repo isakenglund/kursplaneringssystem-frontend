@@ -1,10 +1,9 @@
 import React, {useState} from "react";
 import ColorPicker from "./ColorPicker.jsx";
-import {useSaveCourse} from "../hooks.js";
+import {useSaveCourse, useSaveMisc} from "../hooks.js";
 
 
 export default function CreateCategory({setIsCategoryModalOpen}) {
-
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -12,33 +11,55 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
     const dd = String(today.getDate()).padStart(2, "0");
     const todayDate = `${yyyy}-${mm}-${dd}`;
 
-
     const [name, setName] = useState("");
     const [colorHex, setColorHex] = useState("#0077ff");
     const [categoryType, setCategoryType] = useState("course")
+
     const [numOfStudents, setNumOfStudents] = useState(0);
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
 
-    const course = {
-        type: categoryType,
-        name: name,
-        colorHex: colorHex,
-        numOfStudents: numOfStudents,
-        startDate: startDate,
-        endDate: endDate
-    }
-
-    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save} = useSaveCourse();
+    const {data: savedCourse, loading: savingCourse, err: courseSaveErr, save: saveCourse} = useSaveCourse();
+    const {data: savedMisc, loading: savingMisc, err: miscSaveErr, save: saveMisc} = useSaveMisc();
 
     const handleColorHex = (colorHex) => {
         setColorHex(colorHex);
     }
 
     async function handleCreateClick() {
-        console.log(course)
+        if(!name.trim()) {
+            alert("Vänligen fyll i ett kategori namn.")
+            return;
+        }
+
         try {
-            await save(course);
+            if(categoryType === "course") {
+
+                if (new Date(startDate) > new Date(endDate)) {
+                    alert("Startdatum kan inte vara efter slutdatum.");
+                    return;
+                }
+
+                const coursePayLoad = {
+                    type: "COURSE",
+                    name: name,
+                    colorHex: colorHex,
+                    numOfStudents: parseInt(numOfStudents),
+                    startDate: startDate,
+                    endDate: endDate,
+                }
+                console.log(coursePayLoad)
+                await saveCourse(coursePayLoad);
+            } else {
+
+                const miscPayLoad = {
+                    type: "MISC",
+                    name: name,
+                    colorHex: colorHex
+                }
+                console.log(miscPayLoad)
+                await saveMisc(miscPayLoad);
+            }
 
             setIsCategoryModalOpen(false);
         } catch (e) {
@@ -46,6 +67,7 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
         }
     }
 
+    const isLoading = savingCourse || savingMisc;
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
@@ -87,8 +109,6 @@ export default function CreateCategory({setIsCategoryModalOpen}) {
                             checked={categoryType === "misc"}
                             onChange={(e) => {
                                 setCategoryType(e.target.value);
-                                setStartDate(todayDate);
-                                setEndDate(todayDate)
                             }}
                         /> Övrigt
                     </label>
