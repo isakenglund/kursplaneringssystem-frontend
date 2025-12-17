@@ -2,6 +2,7 @@ import React from "react";
 import {formatDate} from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
+import useGetCourses,{ useGetHolidays} from "../hooks.js";
 
 export default function RightSideBar({
                                          currentEvents,
@@ -24,6 +25,13 @@ export default function RightSideBar({
         return new Date(a.start) - new Date(b.start);
     });
 
+    const [selectedVal, setSelectedVal] = useState('');
+const { data: holidays = [] } = useGetHolidays();
+    /*
+    const filteredList = !selectedVal
+        ? currentEvents // Om inget valt: Visa alla
+        : currentEvents.filter(event => event.courseId === selectedVal);
+    */
 
     function SidebarEvent({ event }) {
         return (
@@ -38,7 +46,7 @@ export default function RightSideBar({
     }
 
     return (
-        <div className='demo-app-sidebarw-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+        <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
             <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
@@ -71,11 +79,14 @@ export default function RightSideBar({
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length})</h2>
-                <ul className="space-y-2 ">
-                    {filteredEvents.map((event) => (
-                        <SidebarEvent key={event.id} event={event} />
-                    ))}
+                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-holidays.length})</h2>
+                <ul className="space-y-2">
+                    {filteredEvents
+  .filter((event) => !event.extendedProps?.wrapText)
+  .map((event) => (
+    <SidebarEvent key={event.id} event={event} />
+  ))}
+
                 </ul>
             </div>
         </div>
