@@ -1,14 +1,16 @@
-import React, {useState} from "react";
+import React from "react";
 import {formatDate} from "@fullcalendar/core";
-import useGetCourses from "../hooks.js";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
 
 export default function RightSideBar({
-    currentEvents , weekendsVisible, handleWeekendsToggle,selectedCourses,
-                                     setSelectedCourses,
-                                     listOfCourses,
-                                     loadingCourses
+                                         currentEvents,
+                                         weekendsVisible,
+                                         handleWeekendsToggle,
+                                         selectedCourses,
+                                         setSelectedCourses,
+                                         listOfCourses,
+                                         loadingCourses
                                      }) {
 
     const animatedComponents = makeAnimated();

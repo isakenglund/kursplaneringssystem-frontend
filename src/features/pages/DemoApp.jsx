@@ -7,7 +7,7 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import { INITIAL_EVENTS} from '../../event-utils.js'
-import useGetCourses, { useGetHolidays } from '../hooks.js'
+import useGetCourses, {useGetAllEvents, useGetHolidays} from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import {Snowfall} from "react-snowfall";
@@ -17,16 +17,17 @@ export default function DemoApp() {
 
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCourses, setSelectedCourses] = useState([]);
+    const {data: allEvents} = useGetAllEvents();
 
-    const getEventClassNames = (arg) => {
-        if (selectedCourses.length === 0) return [];
+    const filteredCalendarEvents = useMemo(() => {
+        if (selectedCourses.length === 0) return allEvents;
 
-        const courseId = arg.event.extendedProps?.courseId;
-        // Kolla om eventets ID finns i de valda kurserna
-        const isMatch = selectedCourses.some(choice => choice.value === courseId);
-
-        return isMatch ? [] : ['hidden-event'];
-    };
+        return allEvents.filter(event => {
+            const props = event.extendedProps || event;
+            const courseId = props.courseId;
+            return selectedCourses.some(choice => choice.value === courseId);
+        });
+    }, [allEvents, selectedCourses]);
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -178,6 +179,7 @@ export default function DemoApp() {
     function handleEventClick(clickInfo) {
         if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
             clickInfo.event.remove();
+
         }
     }
 
@@ -279,6 +281,7 @@ export default function DemoApp() {
                     initialEvents={INITIAL_EVENTS}
                     locale={svLocale}
                     droppable={true}
+                    events={filteredCalendarEvents}
                     eventReceive={handleEventReceive}
                     eventDrop={handleEventDrop}
                     eventContent={renderEventContent}
@@ -287,7 +290,6 @@ export default function DemoApp() {
                     eventColor={function (info) {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
-                    eventClassNames={getEventClassNames}
                 />
             </div>
 

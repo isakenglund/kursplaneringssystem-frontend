@@ -12,6 +12,10 @@ export const API = {
 
     }),
 
+    miscEvents: () => api('/misc-events', {
+        method: "GET",
+    }),
+
     saveCourse: (course) => api('/courses', {
         method: "POST",
         body: JSON.stringify({
