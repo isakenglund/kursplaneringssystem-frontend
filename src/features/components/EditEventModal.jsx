@@ -27,7 +27,7 @@ export default function EditEventModal({ event, onClose, onSaved }) {
             description: description,
             startDate: event.startDate,
             endDate: event.endDate,
-            courseId: event.courseId,
+            courseId: event.categoryId,
             teachers: selectedTeachers.map((t) => t.id),
         }
 

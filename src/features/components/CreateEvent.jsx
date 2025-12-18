@@ -148,7 +148,6 @@ export default function CreateEvent({
     function renderEvents(eventsArray, parentCategory, type) {
         if (!eventsArray || eventsArray.length === 0)
             return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
-
         return (
             <div className="space-y-1">
                 {eventsArray.map((event, index) => {
@@ -186,7 +185,7 @@ export default function CreateEvent({
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setEditEventData({...event, type: type});
+                                            setEditEventData({...event,categoryId: parentCategory, type: type});
                                             setShowEditModal(true);
                                         }}
                                         className="w-5 h-5 text-gray-700 hover:text-green-500"
@@ -289,7 +288,8 @@ export default function CreateEvent({
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
-                        const courseId = updatedEvent.courseId ?? editEventData.courseId;
+                        const courseId = editEventData.categoryId;
+
 
                         setCourses(prev =>
                             prev.map(course =>
