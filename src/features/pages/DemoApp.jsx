@@ -7,7 +7,7 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import {INITIAL_EVENTS} from '../../event-utils.js'
-import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateCourseEvent, useUpdateEventStartTime } from '../hooks.js'
+import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateEventStartTime } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";

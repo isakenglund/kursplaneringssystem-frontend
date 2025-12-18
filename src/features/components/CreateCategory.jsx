@@ -36,7 +36,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
     }
 
     async function handleCreateClick() {
-        if(!name.trim()) {
+        if(!name.trim() && categoryType!=="vacation") {
             alert("Vänligen fyll i ett kategori namn.")
             return;
         }
@@ -136,9 +136,24 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                             }}
                         /> Övrigt
                     </label>
+                    <label className="flex items-center gap-2">
+                        <input
+                            type='radio'
+                            name='categoryType'
+                            value='vacation'
+                            checked={categoryType === "vacation"}
+                            onChange={(e) => {
+                                setCategoryType(e.target.value);
+                                setStartDate(todayDate);
+                                setEndDate(todayDate)
+                            }}
+                        /> Semester
+                    </label>
                 </div>
 
-                <ColorPicker handleColorHex={handleColorHex}/>
+                {categoryType !== "vacation" && (
+                    <ColorPicker handleColorHex={handleColorHex} />
+                )}
 
                 {/* Extra fält för kurs */}
                 {categoryType === "course" && (

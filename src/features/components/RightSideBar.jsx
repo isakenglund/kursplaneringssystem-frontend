@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
@@ -13,7 +13,7 @@ export default function RightSideBar({
                                          listOfCourses,
                                          loadingCourses,
                                          holidayEvents,
-                                         setCurrentEvents
+
                                      }) {
 
     const animatedComponents = makeAnimated();
@@ -47,8 +47,6 @@ export default function RightSideBar({
             </>
         )
     }
-
-    const activeCount = currentEvents.length === 0 ? 0 : currentEvents.length - holidays.length;
 
     return (
         <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
