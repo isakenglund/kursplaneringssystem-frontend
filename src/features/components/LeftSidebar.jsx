@@ -8,13 +8,14 @@ import CreateEvent from "./CreateEvent.jsx";
 export default function LeftSidebar({
     currentEvents,
     removeExternalEvent,
-
+    setVacationDate,
+    vacationDate
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-
+ 
     useEffect(() => {
         let draggable = null;
 
@@ -37,7 +38,10 @@ export default function LeftSidebar({
             className='w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto'>
 
             {isCategoryModalOpen && (
-                <CreateCategory setIsCategoryModalOpen={setIsCategoryModalOpen} />
+                <CreateCategory 
+                    setIsCategoryModalOpen={setIsCategoryModalOpen} 
+                    setVacationDate={setVacationDate}
+                    vacationDate={vacationDate}/>
             )}
 
             <div className='demo-app-sidebar-section mb-8'>

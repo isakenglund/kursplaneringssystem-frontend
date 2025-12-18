@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { formatDate } from "@fullcalendar/core";
-import EditEventModal from "./EditEventModal.jsx";
-import TeacherPicker from "./TeacherPicker.jsx";
-import useGetCourses, { useDeleteCourseEvent, useSaveCourseEvent } from "../hooks.js";
 
-export default function VacationPicker({
-    draggableContainerRef,
-    currentEvents,
-    openModal,
-    closeModal,
-    isModalOpen,
-}) {
+import useGetCourses, { useSaveVacation, useDeleteVacation } from "../hooks.js";
 
+export default function VacationPicker({setVacationDate, vacationDate}) {
+   
+
+  return (
+    <div className="flex gap-x-4">
+      <label >Välj datum:</label>
+      <input 
+        type="date"
+        value={vacationDate}
+        onChange={(e) => setVacationDate(e.target.value)}
+      />
+    </div>
+  );
 }

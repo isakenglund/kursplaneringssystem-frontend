@@ -1,21 +1,26 @@
-import React, {useState} from "react";
-import {formatDate} from "@fullcalendar/core";
-import useGetCourses,{ useGetHolidays} from "../hooks.js";
+import React, { useState } from "react";
+import { formatDate } from "@fullcalendar/core";
+import useGetCourses, { useGetHolidays, useGetVacation } from "../hooks.js";
 
 export default function RightSideBar({
-    currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle
-                                     }) {
+    currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle, holidayEvents
+}) {
 
     //Hämta från leftSideBar sedan när det är refaktorerat
     const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
 
     const [selectedVal, setSelectedVal] = useState('');
-const { data: holidays = [] } = useGetHolidays();
+    const { data: holidays = [] } = useGetHolidays();
+    const { data: vacation = [] } = useGetVacation();
     /*
     const filteredList = !selectedVal
         ? currentEvents // Om inget valt: Visa alla
         : currentEvents.filter(event => event.courseId === selectedVal);
     */
+    const activeCount =
+        (currentEvents?.length || 0) -
+        (vacation?.length || 0) -
+        (holidayEvents?.length || 0);
 
     function SidebarEvent({ event }) {
         return (
@@ -27,7 +32,6 @@ const { data: holidays = [] } = useGetHolidays();
             </>
         )
     }
-
     return (
         <div className='w-96 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
             <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
@@ -38,11 +42,11 @@ const { data: holidays = [] } = useGetHolidays();
                         onChange={handleWeekendsToggle}
                         className="
                             h-5 w-5 rounded-md
-                            appearance-none
-                            border border-gray-400
-                            checked:bg-blue-600
-                            checked:border-blue-600
+                             h-5 w-5 rounded-md
+    border border-gray-400
+    accent-blue-600
                             flex items-center justify-center
+                            
                             "
                     ></input>
                     <span className="text-lg font-bold text-gray-600">Visa helger</span>
@@ -65,13 +69,15 @@ const { data: holidays = [] } = useGetHolidays();
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-holidays.length})</h2>
+                <h2 className="text-lg font-bold mb-3 text-gray-700">
+                    Aktiva i kalendern ({activeCount})
+                </h2>
                 <ul className="space-y-2">
                     {currentEvents
-  .filter((event) => !event.extendedProps?.wrapText) 
-  .map((event) => (
-    <SidebarEvent key={event.id} event={event} />
-  ))}
+                        .filter((event) => !event.extendedProps?.wrapText)
+                        .map((event) => (
+                            <SidebarEvent key={event.id} event={event} />
+                        ))}
 
                 </ul>
             </div>

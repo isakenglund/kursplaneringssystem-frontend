@@ -253,3 +253,86 @@ export function useDeleteCourseEvent() {
     return { data, loading, err, remove };
 }
 
+
+export function useGetVacation() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    useEffect(() => {
+        let live = true;
+
+        (async () => {
+            try {
+                setLoading(true);
+                setErr(null);
+
+                const res = await API.getVacation(); // fetch from DB
+                if (!live) return;
+                setData(res); // assign directly
+            } catch (e) {
+                if (live) setErr(e);
+            } finally {
+                if (live) setLoading(false);
+            }
+        })();
+
+        return () => { live = false; };
+    }, []);
+
+    return { data, loading, err };
+}
+
+export function useDeleteVacation() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function remove(vacationId) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.deleteVacation(vacationId);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return { data, loading, err, remove };
+}
+
+export function useSaveVacation() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function save(vacation) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.saveVacation(vacation);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+    return { data, loading, err, save };
+}
+

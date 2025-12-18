@@ -7,59 +7,97 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import { INITIAL_EVENTS } from '../../event-utils.js'
-import useGetCourses, { useGetHolidays } from '../hooks.js'
+import useGetCourses, { useGetHolidays, useGetVacation, useDeleteVacation } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
-import {Snowfall} from "react-snowfall";
+import { Snowfall } from "react-snowfall";
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
+
 
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
     const todayDate = `${yyyy}-${mm}-${dd}`;
-    const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear()+1]);
+    const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear() + 1]);
+    const { remove: deleteVacation } = useDeleteVacation();
 
     const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
+    const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
         start: todayDate,
         end: todayDate,
     })
     const [showDateInputs, setShowDateInputs] = useState(false);
+    const [vacationDate, setVacationDate] = useState(todayDate);
+
+    const { holidayEvents, holidaySet } = useMemo(() => {
+        if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
+
+        const events = [];
+        const set = new Set();
+        const seenDates = new Set();
+
+        visibleYears.forEach(year => {
+            holidays.forEach(h => {
+                const start = new Date(year, h.month - 1, h.day);
+                const dateKey = start.toISOString().split('T')[0];
+
+                if (seenDates.has(dateKey)) return; // skip duplicates
+                seenDates.add(dateKey);
+
+                events.push({
+                    id: `holiday-${h.id}-${year}`,
+                    title: h.name,
+                    start,
+                    end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
+                    allDay: true,
+                    editable: false,
+                    selectable: false,
+                    extendedProps: { wrapText: true },
+                    color: "#ff83ae"
+                });
+
+                set.add(`${h.month}-${h.day}`);
+            });
+        });
+
+        return { holidayEvents: events, holidaySet: set };
+    }, [holidays, visibleYears]);
 
 
-   const { holidayEvents, holidaySet } = useMemo(() => {
-  if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
+    // vacations = [{ id: 1, date: "2025-12-25" }, { id: 2, date: "2025-12-26" }]
+    const { vacationEvents, vacationSet } = useMemo(() => {
+        if (!vacations || vacations.length === 0)
+            return { vacationEvents: [], vacationSet: new Set() };
+        const events = [];
+        const set = new Set();
 
-  const events = [];
-  const set = new Set();
+        vacations.forEach(v => {
+            const start = new Date(v.date);
+            events.push({
+                id: `vacation-${v.id}`,
+                title: "Vacation",
+                start,
+                end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
+                allDay: true,
+                selectable: false,
+                extendedProps: { wrapText: true, type: "vacation" },
+                color: "#6df18aff"
+            });
 
-  visibleYears.forEach(year => {
-    holidays.forEach(h => {
-      const start = new Date(year, h.month - 1, h.day);
+            const month = start.getMonth() + 1;
+            const day = start.getDate();
+            set.add(`${month}-${day}`); // for CSS highlighting
+        });
 
-      events.push({
-        id: `holiday-${h.id}-${year}`,
-        title: h.name,
-        start,
-        end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
-        allDay: true,
-        editable: false,
-        selectable: false,
-        extendedProps: { wrapText: true },
-        color: "#ff83ae"
-      });
+        return { vacationEvents: events, vacationSet: set };
+    }, [vacations]);
 
-      set.add(`${h.month}-${h.day}`);
-    });
-  });
-
-  return { holidayEvents: events, holidaySet: set };
-}, [holidays, visibleYears]);
 
     const handleDatesSet = (dateInfo) => {
         const startYear = dateInfo.start.getFullYear();
@@ -162,6 +200,32 @@ export default function DemoApp() {
             }
         }
 
+        const isHoliday = checkForHoliday(info);
+        if (isHoliday) {
+            return;
+        }
+        const dayOfWeek = movedEventStart.getDay(); // 0 = Sunday, 6 = Saturday
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            const override = confirm("Du håller på att sätta detta event på en helg, vill du fortsätta?");
+            if(override){
+                return true;
+            }else{
+                info.revert();
+                return false;
+            }
+        }
+
+        const month = movedEventStart.getMonth() + 1;
+        const day = movedEventStart.getDate();
+        if (vacationSet.has(`${month}-${day}`)) {
+           const override = confirm("Du håller på att sätta detta event på en semesterdag, vill du fortsätta?");
+            if(override){
+                return true;
+            }else{
+                info.revert();
+                return false;
+            }
+        }
         return true;
     }
 
@@ -186,11 +250,6 @@ export default function DemoApp() {
 
     function handleEventReceive(info) {
         const isValidEventPlacement = validateEventDrop(info);
-        const isHoliday = checkForHoliday(info);
-
-        if (isHoliday) {
-            return;
-        }
 
         if (!isValidEventPlacement) {
             return;
@@ -199,13 +258,35 @@ export default function DemoApp() {
 
     function handleEventDrop(info) {
         validateEventDrop(info);
-        if (checkForHoliday(info)) return;
     }
 
-    function handleEventClick(clickInfo) {
-        if (!clickInfo.event.extendedProps?.wrapText) {
-            if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
-                clickInfo.event.remove();
+    async function handleEventClick(clickInfo) {
+        const { event } = clickInfo;
+        const isHoliday =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("holiday-");
+
+        if (isHoliday) {
+            return;
+        }
+        const isVacation =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("vacation-");
+
+        const confirmed = confirm(
+            `Är du säker på att du vill ta bort händelsen '${event.title}'?`
+        );
+        if (!confirmed) return;
+
+        event.remove();
+
+        if (isVacation) {
+            try {
+                const vacationId = event.id.replace("vacation-", "");
+                await deleteVacation(vacationId);
+            } catch (err) {
+                console.error("Could not delete vacation via hook:", err);
+                alert("Kunde inte ta bort vacation på servern.");
             }
         }
     }
@@ -216,11 +297,13 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-            <Snowfall snowflakeCount={400} radius={[0.5,4]}/>
+            <Snowfall snowflakeCount={400} radius={[0.5, 4]} />
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
                 loadingCourses={loadingCourses}
+                setVacationDate={setVacationDate}
+                vacationDate={vacationDate}
             />
 
             <div className='demo-app-main flex-grow p-4'>
@@ -292,7 +375,7 @@ export default function DemoApp() {
 
                     datesSet={handleDatesSet}
 
-                    initialView='multiMonthYear'
+                    initialView='timeGridWeek'
                     multiMonthMaxColumns={1}
 
                     visibleRange={showDateInputs
@@ -309,7 +392,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...INITIAL_EVENTS, ...holidayEvents]}
+                    events={[...INITIAL_EVENTS, ...holidayEvents, ...vacationEvents]}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -320,6 +403,9 @@ export default function DemoApp() {
                         }
                         if (holidaySet.has(`${month}-${day}`)) {
                             classes.push('bg-[#FBE7EE]');
+                        }
+                        if (vacationSet.has(`${month}-${day}`)) {
+                            classes.push('bg-[#a8ffbbff]');
                         }
                         return classes;
                     }}
@@ -340,7 +426,8 @@ export default function DemoApp() {
                 currentEvents={currentEvents}
                 setCurrentEvents={setCurrentEvents}
                 weekendsVisible={weekendsVisible}
-                handleWeekendsToggle={handleWeekendsToggle} />
+                handleWeekendsToggle={handleWeekendsToggle}
+                holidayEvents={holidayEvents} />
         </div>
     )
 }

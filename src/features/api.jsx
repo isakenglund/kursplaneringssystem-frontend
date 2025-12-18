@@ -65,4 +65,22 @@ export const API = {
     api(`/course-events/${eventId}`, {
         method: "DELETE"
     }),
+
+    saveVacation: (vacation)=> 
+        api ('/vacation', {
+            method: "POST",
+            body: JSON.stringify({
+                date: vacation.date
+            })
+    }),
+
+    deleteVacation: (vacationId) =>
+    api(`/vacation/${vacationId}`, {
+        method: "DELETE"
+    }),
+
+    getVacation: () => api('/vacation', {
+        method: "GET",
+    }),
+
 };
