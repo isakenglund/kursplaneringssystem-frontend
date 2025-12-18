@@ -18,9 +18,9 @@ export default function EditEventModal({ event, onClose, onSaved }) {
         }
     }, [event, teachers]);
 
+
     async function handleFormSubmit(e) {
         e.preventDefault();
-
         const courseEvent = {
             id: event.id,
             name: name,

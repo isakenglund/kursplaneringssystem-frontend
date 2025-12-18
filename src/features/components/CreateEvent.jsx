@@ -8,6 +8,10 @@ import useGetCourses, {
     useSaveMiscEvent,
     useDeleteMiscEvent
 } from "../hooks.js";
+import ButtonEdit from "./ButtonEdit.jsx"
+import ButtonRemove from "./ButtonRemove.jsx";
+import EventList from "./EventList.jsx";
+
 
 export default function CreateEvent({
                                         draggableContainerRef,
@@ -94,7 +98,6 @@ export default function CreateEvent({
         }
 
         try {
-            console.log("ASDSADSADSADSA", categoryType)
             if (categoryType === "COURSE") {
                 const payload = {
                     name,
@@ -150,78 +153,29 @@ export default function CreateEvent({
             return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
 
         return (
-            <div className="space-y-1">
-                {eventsArray.map((event, index) => {
-                    const disabled = isEventOnCalendar(event.id);
-                    return (
-                        <div
-                            key={event.id}
-                            data-event={JSON.stringify({
-                                id: event.id,
-                                title: event.name,
-                                start: event.startDate || event.startTime,
-                                end: event.endDate || event.endTime,
-                                courseId: parentCategory.id,
-                                miscId: parentCategory.id,
-                                color: parentCategory.colorHex || "#3b82f6",
-                                teachers: event.teachers,
-                            })}
-                            style={{borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}`}}
-                            className={`p-3 rounded border shadow-sm text-sm font-medium flex justify-between items-center transition fc-event-external
-                                ${
-                                disabled
-                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
-                                    : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
-                            }`}
-                        >
-                            <div className="min-w-0 flex-1">
-                                <span className="block truncate" title={event.name}>
-                                    {index + 1}.{event.teachers} {event.name}
-                                </span>
-                            </div>
+            <EventList
+                // HÄR VAR FELET: Använd argumentet 'eventsArray', inte 'myEvents'
+                eventsArray={eventsArray}
 
-                            {!disabled && (
-                                <div className="flex gap-2 flex-shrink-0">
-                                    {/* EDIT */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditEventData({...event, type: type});
-                                            setShowEditModal(true);
-                                        }}
-                                        className="w-5 h-5 text-gray-700 hover:text-green-500"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                             viewBox="0 0 24 24" strokeWidth={1.5}
-                                             stroke="currentColor" className="w-full h-full">
-                                            <path strokeLinecap="round" strokeLinejoin="round"
-                                                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/>
-                                            <path strokeLinecap="round" strokeLinejoin="round"
-                                                  d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
-                                        </svg>
-                                    </button>
+                // HÄR VAR FELET: Använd argumentet 'parentCategory', inte 'category'
+                parentCategory={parentCategory}
 
-                                    {/* DELETE */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleRemoveEvent(parentCategory.id, event.id, type);
-                                        }}
-                                        className="w-5 h-5 text-gray-700 hover:text-red-500"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                             viewBox="0 0 24 24" strokeWidth={1.5}
-                                             stroke="currentColor" className="w-full h-full">
-                                            <path strokeLinecap="round" strokeLinejoin="round"
-                                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
+                // Använd variabeln 'type' (COURSE eller MISC) istället för hårdkodat 'lecture'
+                type={type}
+
+                isEventOnCalendar={isEventOnCalendar}
+
+                onEditClick={(event) => {
+                    // Använd 'type' variabeln här också
+                    setEditEventData({...event, type: type});
+                    setShowEditModal(true);
+                }}
+
+                onRemoveClick={(event) => {
+                    // Använd 'parentCategory.id' och 'type'
+                    handleRemoveEvent(parentCategory.id, event.id, type);
+                }}
+            />
         );
     }
 
@@ -290,7 +244,7 @@ export default function CreateEvent({
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
                         const courseId = updatedEvent.courseId ?? editEventData.courseId;
-
+                        console.log(courseId)
                         setCourses(prev =>
                             prev.map(course =>
                                 String(course.id) === String(courseId)
