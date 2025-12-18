@@ -151,7 +151,6 @@ export default function CreateEvent({
     function renderEvents(eventsArray, parentCategory, type) {
         if (!eventsArray || eventsArray.length === 0)
             return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
-
         return (
             <EventList
                 // HÄR VAR FELET: Använd argumentet 'eventsArray', inte 'myEvents'
@@ -167,7 +166,7 @@ export default function CreateEvent({
 
                 onEditClick={(event) => {
                     // Använd 'type' variabeln här också
-                    setEditEventData({...event, type: type});
+                    setEditEventData({...event,categoryId: parentCategory, type: type});
                     setShowEditModal(true);
                 }}
 
@@ -243,7 +242,8 @@ export default function CreateEvent({
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
-                        const courseId = updatedEvent.courseId ?? editEventData.courseId;
+                        const courseId = editEventData.categoryId;
+
                         console.log(courseId)
                         setCourses(prev =>
                             prev.map(course =>
