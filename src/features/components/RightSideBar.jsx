@@ -1,22 +1,36 @@
-import React, { useState } from "react";
+import React from "react";
 import { formatDate } from "@fullcalendar/core";
-import useGetCourses, { useGetHolidays, useGetVacation } from "../hooks.js";
+import Select from "react-select";
+import makeAnimated from 'react-select/animated'
+import { useGetHolidays, useGetVacation } from "../hooks.js";
 
 export default function RightSideBar({
-    currentEvents, setCurrentEvents, weekendsVisible, handleWeekendsToggle, holidayEvents
-}) {
+                                         currentEvents,
+                                         weekendsVisible,
+                                         handleWeekendsToggle,
+                                         selectedCourses,
+                                         setSelectedCourses,
+                                         listOfCourses,
+                                         loadingCourses,
+                                         holidayEvents,
+                                         setCurrentEvents
+                                     }) {
 
-    //Hämta från leftSideBar sedan när det är refaktorerat
-    const { data: listOfCourses, loading: loadingCourses, err: coursesGetErr } = useGetCourses();
+    const animatedComponents = makeAnimated();
+
+    const filteredEvents = currentEvents.filter(event => {
+        if (selectedCourses.length === 0) return true;
+        const eventCourseId = event.extendedProps?.courseId;
+        return selectedCourses.some(choice => choice.value === eventCourseId);
+    }).sort((a, b) => {
+        return new Date(a.start) - new Date(b.start);
+    });
+
 
     const [selectedVal, setSelectedVal] = useState('');
     const { data: holidays = [] } = useGetHolidays();
     const { data: vacation = [] } = useGetVacation();
-    /*
-    const filteredList = !selectedVal
-        ? currentEvents // Om inget valt: Visa alla
-        : currentEvents.filter(event => event.courseId === selectedVal);
-    */
+
     const activeCount =
         (currentEvents?.length || 0) -
         (vacation?.length || 0) -
@@ -25,16 +39,20 @@ export default function RightSideBar({
     function SidebarEvent({ event }) {
         return (
             <>
-                <li className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                <li className="text-xs text-gray-600 p-2 rounded border-l-4"
+                    style={{borderLeftColor: event.backgroundColor}}>
                     <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
                     <span className="block italic">{event.title}</span>
                 </li>
             </>
         )
     }
+
+    const activeCount = currentEvents.length === 0 ? 0 : currentEvents.length - holidays.length;
+
     return (
-        <div className='w-96 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
-            <div className='demo-app-sidebar-section mb-6 pt-6 border-t border-gray-200'>
+        <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+            <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
                         type='checkbox'
@@ -46,26 +64,22 @@ export default function RightSideBar({
     border border-gray-400
     accent-blue-600
                             flex items-center justify-center
-                            
                             "
                     ></input>
                     <span className="text-lg font-bold text-gray-600">Visa helger</span>
                 </label>
             </div>
 
-            <div>
-                <select
-                    id="courseSelector"
-                    name="courseSelector"
-                    value={selectedVal}
-                    onChange={(e) => setSelectedVal(e.target.value)}
-                    className="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 shadow-sm"
-                >
-                    <option value="" disabled>Välj filtrerings alternativ...</option>
-                    {listOfCourses.map((course) => (
-                        <option key={course.id} value={course.id}>{course.name}</option>
-                    ))}
-                </select>
+            <div className='pt-6 border-t border-gray-200'>
+                <Select
+                    closeMenyOnSelect={false}
+                    components={animatedComponents}
+                    isMulti
+                    isLoading={loadingCourses}
+                    onChange={(selectedOptions) => setSelectedCourses(selectedOptions)}
+                    options={listOfCourses.map(category => ({value: category.id, label: category.name}))}
+                    placeholder = "Filtrera på kategorier..."
+                    />
             </div>
 
             <div className='demo-app-sidebar-section'>
@@ -73,12 +87,9 @@ export default function RightSideBar({
                     Aktiva i kalendern ({activeCount})
                 </h2>
                 <ul className="space-y-2">
-                    {currentEvents
-                        .filter((event) => !event.extendedProps?.wrapText)
-                        .map((event) => (
-                            <SidebarEvent key={event.id} event={event} />
-                        ))}
-
+                    {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
+                        <SidebarEvent key={event.id} event={event} />
+                    ))}
                 </ul>
             </div>
         </div>

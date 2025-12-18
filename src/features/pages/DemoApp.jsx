@@ -6,8 +6,8 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { INITIAL_EVENTS } from '../../event-utils.js'
-import useGetCourses, { useGetHolidays, useGetVacation, useDeleteVacation, useUpdateCourseEvent, useUpdateEventStartTime } from '../hooks.js'
+import {INITIAL_EVENTS} from '../../event-utils.js'
+import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateCourseEvent, useUpdateEventStartTime } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";
@@ -15,6 +15,19 @@ import { Snowfall } from "react-snowfall";
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
+    const [selectedCourses, setSelectedCourses] = useState([]);
+    const {data: allEvents} = useGetAllEvents();
+
+    const filteredCalendarEvents = useMemo(() => {
+        if (selectedCourses.length === 0) return allEvents;
+
+        return allEvents.filter(event => {
+            const props = event.extendedProps || event;
+            const courseId = props.courseId;
+            return selectedCourses.some(choice => choice.value === courseId);
+        });
+    }, [allEvents, selectedCourses]);
+
 
 
     const today = new Date();
@@ -36,8 +49,8 @@ export default function DemoApp() {
     const [vacationDate, setVacationDate] = useState(todayDate);
     const { update: updateEventStartTime, loading, err } = useUpdateEventStartTime();
 
-    const { holidayEvents, holidaySet } = useMemo(() => {
-        if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
+    const {holidayEvents, holidaySet} = useMemo(() => {
+        if (!holidays || visibleYears.length === 0) return {holidayEvents: [], holidaySet: new Set()};
 
         const events = [];
         const set = new Set();
@@ -104,14 +117,19 @@ export default function DemoApp() {
         const startYear = dateInfo.start.getFullYear();
         const endYear = dateInfo.end.getFullYear();
 
-        setVisibleYears([startYear, endYear]); // e.g., [2025, 2026]
+        setVisibleYears((prevYears) => {
+            // Om gamla statet redan innehåller samma år, gör ingenting
+            if (prevYears[0] === startYear && prevYears[1] === endYear) {
+                return prevYears;
+            }
+            return [startYear, endYear];
+        });
 
         if (dateInfo.view.type === 'customInterval') {
             setShowDateInputs(true)
         } else {
             setShowDateInputs(false)
         }
-        const year = dateInfo.start.getFullYear()
     }
 
 
@@ -131,16 +149,15 @@ export default function DemoApp() {
             newStart.setDate(newStart.getDate() + diffDays * sign);
             newEnd.setDate(newEnd.getDate() + diffDays * sign);
 
-            setDateRange({ start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0] });
-        }
-        else {
+            setDateRange({start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0]});
+        } else {
             calendarApi[direction]();
         }
 
     }
 
     const updateDateRange = (e) => {
-        setDateRange({ ...dateRange, [e.target.name]: e.target.value });
+        setDateRange({...dateRange, [e.target.name]: e.target.value});
     }
 
     const calendarRef = useRef(null)
@@ -246,7 +263,7 @@ export default function DemoApp() {
             info.revert();
             return true;
         }
-        
+
         return false;
     }
 
@@ -351,7 +368,6 @@ export default function DemoApp() {
                             buttonText: 'Months',
                         }
                     }}
-
                     customButtons={{
                         smartPrev: {
                             icon: 'chevron-left',
@@ -374,12 +390,9 @@ export default function DemoApp() {
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
-
                     datesSet={handleDatesSet}
-
                     initialView='timeGridWeek'
                     multiMonthMaxColumns={1}
-
                     visibleRange={showDateInputs
                         ? { start: dateRange.start, end: new Date(dateRange.end) }
                         : undefined}
@@ -394,7 +407,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...INITIAL_EVENTS, ...holidayEvents, ...vacationEvents]}
+                    events={[...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -426,9 +439,12 @@ export default function DemoApp() {
 
             <RightSideBar
                 currentEvents={currentEvents}
-                setCurrentEvents={setCurrentEvents}
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
+                selectedCourses={selectedCourses}
+                setSelectedCourses={setSelectedCourses}
+                listOfCourses={listOfCourses}
+                loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents} />
         </div>
     )

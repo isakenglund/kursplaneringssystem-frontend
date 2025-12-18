@@ -7,9 +7,18 @@ export const API = {
 
     }),
 
+    miscs: () => api('/miscs', {
+        method: "GET",
+
+    }),
+
     courseEvents: () => api('/course-events', {
         method: "GET",
 
+    }),
+
+    miscEvents: () => api('/misc-events', {
+        method: "GET",
     }),
 
     saveCourse: (course) => api('/courses', {
@@ -18,10 +27,20 @@ export const API = {
             type: course.type,
             name: course.name,
             colorHex: course.colorHex,
-            hp: course.hp,
             numOfStudents: course.numOfStudents,
             startDate: course.startDate,
             endDate: course.endDate,
+        })
+    },),
+
+    saveMisc: (misc) => api('/miscs', {
+        method: "POST",
+        body: JSON.stringify({
+            type: misc.type,
+            name: misc.name,
+            colorHex: misc.colorHex,
+            startDate: misc.startDate,
+            endDate: misc.endDate,
         })
     },),
 
@@ -33,7 +52,18 @@ export const API = {
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
-            teachers: courseEvent.teachers.map(t => t.id),
+            teachers: courseEvent.teachers,
+        })
+    }),
+
+    saveMiscEvent: (miscEvent) => api ('/misc-events', {
+        method: "POST",
+        body: JSON.stringify({
+            description: miscEvent.description,
+            endDate: miscEvent.endDate,
+            name: miscEvent.name,
+            startDate: miscEvent.startDate,
+            miscId: miscEvent.miscId,
         })
     }),
 
@@ -48,25 +78,43 @@ export const API = {
     }),
 
     updateCourseEvent: (courseEvent) => api ('/course-events', {
-        method: "POST",
+        method: "PUT",
         body: JSON.stringify({
+            id: courseEvent.id,
             description: courseEvent.description,
             endDate: courseEvent.endDate,
             name: courseEvent.name,
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
+            teachers: courseEvent.teachers,
         })
     }),
+
+    updateMiscEvent: (miscEvent) => api ('/misc-events', {
+        method: "POST",
+        body: JSON.stringify({
+            description: miscEvent.description,
+            endDate: miscEvent.endDate,
+            name: miscEvent.name,
+            startDate: miscEvent.startDate,
+            miscId: miscEvent.courseId,
+        })
+    }),
+
 
     holidays: () => api('/holidays'),
 
 
-    deleteCourseEvent: (eventId) =>
-    api(`/course-events/${eventId}`, {
+    deleteCourseEvent: (eventId) => api(`/course-events/${eventId}`, {
         method: "DELETE"
     }),
 
-    saveVacation: (vacation)=> 
+    deleteMiscEvent: (eventId) =>
+        api(`/misc-events/${eventId}`, {
+            method: "DELETE"
+        }),
+
+    saveVacation: (vacation)=>
         api ('/vacation', {
             method: "POST",
             body: JSON.stringify({

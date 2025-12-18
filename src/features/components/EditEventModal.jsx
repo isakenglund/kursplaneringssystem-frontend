@@ -1,27 +1,41 @@
 import {useUpdateCourseEvent} from "../hooks.js";
-import {useState} from "react";
+import React, {useEffect,useState} from "react";
+import TeacherPicker from "./TeacherPicker.jsx";
 
-export default function EditEventModal({ event, onClose }) {
+export default function EditEventModal({ event, onClose, onSaved }) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
     const [description, setDescription] = useState('')
+    const [selectedTeachers, setSelectedTeachers] = useState([]);
+    const [teachers, setTeachers] = useState([])
 
-
+    useEffect(() => {
+        if (event) {
+            setName(event.name ?? "");
+            setDescription(event.description ?? "");
+            setTeachers(teachers ?? [])
+        }
+    }, [event, teachers]);
 
     async function handleFormSubmit(e) {
         e.preventDefault();
 
         const courseEvent = {
+            id: event.id,
             name: name,
             description: description,
             startDate: event.startDate,
             endDate: event.endDate,
-            courseId: event.courseId,
+            courseId: event.categoryId,
+            teachers: selectedTeachers.map((t) => t.id),
         }
 
+
         try {
-            await save(courseEvent);
+            console.log(courseEvent.teachers)
+            const updatedEvent = await save(courseEvent);
+            onSaved(updatedEvent);
             onClose();
         } catch (e) {
             console.error("Kunde inte spara eventet:", e);
@@ -39,7 +53,7 @@ export default function EditEventModal({ event, onClose }) {
                         <label className="block text-sm font-medium text-gray-700">Titel</label>
                         <input
                             type="text"
-                            defaultValue={event.name ?? ""}
+                            value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             autoFocus
@@ -47,10 +61,21 @@ export default function EditEventModal({ event, onClose }) {
                         <label className="block text-sm font-medium text-gray-700">Beskrivning</label>
                         <input
                             type="text"
-                            defaultValue={event.description ?? ""}
+                            value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
+                        <label className="block text-sm font-medium text-gray-700">Lärare</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            {teachers.map(teacher => (
+                                <span key={teacher.id}>{teacher.name} </span>
+                            ))}
+                        </label>
+                        <TeacherPicker
+                            selectedTeachers={selectedTeachers}
+                            setSelectedTeachers={setSelectedTeachers}
+                        />
+
                     </div>
                     <div className="flex justify-end gap-2 mt-4">
                         <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
