@@ -26,11 +26,6 @@ export default function RightSideBar({
     });
 
     const { data: holidays = [] } = useGetHolidays();
-    /*
-    const filteredList = !selectedVal
-        ? currentEvents // Om inget valt: Visa alla
-        : currentEvents.filter(event => event.courseId === selectedVal);
-    */
 
     function SidebarEvent({ event }) {
         return (
@@ -43,6 +38,8 @@ export default function RightSideBar({
             </>
         )
     }
+
+    const activeCount = currentEvents.length === 0 ? 0 : currentEvents.length - holidays.length;
 
     return (
         <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
@@ -78,9 +75,9 @@ export default function RightSideBar({
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-(2*holidays.length)})</h2>
+                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({activeCount})</h2>
                 <ul className="space-y-2">
-                    {currentEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
+                    {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
                         <SidebarEvent key={event.id} event={event} />
                     ))}
                 </ul>

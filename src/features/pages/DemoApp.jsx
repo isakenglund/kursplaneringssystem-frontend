@@ -6,7 +6,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { INITIAL_EVENTS } from '../../event-utils.js'
+import {INITIAL_EVENTS} from '../../event-utils.js'
 import useGetCourses, {useGetAllEvents, useGetHolidays} from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
@@ -29,15 +29,17 @@ export default function DemoApp() {
         });
     }, [allEvents, selectedCourses]);
 
+
+
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
     const todayDate = `${yyyy}-${mm}-${dd}`;
-    const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear()+1]);
+    const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear() + 1]);
 
-    const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: holidays = [] } = useGetHolidays();
+    const {data: listOfCourses, loading: loadingCourses} = useGetCourses();
+    const {data: holidays = []} = useGetHolidays();
     const [dateRange, setDateRange] = useState({
         start: todayDate,
         end: todayDate,
@@ -45,47 +47,52 @@ export default function DemoApp() {
     const [showDateInputs, setShowDateInputs] = useState(false);
 
 
-   const { holidayEvents, holidaySet } = useMemo(() => {
-  if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
+    const {holidayEvents, holidaySet} = useMemo(() => {
+        if (!holidays || visibleYears.length === 0) return {holidayEvents: [], holidaySet: new Set()};
 
-  const events = [];
-  const set = new Set();
+        const events = [];
+        const set = new Set();
 
-  visibleYears.forEach(year => {
-    holidays.forEach(h => {
-      const start = new Date(year, h.month - 1, h.day);
+        visibleYears.forEach(year => {
+            holidays.forEach(h => {
+                const start = new Date(year, h.month - 1, h.day);
 
-      events.push({
-        id: `holiday-${h.id}-${year}`,
-        title: h.name,
-        start,
-        end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
-        allDay: true,
-        editable: false,
-        selectable: false,
-        extendedProps: { wrapText: true },
-        color: "#ff83ae"
-      });
+                events.push({
+                    id: `holiday-${h.id}-${year}`,
+                    title: h.name,
+                    start,
+                    end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
+                    allDay: true,
+                    editable: false,
+                    selectable: false,
+                    extendedProps: {wrapText: true},
+                    color: "#ff83ae"
+                });
 
-      set.add(`${h.month}-${h.day}`);
-    });
-  });
+                set.add(`${h.month}-${h.day}`);
+            });
+        });
 
-  return { holidayEvents: events, holidaySet: set };
-}, [holidays, visibleYears]);
+        return {holidayEvents: events, holidaySet: set};
+    }, [holidays, visibleYears]);
 
     const handleDatesSet = (dateInfo) => {
         const startYear = dateInfo.start.getFullYear();
         const endYear = dateInfo.end.getFullYear();
 
-        setVisibleYears([startYear, endYear]); // e.g., [2025, 2026]
+        setVisibleYears((prevYears) => {
+            // Om gamla statet redan innehåller samma år, gör ingenting
+            if (prevYears[0] === startYear && prevYears[1] === endYear) {
+                return prevYears;
+            }
+            return [startYear, endYear];
+        });
 
         if (dateInfo.view.type === 'customInterval') {
             setShowDateInputs(true)
         } else {
             setShowDateInputs(false)
         }
-        const year = dateInfo.start.getFullYear()
     }
 
 
@@ -105,16 +112,15 @@ export default function DemoApp() {
             newStart.setDate(newStart.getDate() + diffDays * sign);
             newEnd.setDate(newEnd.getDate() + diffDays * sign);
 
-            setDateRange({ start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0] });
-        }
-        else {
+            setDateRange({start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0]});
+        } else {
             calendarApi[direction]();
         }
 
     }
 
     const updateDateRange = (e) => {
-        setDateRange({ ...dateRange, [e.target.name]: e.target.value });
+        setDateRange({...dateRange, [e.target.name]: e.target.value});
     }
 
     const calendarRef = useRef(null)
@@ -131,7 +137,9 @@ export default function DemoApp() {
         const courseId = parseInt(info.event.extendedProps.courseId, 10);
         const course = listOfCourses.find(c => c.id === courseId);
 
-        if (!course) { return true; }
+        if (!course) {
+            return true;
+        }
 
         const courseEvents = course.event;
         const currentIndex = courseEvents.findIndex(e => e.id === movedEventId);
@@ -216,9 +224,10 @@ export default function DemoApp() {
     }
 
     function handleEventClick(clickInfo) {
-        if (!clickInfo.event.extendedProps?.wrapText) {if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
-            clickInfo.event.remove();
-}
+        if (!clickInfo.event.extendedProps?.wrapText) {
+            if (confirm(`Är du säker på att du vill ta bort händelsen '${clickInfo.event.title}'?`)) {
+                clickInfo.event.remove();
+            }
         }
     }
 
@@ -228,7 +237,7 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-            <Snowfall snowflakeCount={400} radius={[0.5,4]}/>
+            <Snowfall snowflakeCount={400} radius={[0.5, 4]}/>
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
@@ -266,7 +275,7 @@ export default function DemoApp() {
                     views={{
                         customTwoWeeks: {
                             type: 'timeGrid',
-                            duration: { weeks: 2 },
+                            duration: {weeks: 2},
                             buttonText: '2 Veckor',
                         },
                         customInterval: {
@@ -301,10 +310,10 @@ export default function DemoApp() {
                     }}
                     height="100%"
                     datesSet={handleDatesSet}
-                    initialView='multiMonthYear'
+                    initialView='timeGridWeek'
                     multiMonthMaxColumns={1}
                     visibleRange={showDateInputs
-                        ? { start: dateRange.start, end: new Date(dateRange.end) }
+                        ? {start: dateRange.start, end: new Date(dateRange.end)}
                         : undefined}
 
                     slotMinTime={'06:00:00'}
@@ -347,11 +356,11 @@ export default function DemoApp() {
             <RightSideBar
                 currentEvents={currentEvents}
                 weekendsVisible={weekendsVisible}
-            handleWeekendsToggle={handleWeekendsToggle}
-            selectedCourses={selectedCourses}
-            setSelectedCourses={setSelectedCourses}
-            listOfCourses={listOfCourses}
-            loadingCourses={loadingCourses}/>
+                handleWeekendsToggle={handleWeekendsToggle}
+                selectedCourses={selectedCourses}
+                setSelectedCourses={setSelectedCourses}
+                listOfCourses={listOfCourses}
+                loadingCourses={loadingCourses}/>
         </div>
     )
 }
