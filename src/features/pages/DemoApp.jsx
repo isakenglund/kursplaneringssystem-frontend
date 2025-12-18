@@ -7,7 +7,7 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import { INITIAL_EVENTS } from '../../event-utils.js'
-import useGetCourses, { useGetHolidays, useGetVacation, useDeleteVacation } from '../hooks.js'
+import useGetCourses, { useGetHolidays, useGetVacation, useDeleteVacation, useUpdateCourseEvent, useUpdateEventStartTime } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";
@@ -34,6 +34,7 @@ export default function DemoApp() {
     })
     const [showDateInputs, setShowDateInputs] = useState(false);
     const [vacationDate, setVacationDate] = useState(todayDate);
+    const { update: updateEventStartTime, loading, err } = useUpdateEventStartTime();
 
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -226,6 +227,7 @@ export default function DemoApp() {
                 return false;
             }
         }
+        updateEventStartTime(info.event.id,info.event.start)
         return true;
     }
 
@@ -244,7 +246,7 @@ export default function DemoApp() {
             info.revert();
             return true;
         }
-
+        
         return false;
     }
 

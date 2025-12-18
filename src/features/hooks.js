@@ -336,3 +336,24 @@ export function useSaveVacation() {
     return { data, loading, err, save };
 }
 
+export function useUpdateEventStartTime(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(eventId, startTime) {
+        setLoading(true);
+        setErr(null);
+         try {
+                const res = await API.updateEventStartTime(eventId, startTime);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+             setErr(e);
+             throw e;
+            } finally {
+             setLoading(false);
+            }
+        }
+    return { data, loading, err, update };
+}

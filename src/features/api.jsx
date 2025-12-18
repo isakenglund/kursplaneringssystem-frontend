@@ -83,4 +83,17 @@ export const API = {
         method: "GET",
     }),
 
+   updateEventStartTime: (eventId, startTime) =>
+  api(`/course-events/${eventId}/start-time`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      startTime: startTime instanceof Date
+        ? startTime.toISOString()
+        : startTime,
+    }),
+  }),
+
 };
