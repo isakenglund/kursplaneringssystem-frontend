@@ -31,6 +31,7 @@ export default function EditEventModal({ event, onClose, onSaved }) {
             teachers: selectedTeachers.map((t) => t.id),
         }
 
+
         try {
             console.log(courseEvent.teachers)
             const updatedEvent = await save(courseEvent);

@@ -47,7 +47,6 @@ export const API = {
     saveCourseEvent: (courseEvent) => api ('/course-events', {
         method: "POST",
         body: JSON.stringify({
-            id: courseEvent.id,
             description: courseEvent.description,
             endDate: courseEvent.endDate,
             name: courseEvent.name,

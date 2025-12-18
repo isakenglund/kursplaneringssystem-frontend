@@ -1,23 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
-import useGetCourses, { useDeleteCourseEvent, useSaveCourseEvent, useGetMiscs,  useSaveMiscEvent, useDeleteMiscEvent } from "../hooks.js";
+import useGetCourses, {
+    useDeleteCourseEvent,
+    useSaveCourseEvent,
+    useGetMiscs,
+    useSaveMiscEvent,
+    useDeleteMiscEvent
+} from "../hooks.js";
 
 export default function CreateEvent({
-    draggableContainerRef,
-    currentEvents,
-    openModal,
-    closeModal,
-    isModalOpen,
-}) {
-    const { data: fetchedCourses } = useGetCourses();
-    const { data: fetchedMiscs} = useGetMiscs();
+                                        draggableContainerRef,
+                                        currentEvents,
+                                        openModal,
+                                        closeModal,
+                                        isModalOpen,
+                                    }) {
+    const {data: fetchedCourses} = useGetCourses();
+    const {data: fetchedMiscs} = useGetMiscs();
 
-    const { remove: deleteCourseEvent } = useDeleteCourseEvent();
-    const { remove: deleteMiscEvent } = useDeleteMiscEvent();
+    const {remove: deleteCourseEvent} = useDeleteCourseEvent();
+    const {remove: deleteMiscEvent} = useDeleteMiscEvent();
 
-    const { save: saveCourseEvent } = useSaveCourseEvent();
-    const { save: saveMiscEvent } = useSaveMiscEvent();
+    const {save: saveCourseEvent} = useSaveCourseEvent();
+    const {save: saveMiscEvent} = useSaveMiscEvent();
 
     const [courses, setCourses] = useState([]);
     const [miscs, setMiscs] = useState([]);
@@ -52,9 +58,12 @@ export default function CreateEvent({
 
     async function handleRemoveEvent(parentId, eventId, type) {
 
-        if(type === "COURSE") {
+        if (type === "COURSE") {
             const previous = courses;
-            setCourses(prev => prev.map(c => c.id === parentId ? { ...c, event: c.event.filter(e => e.id !== eventId) } : c));
+            setCourses(prev => prev.map(c => c.id === parentId ? {
+                ...c,
+                event: c.event.filter(e => e.id !== eventId)
+            } : c));
             try {
                 await deleteCourseEvent(eventId);
             } catch (error) {
@@ -63,7 +72,10 @@ export default function CreateEvent({
             }
         } else {
             const previous = miscs;
-            setMiscs(prev => prev.map(m => m.id === parentId ? { ...m, event: m.event.filter(e => e.id !== eventId) } : m));
+            setMiscs(prev => prev.map(m => m.id === parentId ? {
+                ...m,
+                event: m.event.filter(e => e.id !== eventId)
+            } : m));
             try {
                 await deleteMiscEvent(eventId);
             } catch (error) {
@@ -82,21 +94,21 @@ export default function CreateEvent({
         }
 
         try {
+            console.log("ASDSADSADSADSA", categoryType)
             if (categoryType === "COURSE") {
                 const payload = {
-                    id,
-            name,
-            description,
-            startTime: startDate,
-            endTime: endDate,
-            courseId: categoryId,
-                    teachers: selectedTeachers.map((t) => t.id),
+                    name,
+                    description,
+                    startTime: startDate,
+                    endTime: endDate,
+                    courseId: categoryId,
+                    teachers: selectedTeachers.map((t) => t.id)
                 };
 
                 const savedEvent = await saveCourseEvent(payload);
-            setCourses((prev) =>
-                prev.map((c) =>
-                    c.id === categoryId ? { ...c, event: [...c.event, savedEvent] } : c
+                setCourses((prev) =>
+                    prev.map((c) =>
+                        c.id === categoryId ? {...c, event: [...c.event, savedEvent]} : c
                     )
                 );
             } else {
@@ -112,7 +124,7 @@ export default function CreateEvent({
 
                 setMiscs((prev) =>
                     prev.map((m) =>
-                        m.id === categoryId ? { ...m, event: [...m.event, savedEvent] } : m
+                        m.id === categoryId ? {...m, event: [...m.event, savedEvent]} : m
                     )
                 );
             }
@@ -125,8 +137,8 @@ export default function CreateEvent({
             closeModal();
 
         } catch (error) {
-            console.error("Kunde inte spara eventet:", error);
-            alert("Ett fel inträffade vid sparande.");
+            console.error("DEBUG-FEL:", error);
+            alert(`Fel: ${error.message}`);
         }
     }
 
@@ -149,18 +161,18 @@ export default function CreateEvent({
                                 title: event.name,
                                 start: event.startDate || event.startTime,
                                 end: event.endDate || event.endTime,
-                                courseId: type === "COURSE" ? parentCategory.id : undefined,
-                                miscId: type === "MISC" ? parentCategory.id : undefined,
+                                courseId: parentCategory.id,
+                                miscId: parentCategory.id,
                                 color: parentCategory.colorHex || "#3b82f6",
                                 teachers: event.teachers,
                             })}
-                            style={{ borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}` }}
+                            style={{borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}`}}
                             className={`p-3 rounded border shadow-sm text-sm font-medium flex justify-between items-center transition fc-event-external
                                 ${
-                                    disabled
-                                        ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
-                                        : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
-                                }`}
+                                disabled
+                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
+                                    : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
+                            }`}
                         >
                             <div className="min-w-0 flex-1">
                                 <span className="block truncate" title={event.name}>
@@ -174,7 +186,7 @@ export default function CreateEvent({
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setEditEventData({... event, type: type});
+                                            setEditEventData({...event, type: type});
                                             setShowEditModal(true);
                                         }}
                                         className="w-5 h-5 text-gray-700 hover:text-green-500"
@@ -183,9 +195,9 @@ export default function CreateEvent({
                                              viewBox="0 0 24 24" strokeWidth={1.5}
                                              stroke="currentColor" className="w-full h-full">
                                             <path strokeLinecap="round" strokeLinejoin="round"
-                                                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                                                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/>
                                             <path strokeLinecap="round" strokeLinejoin="round"
-                                                  d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                                  d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
                                         </svg>
                                     </button>
 
@@ -273,7 +285,7 @@ export default function CreateEvent({
             {/* EDIT MODAL */}
             {showEditModal && (
                 <EditEventModal
-                    selectedTeachers = {selectedTeachers}
+                    selectedTeachers={selectedTeachers}
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
@@ -285,7 +297,7 @@ export default function CreateEvent({
                                     ? {
                                         ...course,
                                         event: course.event.map(ev =>
-                                            ev.id === updatedEvent.id ? { ...ev, ...updatedEvent } : ev
+                                            ev.id === updatedEvent.id ? {...ev, ...updatedEvent} : ev
                                         ),
                                     }
                                     : course
@@ -299,33 +311,34 @@ export default function CreateEvent({
             <div className="mb-2 mt-2">
                 <div id="external-events" ref={draggableContainerRef} className="space-y-2">
 
-                    {courses.length > 0 && <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 mt-4">Kurser</h3>}
+                    {courses.length > 0 &&
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 mt-4">Kurser</h3>}
                     <div className="space-y-4">
-                    {courses.map((course) => (
-                        <div key={course.id} className="border border-gray-300 rounded-lg p-3 bg-gray-50">
-                            <div className="flex items-center justify-between mb-2">
-                                <h2 className="text-base font-bold">{course.name}</h2>
+                        {courses.map((course) => (
+                            <div key={course.id} className="border border-gray-300 rounded-lg p-3 bg-gray-50">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h2 className="text-base font-bold">{course.name}</h2>
 
-                                <button
-                                    onClick={() => {
-                                        setId(course.id);
-                                        setCategoryName(course.name);
-                                        setCategoryType("COURSE")
-                                        setCourseId(course.courseId);
-                                        openModal();
-                                    }}
-                                    className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
-                                >
-                                    +
-                                </button>
+                                    <button
+                                        onClick={() => {
+                                            setCategoryId(course.id);
+                                            setCategoryName(course.name);
+                                            setCategoryType("COURSE");
+                                            openModal();
+                                        }}
+                                        className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+
+                                {renderEvents(course.event, course, "COURSE")}
                             </div>
-
-                            {renderEvents(course.event, course, "COURSE")}
-                        </div>
-                    ))}
+                        ))}
                     </div>
 
-                    {miscs.length > 0 && <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 mt-6">Övrigt</h3>}
+                    {miscs.length > 0 &&
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 mt-6">Övrigt</h3>}
                     <div className="space-y-4">
                         {miscs.map((misc) => (
                             <div key={misc.id} className="border border-gray-300 rounded-lg p-3 bg-gray-50">
