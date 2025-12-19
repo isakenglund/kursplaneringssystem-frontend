@@ -405,6 +405,41 @@ export function useGetAllEvents(){
                 ]);
 
                 const allEvents = [...courses, ...misc];
+                console.log("ALL EVENTS",allEvents);
+                if (!live) return;
+                setData(allEvents);
+            } catch (e) {
+                if (live) setErr(e);
+            } finally {
+                if (live) setLoading(false);
+            }
+        })();
+
+        return () => { live = false; };
+    }, []);
+
+    return { data, loading, err };
+}
+
+export function useGetAllCategories(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    useEffect(() => {
+        let live = true;
+
+        (async () => {
+            try {
+                setLoading(true);
+                setErr(null);
+
+                const [courses, misc] = await Promise.all([
+                    API.courses(),
+                    API.miscs()
+                ]);
+
+                const allEvents = [...courses, ...misc];
                 if (!live) return;
                 setData(allEvents);
             } catch (e) {

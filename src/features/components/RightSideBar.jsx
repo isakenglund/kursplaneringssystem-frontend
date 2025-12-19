@@ -1,16 +1,16 @@
 import React, {useState} from "react";
-import { formatDate } from "@fullcalendar/core";
+import {formatDate} from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
-import { useGetHolidays, useGetVacation } from "../hooks.js";
+import {useGetHolidays, useGetVacation} from "../hooks.js";
 
 export default function RightSideBar({
                                          currentEvents,
                                          weekendsVisible,
                                          handleWeekendsToggle,
-                                         selectedCourses,
-                                         setSelectedCourses,
-                                         listOfCourses,
+                                         selectedCategories,
+                                         setSelectedCategories,
+                                         listOfCategories,
                                          loadingCourses,
                                          holidayEvents,
 
@@ -19,29 +19,28 @@ export default function RightSideBar({
     const animatedComponents = makeAnimated();
 
     const filteredEvents = currentEvents.filter(event => {
-        if (selectedCourses.length === 0) return true;
+        if (selectedCategories.length === 0) return true;
         const eventCourseId = event.extendedProps?.courseId;
-        return selectedCourses.some(choice => choice.value === eventCourseId);
+        return selectedCategories.some(choice => choice.value === eventCourseId);
     }).sort((a, b) => {
         return new Date(a.start) - new Date(b.start);
     });
 
 
-    const [selectedVal, setSelectedVal] = useState('');
-    const { data: holidays = [] } = useGetHolidays();
-    const { data: vacation = [] } = useGetVacation();
+    const {data: holidays = []} = useGetHolidays();
+    const {data: vacation = []} = useGetVacation();
 
     const activeCount =
         (currentEvents?.length || 0) -
         (vacation?.length || 0) -
         (holidayEvents?.length || 0);
 
-    function SidebarEvent({ event }) {
+    function SidebarEvent({event}) {
         return (
             <>
                 <li className="text-xs text-gray-600 p-2 rounded border-l-4"
                     style={{borderLeftColor: event.backgroundColor}}>
-                    <b>{formatDate(event.start, { year: 'numeric', month: 'short', day: 'numeric' })}</b>
+                    <b>{formatDate(event.start, {year: 'numeric', month: 'short', day: 'numeric'})}</b>
                     <span className="block italic">{event.title}</span>
                 </li>
             </>
@@ -57,13 +56,10 @@ export default function RightSideBar({
                         checked={weekendsVisible}
                         onChange={handleWeekendsToggle}
                         className="
-                            h-5 w-5 rounded-md
-                             h-5 w-5 rounded-md
-    border border-gray-400
-    accent-blue-600
-                            flex items-center justify-center
-                            "
-                    ></input>
+                             h-5 w-5 rounded-md border border-gray-400 accent-blue-600
+                             flex items-center justify-center">
+
+                    </input>
                     <span className="text-lg font-bold text-gray-600">Visa helger</span>
                 </label>
             </div>
@@ -74,10 +70,10 @@ export default function RightSideBar({
                     components={animatedComponents}
                     isMulti
                     isLoading={loadingCourses}
-                    onChange={(selectedOptions) => setSelectedCourses(selectedOptions)}
-                    options={listOfCourses.map(category => ({value: category.id, label: category.name}))}
-                    placeholder = "Filtrera på kategorier..."
-                    />
+                    onChange={(selectedOptions) => setSelectedCategories(selectedOptions)}
+                    options={listOfCategories.map(category => ({value: category.id, label: category.name}))}
+                    placeholder="Filtrera på kategorier..."
+                />
             </div>
 
             <div className='demo-app-sidebar-section'>
@@ -86,7 +82,7 @@ export default function RightSideBar({
                 </h2>
                 <ul className="space-y-2">
                     {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
-                        <SidebarEvent key={event.id} event={event} />
+                        <SidebarEvent key={event.id} event={event}/>
                     ))}
                 </ul>
             </div>

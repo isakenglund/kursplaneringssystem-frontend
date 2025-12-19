@@ -7,7 +7,10 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import {INITIAL_EVENTS} from '../../event-utils.js'
-import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateEventStartTime } from '../hooks.js'
+import useGetCourses, {
+    useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateEventStartTime,
+    useGetAllCategories
+} from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";
@@ -15,19 +18,25 @@ import { Snowfall } from "react-snowfall";
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const [selectedCourses, setSelectedCourses] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const {data: allEvents} = useGetAllEvents();
+    const {data:allCategories} = useGetAllCategories();
 
     const filteredCalendarEvents = useMemo(() => {
-        if (selectedCourses.length === 0) return allEvents;
+        if (!allEvents || allEvents.length === 0) return [];
+        if (selectedCategories.length === 0) return allEvents;
 
         return allEvents.filter(event => {
-            const props = event.extendedProps || event;
-            const courseId = props.courseId;
-            return selectedCourses.some(choice => choice.value === courseId);
-        });
-    }, [allEvents, selectedCourses]);
+            // Get courseId directly from event (since we're now building it properly)
+            const courseId = event.courseId || event.extendedProps?.courseId;
 
+            // If no courseId, don't include it (holidays/vacations)
+            if (!courseId) return false;
+
+            // Check if this event's courseId matches any selected category
+            return selectedCategories.some(choice => choice.value === courseId);
+        });
+    }, [allEvents, selectedCategories]);
 
 
     const today = new Date();
@@ -441,9 +450,9 @@ export default function DemoApp() {
                 currentEvents={currentEvents}
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
-                selectedCourses={selectedCourses}
-                setSelectedCourses={setSelectedCourses}
-                listOfCourses={listOfCourses}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+                listOfCategories={allCategories}
                 loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents} />
         </div>
