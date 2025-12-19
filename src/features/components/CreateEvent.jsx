@@ -11,6 +11,8 @@ import useGetCourses, {
 import ButtonEdit from "./ButtonEdit.jsx"
 import ButtonRemove from "./ButtonRemove.jsx";
 import EventList from "./EventList.jsx";
+import { useReorderCourseEvents } from "../hooks.js";
+
 
 
 export default function CreateEvent({
@@ -22,35 +24,27 @@ export default function CreateEvent({
                                     }) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
-
     const {remove: deleteCourseEvent} = useDeleteCourseEvent();
     const {remove: deleteMiscEvent} = useDeleteMiscEvent();
-
     const {save: saveCourseEvent} = useSaveCourseEvent();
     const {save: saveMiscEvent} = useSaveMiscEvent();
-
     const [courses, setCourses] = useState([]);
     const [miscs, setMiscs] = useState([]);
-
     const [categoryId, setCategoryId] = useState("");
     const [categoryType, setCategoryType] = useState("COURSE");
     const [categoryName, setCategoryName] = useState("");
-
     const [selectedTeachers, setSelectedTeachers] = useState([]);
     const [description, setDescription] = useState("");
     const [endDate, setEndDate] = useState(new Date());
     const [name, setName] = useState("");
-    const [id, setId] = useState("");
     const [startDate, setStartDate] = useState(new Date());
-    const [courseId, setCourseId] = useState("");
-
     const [editEventData, setEditEventData] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
 
     // Load courses
     useEffect(() => {
         if (fetchedCourses) setCourses(fetchedCourses);
-    }, [fetchedCourses]);
+    }, [fetchedCourses, fetchedMiscs]);
 
     useEffect(() => {
         if (fetchedMiscs) setMiscs(fetchedMiscs);
@@ -60,8 +54,40 @@ export default function CreateEvent({
         return currentEvents.some((ce) => String(ce.id) === String(eventId));
     };
 
-    async function handleRemoveEvent(parentId, eventId, type) {
+    // Hämta save-funktionen från hooken
+    const { saveOrder: saveCourseOrder } = useReorderCourseEvents();
 
+    // Funktion som hanterar när sorteringen är klar i listan
+    const handleOrderChange = async (newEventsArray, parentId, type) => {
+
+        // 1. Extrahera ID:n i rätt ordning för att skicka till backend
+        const orderedIds = newEventsArray.map(e => e.id);
+
+        try {
+            if (type === "COURSE") {
+                // 2. Uppdatera UI:t (state) direkt så det inte "hoppar tillbaka"
+                // Vi måste uppdatera 'courses' statet med den nya ordningen
+                setCourses(prev => prev.map(c =>
+                    c.id === parentId ? { ...c, event: newEventsArray } : c
+                ));
+
+                // 3. Skicka till backend
+                await saveCourseOrder(parentId, orderedIds);
+            }
+            else if (type === "MISC") {
+                // Samma logik för Misc...
+                setMiscs(prev => prev.map(m =>
+                    m.id === parentId ? { ...m, event: newEventsArray } : m
+                ));
+                // await saveMiscOrder(parentId, orderedIds);
+            }
+        } catch (error) {
+            console.error("Kunde inte spara ordning:", error);
+            // Här kan man lägga till logik för att återställa ordningen vid fel (valfritt)
+        }
+    };
+
+    async function handleRemoveEvent(parentId, eventId, type) {
         if (type === "COURSE") {
             const previous = courses;
             setCourses(prev => prev.map(c => c.id === parentId ? {
@@ -145,42 +171,31 @@ export default function CreateEvent({
         }
     }
 
-    // ------------------------------------------------------------
-    // Unified event renderer (edit + delete + drag + disabled)
-    // ------------------------------------------------------------
     function renderEvents(eventsArray, parentCategory, type) {
         if (!eventsArray || eventsArray.length === 0)
             return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
+
         return (
             <EventList
-                // HÄR VAR FELET: Använd argumentet 'eventsArray', inte 'myEvents'
                 eventsArray={eventsArray}
-
-                // HÄR VAR FELET: Använd argumentet 'parentCategory', inte 'category'
                 parentCategory={parentCategory}
-
-                // Använd variabeln 'type' (COURSE eller MISC) istället för hårdkodat 'lecture'
                 type={type}
-
                 isEventOnCalendar={isEventOnCalendar}
-
                 onEditClick={(event) => {
-                    // Använd 'type' variabeln här också
-                    setEditEventData({...event,categoryId: parentCategory, type: type});
+                    setEditEventData({...event, type: type});
                     setShowEditModal(true);
                 }}
-
                 onRemoveClick={(event) => {
-                    // Använd 'parentCategory.id' och 'type'
                     handleRemoveEvent(parentCategory.id, event.id, type);
                 }}
+                // HÄR KOPPLAR VI IN DET:
+                onOrderChange={(newOrder) => handleOrderChange(newOrder, parentCategory.id, type)}
             />
         );
     }
 
     return (
         <div>
-            {/* CREATE MODAL */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-96">
@@ -235,7 +250,6 @@ export default function CreateEvent({
                 </div>
             )}
 
-            {/* EDIT MODAL */}
             {showEditModal && (
                 <EditEventModal
                     selectedTeachers={selectedTeachers}
@@ -243,8 +257,6 @@ export default function CreateEvent({
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
                         const courseId = editEventData.categoryId;
-
-                        console.log(courseId)
                         setCourses(prev =>
                             prev.map(course =>
                                 String(course.id) === String(courseId)

@@ -1,8 +1,9 @@
-export default function ButtonEdit({ onClick, className = "" }) {
+export default function ButtonEdit({ onClick, className = "", onPointerDown}) {
     return (
         <button
             onClick={onClick}
             className={`w-5 h-5 text-gray-700 hover:text-green-500 ${className}`}
+            onPointerDown={onPointerDown}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"

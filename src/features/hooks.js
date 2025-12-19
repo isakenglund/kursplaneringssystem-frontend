@@ -1,15 +1,14 @@
 import {useEffect, useState} from 'react';
-import { API } from './api';
+import {API} from './api';
 
 const USE_MOCK = (import.meta.env?.VITE_USE_MOCK ?? 'true') === 'false';
 
 const MOCK = {
 
     courses: [
-        {  },
-        {  },
+        {},
+        {},
     ],
-
 
 
 };
@@ -51,10 +50,12 @@ export default function useGetCourses() {
             }
         })();
 
-        return () => { live = false; };
+        return () => {
+            live = false;
+        };
     }, []);
 
-    return { data, loading, err};
+    return {data, loading, err};
 }
 
 export function useGetMiscs() {
@@ -86,13 +87,15 @@ export function useGetMiscs() {
             }
         })();
 
-        return () => { live = false; };
+        return () => {
+            live = false;
+        };
     }, []);
 
-    return { data, loading, err};
+    return {data, loading, err};
 }
 
-export function useSaveCourse(){
+export function useSaveCourse() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -100,21 +103,22 @@ export function useSaveCourse(){
     async function save(course) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.saveCourse(course);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.saveCourse(course);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
-    return { data, loading, err, save: save };
+    }
+
+    return {data, loading, err, save: save};
 }
 
-export function useSaveMisc(){
+export function useSaveMisc() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -133,7 +137,8 @@ export function useSaveMisc(){
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
 
 export function useGetTeachers() {
@@ -159,10 +164,12 @@ export function useGetTeachers() {
                     setTeachers([]);
                 }
             } finally {
-                if(live) setLoading(false);
+                if (live) setLoading(false);
             }
         })();
-        return () => { live = false; };
+        return () => {
+            live = false;
+        };
 
     }, []);
 
@@ -201,7 +208,7 @@ export function useEventTeacherUpdater() {
         }
     };
 
-    return { addTeacher, removeTeacher, loading, error };
+    return {addTeacher, removeTeacher, loading, error};
 }
 
 export function useSaveCourseEvent() {
@@ -224,7 +231,8 @@ export function useSaveCourseEvent() {
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
 
 export function useSaveMiscEvent() {
@@ -247,7 +255,8 @@ export function useSaveMiscEvent() {
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
 
 export function useUpdateCourseEvent() {
@@ -269,7 +278,8 @@ export function useUpdateCourseEvent() {
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
 
 export function useUpdateMiscEvent() {
@@ -292,7 +302,8 @@ export function useUpdateMiscEvent() {
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
 
 export function useGetHolidays() {
@@ -318,10 +329,12 @@ export function useGetHolidays() {
             }
         })();
 
-        return () => { live = false; };
+        return () => {
+            live = false;
+        };
     }, []);
 
-    return { data, loading, err };
+    return {data, loading, err};
 }
 
 export function useDeleteCourseEvent() {
@@ -352,7 +365,7 @@ export function useDeleteCourseEvent() {
         }
     }
 
-    return { data, loading, err, remove };
+    return {data, loading, err, remove};
 }
 
 export function useDeleteMiscEvent() {
@@ -383,10 +396,10 @@ export function useDeleteMiscEvent() {
         }
     }
 
-    return { data, loading, err, remove };
+    return {data, loading, err, remove};
 }
 
-export function useGetAllEvents(){
+export function useGetAllEvents() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -414,10 +427,12 @@ export function useGetAllEvents(){
             }
         })();
 
-        return () => { live = false; };
+        return () => {
+            live = false;
+        };
     }, []);
 
-    return { data, loading, err };
+    return {data, loading, err};
 }
 
 
@@ -444,10 +459,12 @@ export function useGetVacation() {
             }
         })();
 
-        return () => { live = false; };
+        return () => {
+            live = false;
+        };
     }, []);
 
-    return { data, loading, err };
+    return {data, loading, err};
 }
 
 export function useDeleteVacation() {
@@ -478,7 +495,7 @@ export function useDeleteVacation() {
         }
     }
 
-    return { data, loading, err, remove };
+    return {data, loading, err, remove};
 }
 
 export function useSaveVacation() {
@@ -500,10 +517,11 @@ export function useSaveVacation() {
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
 
-export function useUpdateEventStartTime(){
+export function useUpdateEventStartTime() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -511,16 +529,47 @@ export function useUpdateEventStartTime(){
     async function update(eventId, startTime) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.updateEventStartTime(eventId, startTime);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.updateEventStartTime(eventId, startTime);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
-    return { data, loading, err, update };
+    }
+
+    return {data, loading, err, update};
+}
+
+export function useReorderCourseEvents() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+    console.log("kör hooken")
+
+    async function update(courseId, orderedIds) {
+        setLoading(true);
+        setErr(null);
+        console.log(courseId)
+
+    try {
+        const res = await API.reorderCourseEvents(courseId, orderedIds);
+        setData(pickList(res));
+        return res;
+    } catch (e) {
+        setErr(e);
+        throw e;
+    } finally {
+        setLoading(false);
+    }
+
+}
+
+    return {data, loading, err, update};
+
+
+
 }

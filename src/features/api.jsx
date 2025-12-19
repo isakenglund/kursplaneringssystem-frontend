@@ -4,17 +4,14 @@ export const API = {
 
     courses: () => api('/courses', {
         method: "GET",
-
     }),
 
     miscs: () => api('/miscs', {
         method: "GET",
-
     }),
 
     courseEvents: () => api('/course-events', {
         method: "GET",
-
     }),
 
     miscEvents: () => api('/misc-events', {
@@ -44,7 +41,7 @@ export const API = {
         })
     },),
 
-    saveCourseEvent: (courseEvent) => api ('/course-events', {
+    saveCourseEvent: (courseEvent) => api('/course-events', {
         method: "POST",
         body: JSON.stringify({
             description: courseEvent.description,
@@ -53,10 +50,11 @@ export const API = {
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
             teachers: courseEvent.teachers,
+            displayIndex: courseEvent.displayIndex
         })
     }),
 
-    saveMiscEvent: (miscEvent) => api ('/misc-events', {
+    saveMiscEvent: (miscEvent) => api('/misc-events', {
         method: "POST",
         body: JSON.stringify({
             description: miscEvent.description,
@@ -64,6 +62,7 @@ export const API = {
             name: miscEvent.name,
             startDate: miscEvent.startDate,
             miscId: miscEvent.miscId,
+            displayIndex: miscEvent.displayIndex
         })
     }),
 
@@ -77,7 +76,7 @@ export const API = {
         method: "DELETE",
     }),
 
-    updateCourseEvent: (courseEvent) => api ('/course-events', {
+    updateCourseEvent: (courseEvent) => api('/course-events', {
         method: "PUT",
         body: JSON.stringify({
             id: courseEvent.id,
@@ -87,10 +86,11 @@ export const API = {
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
             teachers: courseEvent.teachers,
+            displayIndex: courseEvent.displayIndex
         })
     }),
 
-    updateMiscEvent: (miscEvent) => api ('/misc-events', {
+    updateMiscEvent: (miscEvent) => api('/misc-events', {
         method: "POST",
         body: JSON.stringify({
             description: miscEvent.description,
@@ -98,6 +98,7 @@ export const API = {
             name: miscEvent.name,
             startDate: miscEvent.startDate,
             miscId: miscEvent.courseId,
+            displayIndex: miscEvent.displayIndex
         })
     }),
 
@@ -114,34 +115,42 @@ export const API = {
             method: "DELETE"
         }),
 
-    saveVacation: (vacation)=>
-        api ('/vacation', {
+    saveVacation: (vacation) =>
+        api('/vacation', {
             method: "POST",
             body: JSON.stringify({
                 date: vacation.date
             })
-    }),
+        }),
 
     deleteVacation: (vacationId) =>
-    api(`/vacation/${vacationId}`, {
-        method: "DELETE"
-    }),
+        api(`/vacation/${vacationId}`, {
+            method: "DELETE"
+        }),
 
     getVacation: () => api('/vacation', {
         method: "GET",
     }),
 
-   updateEventStartTime: (eventId, startTime) =>
-  api(`/course-events/${eventId}/start-time`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      startTime: startTime instanceof Date
-        ? startTime.toISOString()
-        : startTime,
-    }),
-  }),
+    updateEventStartTime: (eventId, startTime) =>
+        api(`/course-events/${eventId}/start-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                startTime: startTime instanceof Date
+                    ? startTime.toISOString()
+                    : startTime,
+            }),
+        }),
 
+    reorderCourseEvents: (courseId, orderedIds) =>
+        api(`course-events/${courseId}/reorder`, { // OBS: course-events, inte courses
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderedIds),
+        }),
 };
