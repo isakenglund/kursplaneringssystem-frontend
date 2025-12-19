@@ -228,7 +228,6 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-            <Snowfall snowflakeCount={400} radius={[0.5,4]}/>
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
