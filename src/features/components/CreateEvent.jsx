@@ -53,6 +53,8 @@ export default function CreateEvent({
         fetchedCourses.forEach(course => {
             defaultOpen[`course-${course.id}`] = true;
         });
+
+        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
     }, [fetchedCourses]);
 
     useEffect(() => {
@@ -62,6 +64,8 @@ export default function CreateEvent({
         fetchedCourses.forEach(misc => {
             defaultOpen[`misc-${misc.id}`] = true;
         });
+
+        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
     }, [fetchedMiscs]);
 
     const toggleEventSection = (sectionId) => {
