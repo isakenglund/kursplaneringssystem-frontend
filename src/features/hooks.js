@@ -213,7 +213,7 @@ export function useSaveCourseEvent() {
         setLoading(true);
         setErr(null);
         try {
-            console.log(courseEvent)
+            console.log("brumbrum",courseEvent)
             const res = await API.saveCourseEvent(courseEvent);
             setData(pickList(res));
             return res;
