@@ -61,7 +61,7 @@ export default function CreateEvent({
         if (fetchedMiscs) setMiscs(fetchedMiscs);
 
         const defaultOpen = {};
-        fetchedCourses.forEach(misc => {
+        fetchedMiscs.forEach(misc => {
             defaultOpen[`misc-${misc.id}`] = true;
         });
 
