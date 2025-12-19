@@ -113,4 +113,35 @@ export const API = {
         api(`/misc-events/${eventId}`, {
             method: "DELETE"
         }),
+
+    saveVacation: (vacation)=>
+        api ('/vacation', {
+            method: "POST",
+            body: JSON.stringify({
+                date: vacation.date
+            })
+    }),
+
+    deleteVacation: (vacationId) =>
+    api(`/vacation/${vacationId}`, {
+        method: "DELETE"
+    }),
+
+    getVacation: () => api('/vacation', {
+        method: "GET",
+    }),
+
+   updateEventStartTime: (eventId, startTime) =>
+  api(`/course-events/${eventId}/start-time`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      startTime: startTime instanceof Date
+        ? startTime.toISOString()
+        : startTime,
+    }),
+  }),
+
 };
