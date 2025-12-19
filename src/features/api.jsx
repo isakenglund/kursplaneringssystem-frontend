@@ -1,4 +1,4 @@
-import {api} from "../lib/fetcher.jsx";
+import { api } from "../lib/fetcher.jsx";
 
 export const API = {
 
@@ -14,7 +14,6 @@ export const API = {
 
     courseEvents: () => api('/course-events', {
         method: "GET",
-
     }),
 
     miscEvents: () => api('/misc-events', {
@@ -44,7 +43,7 @@ export const API = {
         })
     },),
 
-    saveCourseEvent: (courseEvent) => api ('/course-events', {
+    saveCourseEvent: (courseEvent) => api('/course-events', {
         method: "POST",
         body: JSON.stringify({
             description: courseEvent.description,
@@ -56,7 +55,7 @@ export const API = {
         })
     }),
 
-    saveMiscEvent: (miscEvent) => api ('/misc-events', {
+    saveMiscEvent: (miscEvent) => api('/misc-events', {
         method: "POST",
         body: JSON.stringify({
             description: miscEvent.description,
@@ -77,7 +76,7 @@ export const API = {
         method: "DELETE",
     }),
 
-    updateCourseEvent: (courseEvent) => api ('/course-events', {
+    updateCourseEvent: (courseEvent) => api('/course-events', {
         method: "PUT",
         body: JSON.stringify({
             id: courseEvent.id,
@@ -90,7 +89,7 @@ export const API = {
         })
     }),
 
-    updateMiscEvent: (miscEvent) => api ('/misc-events', {
+    updateMiscEvent: (miscEvent) => api('/misc-events', {
         method: "POST",
         body: JSON.stringify({
             description: miscEvent.description,
@@ -114,34 +113,67 @@ export const API = {
             method: "DELETE"
         }),
 
-    saveVacation: (vacation)=>
-        api ('/vacation', {
+    saveVacation: (vacation) =>
+        api('/vacation', {
             method: "POST",
             body: JSON.stringify({
                 date: vacation.date
             })
-    }),
+        }),
 
     deleteVacation: (vacationId) =>
-    api(`/vacation/${vacationId}`, {
-        method: "DELETE"
-    }),
+        api(`/vacation/${vacationId}`, {
+            method: "DELETE"
+        }),
 
     getVacation: () => api('/vacation', {
         method: "GET",
     }),
 
-   updateEventStartTime: (eventId, startTime) =>
-  api(`/course-events/${eventId}/start-time`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      startTime: startTime instanceof Date
-        ? startTime.toISOString()
-        : startTime,
-    }),
-  }),
+    updateEventTime: (eventId, startTime, endTime) => {
 
+        api(`/course-events/${eventId}/updateTime`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                startTime: startTime instanceof Date
+                    ? formatToISO(startTime)
+                    : startTime,
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
+
+
+    updateEventEndTime: (eventId, endTime) => {
+        api(`/course-events/${eventId}/end-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
+
+};
+
+function formatToISO(date) {
+    const pad = (num) => String(num).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
 };

@@ -7,7 +7,7 @@ import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
 import {INITIAL_EVENTS} from '../../event-utils.js'
-import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateEventStartTime } from '../hooks.js'
+import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateEventTime, useUpdateEventEndTime } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";
@@ -47,8 +47,8 @@ export default function DemoApp() {
     })
     const [showDateInputs, setShowDateInputs] = useState(false);
     const [vacationDate, setVacationDate] = useState(todayDate);
-    const { update: updateEventStartTime, loading, err } = useUpdateEventStartTime();
-
+    const { update: updateEventTime} = useUpdateEventTime();
+    const { update: updateEventEndTime} = useUpdateEventEndTime();
     const {holidayEvents, holidaySet} = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return {holidayEvents: [], holidaySet: new Set()};
 
@@ -111,6 +111,30 @@ export default function DemoApp() {
 
         return { vacationEvents: events, vacationSet: set };
     }, [vacations]);
+
+
+
+const listOfPersistantEvents = useMemo(() => {
+  return listOfCourses
+    .flatMap(course =>
+      course.event
+        .filter(event => event.startTime)
+        .map(event => ({
+          id: event.id,
+          title: event.name,
+          start: event.startTime,
+          end: event.endTime || undefined,
+          color: course.colorHex || '#3788d8',
+          extendedProps: {
+            courseId: course.id,   // store courseId
+            miscId: event.miscId,  // if you have a miscId
+            description: event.description, // optional extra data
+          },
+        }))
+    );
+}, [listOfCourses]);
+
+
 
 
     const handleDatesSet = (dateInfo) => {
@@ -244,9 +268,12 @@ export default function DemoApp() {
                 return false;
             }
         }
-        updateEventStartTime(info.event.id,info.event.start)
+
+        updateEventTime(movedEventId,movedEventStart,movedEventEnd)
+
         return true;
     }
+
 
     function checkForHoliday(info) {
         const eventDate = info.event.start;
@@ -296,7 +323,8 @@ export default function DemoApp() {
             `Är du säker på att du vill ta bort händelsen '${event.title}'?`
         );
         if (!confirmed) return;
-
+        
+        updateEventTime(clickInfo.event.id,null,null)
         event.remove();
 
         if (isVacation) {
@@ -316,7 +344,7 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-            <Snowfall snowflakeCount={400} radius={[0.5, 4]} />
+           
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
@@ -407,7 +435,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
+                    events={[...listOfPersistantEvents, ...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;

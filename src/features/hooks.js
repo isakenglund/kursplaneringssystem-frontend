@@ -503,16 +503,38 @@ export function useSaveVacation() {
     return { data, loading, err, save };
 }
 
-export function useUpdateEventStartTime(){
+export function useUpdateEventTime(){
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
 
-    async function update(eventId, startTime) {
+    async function update(eventId, startTime, endTime) {
         setLoading(true);
         setErr(null);
          try {
-                const res = await API.updateEventStartTime(eventId, startTime);
+                const res = await API.updateEventTime(eventId, startTime, endTime);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+             setErr(e);
+             throw e;
+            } finally {
+             setLoading(false);
+            }
+        }
+    return { data, loading, err, update };
+}
+
+export function useUpdateEventEndTime(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(eventId, endTime) {
+        setLoading(true);
+        setErr(null);
+         try {
+                const res = await API.updateEventEndTime(eventId, endTime);
                 setData(pickList(res));
                 return res;
             } catch (e) {
