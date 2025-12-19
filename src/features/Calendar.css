@@ -1,3 +1,19 @@
 .fc-day-mon {
     border-left: 5px solid #ccc !important;
 }
+@layer components {
+  /* Wrap normal events */
+  .fc-event-title {
+    @apply whitespace-normal break-words;
+  }
+
+  /* Wrap background events (holidays) */
+  .fc-bg-event {
+    @apply whitespace-normal break-words;
+  }
+
+  /* Optional: make the height auto for multi-line events */
+  .fc-daygrid-event {
+    height: auto !important;
+  }
+}

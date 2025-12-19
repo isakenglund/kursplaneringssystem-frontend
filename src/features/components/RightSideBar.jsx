@@ -1,8 +1,8 @@
-import React from "react";
-import {formatDate} from "@fullcalendar/core";
+import React, {useState} from "react";
+import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
-import{ useGetHolidays} from "../hooks.js";
+import { useGetHolidays, useGetVacation } from "../hooks.js";
 
 export default function RightSideBar({
                                          currentEvents,
@@ -11,13 +11,14 @@ export default function RightSideBar({
                                          selectedCourses,
                                          setSelectedCourses,
                                          listOfCourses,
-                                         loadingCourses
+                                         loadingCourses,
+                                         holidayEvents,
+
                                      }) {
 
     const animatedComponents = makeAnimated();
 
     const filteredEvents = currentEvents.filter(event => {
-
         if (selectedCourses.length === 0) return true;
         const eventCourseId = event.extendedProps?.courseId;
         return selectedCourses.some(choice => choice.value === eventCourseId);
@@ -25,12 +26,15 @@ export default function RightSideBar({
         return new Date(a.start) - new Date(b.start);
     });
 
+
+    const [selectedVal, setSelectedVal] = useState('');
     const { data: holidays = [] } = useGetHolidays();
-    /*
-    const filteredList = !selectedVal
-        ? currentEvents // Om inget valt: Visa alla
-        : currentEvents.filter(event => event.courseId === selectedVal);
-    */
+    const { data: vacation = [] } = useGetVacation();
+
+    const activeCount =
+        (currentEvents?.length || 0) -
+        (vacation?.length || 0) -
+        (holidayEvents?.length || 0);
 
     function SidebarEvent({ event }) {
         return (
@@ -54,10 +58,9 @@ export default function RightSideBar({
                         onChange={handleWeekendsToggle}
                         className="
                             h-5 w-5 rounded-md
-                            appearance-none
-                            border border-gray-400
-                            checked:bg-blue-600
-                            checked:border-blue-600
+                             h-5 w-5 rounded-md
+    border border-gray-400
+    accent-blue-600
                             flex items-center justify-center
                             "
                     ></input>
@@ -78,9 +81,11 @@ export default function RightSideBar({
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">Aktiva i kalendern ({currentEvents.length-(2*holidays.length)})</h2>
+                <h2 className="text-lg font-bold mb-3 text-gray-700">
+                    Aktiva i kalendern ({activeCount})
+                </h2>
                 <ul className="space-y-2">
-                    {currentEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
+                    {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
                         <SidebarEvent key={event.id} event={event} />
                     ))}
                 </ul>
