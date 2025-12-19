@@ -305,6 +305,10 @@ const listOfPersistantEvents = useMemo(() => {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
+    function handleEventResize(info) {
+        const event = info.event;
+        updateEventEndTime(event.id, event.end);
+    }
 
     async function handleEventClick(clickInfo) {
         const { event } = clickInfo;
@@ -459,6 +463,7 @@ const listOfPersistantEvents = useMemo(() => {
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
+                    eventResize={handleEventResize}
                     eventColor={function (info) {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
