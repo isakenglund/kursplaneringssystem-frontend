@@ -46,6 +46,7 @@ export default function CreateEvent({
     // Load courses
     useEffect(() => {
         if (fetchedCourses) setCourses(fetchedCourses);
+        console.log(fetchedCourses);
     }, [fetchedCourses]);
 
     useEffect(() => {
@@ -94,7 +95,6 @@ export default function CreateEvent({
         }
 
         try {
-            console.log("ASDSADSADSADSA", categoryType)
             if (categoryType === "COURSE") {
                 const payload = {
                     name,
@@ -102,7 +102,7 @@ export default function CreateEvent({
                     startTime: startDate,
                     endTime: endDate,
                     courseId: categoryId,
-                    teachers: selectedTeachers.map((t) => t.id)
+                    teachers: selectedTeachers
                 };
 
                 const savedEvent = await saveCourseEvent(payload);
@@ -160,8 +160,8 @@ export default function CreateEvent({
                                 title: event.name,
                                 start: event.startDate || event.startTime,
                                 end: event.endDate || event.endTime,
-                                courseId: parentCategory.id,
-                                miscId: parentCategory.id,
+                                courseId: type === "COURSE" ? parentCategory.id : undefined,
+                                miscId: type !== "COURSE" ? parentCategory.id : undefined,
                                 color: parentCategory.colorHex || "#3b82f6",
                                 teachers: event.teachers,
                             })}
@@ -175,7 +175,7 @@ export default function CreateEvent({
                         >
                             <div className="min-w-0 flex-1">
                                 <span className="block truncate" title={event.name}>
-                                    {index + 1}.{event.teachers} {event.name}
+                                    {index + 1}. {event.name}
                                 </span>
                             </div>
 
