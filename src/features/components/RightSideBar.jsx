@@ -13,7 +13,7 @@ export default function RightSideBar({
     listOfCourses,
     loadingCourses,
     holidayEvents,
-
+    
 }) {
 
     const animatedComponents = makeAnimated();
@@ -30,6 +30,8 @@ export default function RightSideBar({
     const [selectedVal, setSelectedVal] = useState('');
     const { data: holidays = [] } = useGetHolidays();
     const { data: vacation = [] } = useGetVacation();
+
+    const totalCount = listOfCourses.reduce((sum, course) => sum + course.event.length, 0);
 
     const activeCount =
         (currentEvents?.length || 0) -
@@ -81,9 +83,15 @@ export default function RightSideBar({
             </div>
 
             <div className='demo-app-sidebar-section'>
-                <h2 className="text-lg font-bold mb-3 text-gray-700">
-                    Aktiva i kalendern ({activeCount})
+                <h2
+                    className={`text-lg font-bold mb-3 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
+                        }`}
+                >
+                    Aktiva i kalendern {activeCount} / {totalCount}
                 </h2>
+
+
+
                 <ul className="space-y-2">
                     {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
                         <SidebarEvent key={event.id} event={event} />

@@ -94,7 +94,7 @@ export default function DemoApp() {
             const start = new Date(v.date);
             events.push({
                 id: `vacation-${v.id}`,
-                title: "Vacation",
+                title: "Semester",
                 start,
                 end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
                 allDay: true,
@@ -312,36 +312,37 @@ const listOfPersistantEvents = useMemo(() => {
     }
 
     async function handleEventClick(clickInfo) {
-        const { event } = clickInfo;
-        const isHoliday =
-            event.extendedProps?.wrapText &&
-            event.id?.startsWith("holiday-");
+    const { event } = clickInfo;
 
-        if (isHoliday) {
-            return;
-        }
-        const isVacation =
-            event.extendedProps?.wrapText &&
-            event.id?.startsWith("vacation-");
+    const isHoliday =
+        event.extendedProps?.wrapText &&
+        event.id?.startsWith("holiday-");
+    if (isHoliday) return;
 
-        const confirmed = confirm(
-            `Är du säker på att du vill ta bort händelsen '${event.title}'?`
-        );
-        if (!confirmed) return;
-        
-        updateEventTime(clickInfo.event.id,null,null)
-        event.remove();
+    const isVacation =
+        event.extendedProps?.wrapText &&
+        event.id?.startsWith("vacation-");
 
+    const confirmed = await confirmCustom(
+        `Är du säker på att du vill ta bort händelsen '${event.title}'?`
+    );
+    if (!confirmed) return;
+
+    try {
         if (isVacation) {
-            try {
-                const vacationId = event.id.replace("vacation-", "");
-                await deleteVacation(vacationId);
-            } catch (err) {
-                console.error("Could not delete vacation via hook:", err);
-                alertCustom("Kunde inte ta bort semestern via hook")
-            }
+            const vacationId = Number(event.id.replace("vacation-", ""));
+            await deleteVacation(vacationId);
+        } else {
+            const eventId = Number(event.id); // ensure numeric
+            await updateEventTime(eventId, null, null);
         }
+        event.remove();
+    } catch (err) {
+        console.error("Could not remove event:", err);
+        alertCustom("Kunde inte ta bort händelsen");
     }
+}
+
 
     function handleEvents(events) {
         setCurrentEvents(events)
