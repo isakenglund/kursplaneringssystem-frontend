@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import ColorPicker from "./ColorPicker.jsx";
 import { useSaveCourse, useSaveVacation, useSaveMisc } from "../hooks.js";
 import VacationPicker from "./VacationPicker.jsx";
-import { ALERT_TYPES } from "../components/AlertModal.jsx";
+import { alertCustom } from "../functions/alertFunctions.jsx";
 
-export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate,setAlertData }) {
+export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate }) {
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -38,10 +38,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
 
     async function handleCreateClick() {
         if(!name.trim() && categoryType!=="vacation") {
-            setAlertData({
-                                    type: ALERT_TYPES.OK,       
-                                    message: "Vänligen fyll i ett kategori namn.", 
-                                });
+            await alertCustom("Vänligen fyll i ett kategori namn.")
             return;
              
         }

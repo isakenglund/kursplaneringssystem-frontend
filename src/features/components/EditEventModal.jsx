@@ -1,9 +1,9 @@
 import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
-import { ALERT_TYPES } from "../components/AlertModal.jsx";
+import { alertCustom } from "../functions/alertFunctions.jsx";
 
-export default function EditEventModal({ event, onClose, onSaved ,setAlertData,}) {
+export default function EditEventModal({ event, onClose, onSaved ,}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
@@ -45,10 +45,7 @@ export default function EditEventModal({ event, onClose, onSaved ,setAlertData,}
             onClose();
         } catch (e) {
             console.error("Kunde inte spara eventet:", e);
-            setAlertData({
-                                    type: ALERT_TYPES.OK,       
-                                    message: "Ett fel inträffade vid sparande.", 
-                                });
+            await alertCustom("Ett fel inträffade vid sparande");
         }
     }
 

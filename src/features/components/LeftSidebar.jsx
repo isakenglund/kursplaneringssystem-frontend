@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
-import { ALERT_TYPES } from "../components/AlertModal.jsx";
 
 
 
@@ -10,8 +9,7 @@ export default function LeftSidebar({
     currentEvents,
     removeExternalEvent,
     setVacationDate,
-    vacationDate,
-    setAlertData
+    vacationDate
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -43,8 +41,7 @@ export default function LeftSidebar({
                 <CreateCategory 
                     setIsCategoryModalOpen={setIsCategoryModalOpen} 
                     setVacationDate={setVacationDate}
-                    vacationDate={vacationDate}
-                    setAlertData={setAlertData}/>
+                    vacationDate={vacationDate}/>
             )}
 
             <div className='demo-app-sidebar-section mb-8'>

@@ -21,7 +21,7 @@ export default function AlertModal({ alertData, onClose, onResult }) {
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                <p className="mb-4">{alertData.message}</p>
+                <p className="mb-4 justify-end">{alertData.message}</p>
 
                 {alertData.type === ALERT_TYPES.OK && (
                     <button

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
-import { ALERT_TYPES } from "../components/AlertModal.jsx";
+import { alertCustom } from "../functions/alertFunctions.jsx";
 import useGetCourses, {
     useDeleteCourseEvent,
     useSaveCourseEvent,
@@ -15,8 +15,7 @@ export default function CreateEvent({
                                         currentEvents,
                                         openModal,
                                         closeModal,
-                                        isModalOpen,
-                                        setAlertData
+                                        isModalOpen
                                     }) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
@@ -114,10 +113,7 @@ export default function CreateEvent({
         e.preventDefault();
 
         if (!name) {
-            setAlertData({
-                type: ALERT_TYPES.OK,       
-                message: "Vänligen fyll i namn på eventet", 
-            });
+            await alertCustom("Vänligen fyll i namn på eventet");
             return;
         }
 
@@ -165,10 +161,7 @@ export default function CreateEvent({
 
         } catch (error) {
             console.error("DEBUG-FEL:", error);
-             setAlertData({
-                                    type: ALERT_TYPES.OK,       
-                                    message: `Fel: ${error.message}`, 
-                                });
+            await alertCustom(`Fel: ${error.message}`)
         }
     }
 
@@ -317,7 +310,6 @@ export default function CreateEvent({
                     selectedTeachers={selectedTeachers}
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
-                    setAlertData={setAlertData}
                     onSaved={(updatedEvent) => {
                         const courseId = editEventData.categoryId;
 

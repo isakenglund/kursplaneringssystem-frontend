@@ -3,7 +3,6 @@ import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
 import { useGetHolidays, useGetVacation } from "../hooks.js";
-import { ALERT_TYPES } from "../components/AlertModal.jsx";
 
 export default function RightSideBar({
     currentEvents,
