@@ -11,8 +11,10 @@ import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDelet
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";
+import AlertModal, { ALERT_TYPES } from "../components/AlertModal.jsx";
 
 export default function DemoApp() {
+    const [alertData, setAlertData] = useState(null);
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCourses, setSelectedCourses] = useState([]);
@@ -188,6 +190,31 @@ const listOfPersistantEvents = useMemo(() => {
         setWeekendsVisible(!weekendsVisible)
     }
 
+
+    export function confirm(message) {
+    return new Promise((resolve) => {
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+
+        const root = createRoot(container);
+
+        const handleClose = () => {
+            root.unmount();
+            container.remove();
+        };
+
+        root.render(
+            <AlertModal
+                alertData={{
+                    type: ALERT_TYPES.CONFIRM,
+                    message,
+                }}
+                onClose={handleClose}
+                onResult={(result) => resolve(result)}
+            />
+        );
+    });
+    
     function validateEventDrop(info) {
         if (!info.event.extendedProps || !info.event.extendedProps.courseId) {
             return true;
@@ -216,8 +243,10 @@ const listOfPersistantEvents = useMemo(() => {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
 
                 if (movedEventStart < earlierEventEnd) {
-                    alert("ogiltig ordning")
-                    console.log("Ogiltig ordning")
+                   setAlertData({
+                        type: ALERT_TYPES.OK,       
+                        message: "Ogiltig ordning", 
+                    });
                     info.revert();
                     return false;
                 }
@@ -232,7 +261,10 @@ const listOfPersistantEvents = useMemo(() => {
                 const laterEventStart = laterEventOnCalendar.start;
 
                 if (movedEventEnd > laterEventStart) {
-                    alert("ogiltig ordning")
+                    setAlertData({
+                        type: ALERT_TYPES.OK,       
+                        message: "Ogiltig ordning", 
+                    });
                     console.log("Ogiltig ordning")
                     info.revert();
                     return false;
@@ -246,7 +278,11 @@ const listOfPersistantEvents = useMemo(() => {
         }
         const dayOfWeek = movedEventStart.getDay(); // 0 = Sunday, 6 = Saturday
         if (dayOfWeek === 0 || dayOfWeek === 6) {
-            const override = confirm("Du håller på att sätta detta event på en helg, vill du fortsätta?");
+             setAlertData({
+                                    type: ALERT_TYPES.CONFIRM,       
+                                    message: "Vänligen fyll i ett kategori namn.", 
+                                });
+            const override = 
             if(override){
                 return true;
             }else{
@@ -284,7 +320,10 @@ const listOfPersistantEvents = useMemo(() => {
 
         if (matchingHoliday) {
             const holidayName = matchingHoliday.name;
-            alert(`You cannot drop events on a holiday: ${holidayName}`);
+             setAlertData({
+                        type: ALERT_TYPES.OK,       
+                        message: `Du kan inte lägga event på högtiden: ${holidayName}`, 
+                    });
             info.revert();
             return true;
         }
@@ -335,7 +374,10 @@ const listOfPersistantEvents = useMemo(() => {
                 await deleteVacation(vacationId);
             } catch (err) {
                 console.error("Could not delete vacation via hook:", err);
-                alert("Kunde inte ta bort vacation på servern.");
+                setAlertData({
+                        type: ALERT_TYPES.OK,       
+                        message: "Kunde inte ta bort semestern via hook", 
+                    });
             }
         }
     }
@@ -346,13 +388,19 @@ const listOfPersistantEvents = useMemo(() => {
 
     return (
         <div className='demo-app relative h-screen flex'>
-           
+            {alertData && (
+                 <AlertModal 
+                    alertData={alertData} 
+                    onClose={() => setAlertData(null)} 
+                 />
+            )}
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
                 loadingCourses={loadingCourses}
                 setVacationDate={setVacationDate}
                 vacationDate={vacationDate}
+                setAlertData={setAlertData}
             />
 
             <div className='demo-app-main flex-grow p-4'>
@@ -476,7 +524,8 @@ const listOfPersistantEvents = useMemo(() => {
                 setSelectedCourses={setSelectedCourses}
                 listOfCourses={listOfCourses}
                 loadingCourses={loadingCourses}
-                holidayEvents={holidayEvents} />
+                holidayEvents={holidayEvents} 
+                />
         </div>
     )
 }

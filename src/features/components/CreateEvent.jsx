@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
+import { ALERT_TYPES } from "../components/AlertModal.jsx";
 import useGetCourses, {
     useDeleteCourseEvent,
     useSaveCourseEvent,
@@ -15,6 +16,7 @@ export default function CreateEvent({
                                         openModal,
                                         closeModal,
                                         isModalOpen,
+                                        setAlertData
                                     }) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
@@ -112,7 +114,10 @@ export default function CreateEvent({
         e.preventDefault();
 
         if (!name) {
-            alert("Vänligen fyll i en titel");
+            setAlertData({
+                type: ALERT_TYPES.OK,       
+                message: "Vänligen fyll i namn på eventet", 
+            });
             return;
         }
 
@@ -160,7 +165,10 @@ export default function CreateEvent({
 
         } catch (error) {
             console.error("DEBUG-FEL:", error);
-            alert(`Fel: ${error.message}`);
+             setAlertData({
+                                    type: ALERT_TYPES.OK,       
+                                    message: `Fel: ${error.message}`, 
+                                });
         }
     }
 
@@ -309,6 +317,7 @@ export default function CreateEvent({
                     selectedTeachers={selectedTeachers}
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
+                    setAlertData={setAlertData}
                     onSaved={(updatedEvent) => {
                         const courseId = editEventData.categoryId;
 
