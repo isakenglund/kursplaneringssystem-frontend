@@ -19,21 +19,23 @@ export default function RightSideBar({
 
     const animatedComponents = makeAnimated();
 
-    const {data: fetchedMiscs} = useGetMiscs();
-    const filteredEvents = currentEvents.filter(event => {
-        if (selectedCategories.length === 0) return true;
-        const eventCourseId = event.extendedProps?.courseId;
-        return selectedCategories.some(choice => choice.value === eventCourseId);
-    }).sort((a, b) => {
-        return new Date(a.start) - new Date(b.start);
-    });
+     const filteredEvents = currentEvents
+        .filter(event => { 
+            if (selectedCategories.length === 0) return true;
+            const eventCourseId = event.extendedProps?.courseId;
+            const eventMiscId = event.extendedProps?.miscId;
+            return selectedCategories.some(choice =>
+                choice.value === eventCourseId || choice.value === eventMiscId
+            );
+        })
+        .sort((a, b) => new Date(a.start) - new Date(b.start));
 
-
+    console.log(filteredEvents)
     const [selectedVal, setSelectedVal] = useState('');
     const { data: holidays = [] } = useGetHolidays();
     const { data: vacation = [] } = useGetVacation();
 
-    const totalCount = listOfCourses.reduce((sum, course) => sum + course.event.length, 0)+fetchedMiscs.reduce((sum, misc) => sum + misc.event.length, 0);
+    const totalCount = listOfCategories.reduce((sum, course) => sum + course.event.length, 0);
 
     const activeCount =
         (currentEvents?.length || 0) -
@@ -51,7 +53,6 @@ export default function RightSideBar({
             </>
         )
     }
-
     return (
         <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
             <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>

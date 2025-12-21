@@ -30,22 +30,22 @@ export default function DemoApp() {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const {data: allEvents} = useGetAllEvents();
     const {data:allCategories} = useGetAllCategories();
-
-    const filteredCalendarEvents = useMemo(() => {
+const filteredCalendarEvents = useMemo(() => {
         if (!allEvents || allEvents.length === 0) return [];
         if (selectedCategories.length === 0) return allEvents;
 
         return allEvents.filter(event => {
-            // Get courseId directly from event (since we're now building it properly)
             const courseId = event.courseId || event.extendedProps?.courseId;
+            const miscId = event.miscId || event.extendedProps?.miscId;
 
-            // If no courseId, don't include it (holidays/vacations)
-            if (!courseId) return false;
+            if (!courseId && !miscId) return false;
 
-            // Check if this event's courseId matches any selected category
-            return selectedCategories.some(choice => choice.value === courseId);
+            return selectedCategories.some(choice =>
+                choice.value === courseId || choice.value === miscId
+            );
         });
-    }, [allEvents, selectedCourses]);
+    }, [allEvents, selectedCategories]);
+
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -221,6 +221,16 @@ export default function DemoApp() {
 
     const calendarRef = useRef(null)
 
+const eventsForCalendar = useMemo(() => { 
+    if (selectedCategories.length === 0) {
+        return [...listOfPersistantEvents, ...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
+    } else {
+        return [...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
+    }
+}, [listOfPersistantEvents, filteredCalendarEvents, vacationEvents, holidayEvents, selectedCategories]);
+
+
+
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
@@ -351,9 +361,18 @@ export default function DemoApp() {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
-    function handleEventResize(info) {
+    async function handleEventResize(info) {
         const event = info.event;
-        updateEventEndTime(event.id, event.end);
+        const isCourseEvent = !!info.event.extendedProps.courseId;
+        const isMiscEvent = !!info.event.extendedProps.miscId;
+         if (isCourseEvent) {
+            await updateCourseEventEndTime(event.id, event.end);
+        } else if (isMiscEvent) {
+            await updateMiscEventEndTime(event.id, event.end);
+        } else {
+            await alertCustom("Något blev fel");
+        }
+        
     }
 
    async function handleEventClick(clickInfo) {
@@ -505,7 +524,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...listOfPersistantEvents, ...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
+                    events={eventsForCalendar}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
