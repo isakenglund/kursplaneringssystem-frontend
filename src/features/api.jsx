@@ -130,9 +130,9 @@ export const API = {
         method: "GET",
     }),
 
-    updateEventTime: (eventId, startTime, endTime) => {
+    updateCourseEventTime: (eventId, startTime, endTime) => {
 
-        api(`/course-events/${eventId}/updateTime`, {
+        api(`/course-events/${eventId}/course-update-time`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -149,8 +149,41 @@ export const API = {
     },
 
 
-    updateEventEndTime: (eventId, endTime) => {
-        api(`/course-events/${eventId}/end-time`, {
+    updateCourseEventEndTime: (eventId, endTime) => {
+        api(`/course-events/${eventId}/course-end-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
+
+    updateMiscEventTime: (eventId, startTime, endTime) => {
+
+        api(`/misc-events/${eventId}/misc-update-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                startTime: startTime instanceof Date
+                    ? formatToISO(startTime)
+                    : startTime,
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
+
+
+    updateMiscEventEndTime: (eventId, endTime) => {
+        api(`/misc-events/${eventId}/misc-end-time`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
