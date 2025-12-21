@@ -213,7 +213,6 @@ export function useSaveCourseEvent() {
         setLoading(true);
         setErr(null);
         try {
-            console.log(courseEvent)
             const res = await API.saveCourseEvent(courseEvent);
             setData(pickList(res));
             return res;
@@ -236,7 +235,6 @@ export function useSaveMiscEvent() {
         setLoading(true);
         setErr(null);
         try {
-            console.log(miscEvent)
             const res = await API.saveMiscEvent(miscEvent);
             setData(pickList(res));
             return res;
@@ -281,7 +279,6 @@ export function useUpdateMiscEvent() {
         setLoading(true);
         setErr(null);
         try {
-            console.log(miscEvent)
             const res = await API.updateMiscEvent(miscEvent);
             setData(pickList(res));
             return res;
@@ -538,16 +535,16 @@ export function useSaveVacation() {
     return { data, loading, err, save };
 }
 
-export function useUpdateEventStartTime(){
+export function useUpdateCourseEventTime(){
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
 
-    async function update(eventId, startTime) {
+    async function update(eventId, startTime, endTime) {
         setLoading(true);
         setErr(null);
          try {
-                const res = await API.updateEventStartTime(eventId, startTime);
+                const res = await API.updateCourseEventTime(eventId, startTime, endTime);
                 setData(pickList(res));
                 return res;
             } catch (e) {
@@ -559,3 +556,70 @@ export function useUpdateEventStartTime(){
         }
     return { data, loading, err, update };
 }
+
+export function useUpdateCourseEventEndTime(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(eventId, endTime) {
+        setLoading(true);
+        setErr(null);
+         try {
+                const res = await API.updateCourseEventEndTime(eventId, endTime);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+             setErr(e);
+             throw e;
+            } finally {
+             setLoading(false);
+            }
+        }
+    return { data, loading, err, update };
+}
+
+export function useUpdateMiscEventTime(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(eventId, startTime, endTime) {
+        setLoading(true);
+        setErr(null);
+         try {
+                const res = await API.updateMiscEventTime(eventId, startTime, endTime);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+             setErr(e);
+             throw e;
+            } finally {
+             setLoading(false);
+            }
+        }
+    return { data, loading, err, update };
+}
+
+export function useUpdateMiscEventEndTime(){
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(eventId, endTime) {
+        setLoading(true);
+        setErr(null);
+         try {
+                const res = await API.updateMiscEventEndTime(eventId, endTime);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+             setErr(e);
+             throw e;
+            } finally {
+             setLoading(false);
+            }
+        }
+    return { data, loading, err, update };
+}
+
