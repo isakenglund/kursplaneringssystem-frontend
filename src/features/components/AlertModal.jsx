@@ -9,12 +9,12 @@ export default function AlertModal({ alertData, onClose, onResult }) {
     if (!alertData) return null;
 
     const handleConfirm = () => {
-        onResult?.(true);  // Return "true" to parent when Yes is pressed
+        onResult?.(true);  
         onClose();
     };
 
     const handleCancel = () => {
-        onResult?.(false); // Return "false" to parent when No is pressed
+        onResult?.(false); 
         onClose();
     };
 
