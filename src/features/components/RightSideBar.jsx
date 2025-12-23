@@ -19,18 +19,16 @@ export default function RightSideBar({
 
     const animatedComponents = makeAnimated();
 
-     const filteredEvents = currentEvents
-        .filter(event => { 
-            if (selectedCategories.length === 0) return true;
-            const eventCourseId = event.extendedProps?.courseId;
-            const eventMiscId = event.extendedProps?.miscId;
-            return selectedCategories.some(choice =>
-                choice.value === eventCourseId || choice.value === eventMiscId
-            );
-        })
-        .sort((a, b) => new Date(a.start) - new Date(b.start));
+        const filteredEvents = currentEvents.filter(event => {
+        if (selectedCategories.length === 0) return true;
+        const eventCourseId = event.extendedProps?.courseId;
+        return selectedCategories.some(choice => choice.value === eventCourseId);
+    }).sort((a, b) => {
+        return new Date(a.start) - new Date(b.start);
+    });
 
-    console.log(filteredEvents)
+
+    
     const [selectedVal, setSelectedVal] = useState('');
     const { data: holidays = [] } = useGetHolidays();
     const { data: vacation = [] } = useGetVacation();

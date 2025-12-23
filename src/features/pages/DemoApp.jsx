@@ -28,24 +28,28 @@ export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const {data: allEvents} = useGetAllEvents();
-    const {data:allCategories} = useGetAllCategories();
-const filteredCalendarEvents = useMemo(() => {
+    const { data: allEvents } = useGetAllEvents();
+    const { data: allCategories } = useGetAllCategories();
+    const filteredCalendarEvents = useMemo(() => {
         if (!allEvents || allEvents.length === 0) return [];
         if (selectedCategories.length === 0) return allEvents;
 
         return allEvents.filter(event => {
-            const courseId = event.courseId || event.extendedProps?.courseId;
-            const miscId = event.miscId || event.extendedProps?.miscId;
-
-            if (!courseId && !miscId) return false;
+            if (!event.id) return false;
+            console.log(event.extendedProps)
+            const courseId = event.extendedProps?.courseId;
+            const miscId = event.extendedProps?.miscId;
+            console.log(courseId)
+            console.log(miscId)
 
             return selectedCategories.some(choice =>
                 choice.value === courseId || choice.value === miscId
             );
         });
-    }, [allEvents, selectedCategories]);
 
+    }, [allEvents, selectedCategories]);
+    console.log(filteredCalendarEvents)
+    console.log(selectedCategories)
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -221,13 +225,13 @@ const filteredCalendarEvents = useMemo(() => {
 
     const calendarRef = useRef(null)
 
-const eventsForCalendar = useMemo(() => { 
-    if (selectedCategories.length === 0) {
-        return [...listOfPersistantEvents, ...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
-    } else {
-        return [...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
-    }
-}, [listOfPersistantEvents, filteredCalendarEvents, vacationEvents, holidayEvents, selectedCategories]);
+    const eventsForCalendar = useMemo(() => {
+        if (selectedCategories.length === 0) {
+            return [...listOfPersistantEvents, ...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
+        } else {
+            return [...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
+        }
+    }, [listOfPersistantEvents, filteredCalendarEvents, vacationEvents, holidayEvents, selectedCategories]);
 
 
 
@@ -365,65 +369,65 @@ const eventsForCalendar = useMemo(() => {
         const event = info.event;
         const isCourseEvent = !!info.event.extendedProps.courseId;
         const isMiscEvent = !!info.event.extendedProps.miscId;
-         if (isCourseEvent) {
+        if (isCourseEvent) {
             await updateCourseEventEndTime(event.id, event.end);
         } else if (isMiscEvent) {
             await updateMiscEventEndTime(event.id, event.end);
         } else {
             await alertCustom("Något blev fel");
         }
-        
+
     }
 
-   async function handleEventClick(clickInfo) {
-    const { event } = clickInfo;
+    async function handleEventClick(clickInfo) {
+        const { event } = clickInfo;
 
-    const isHoliday =
-        event.extendedProps?.wrapText &&
-        event.id?.startsWith("holiday-");
-    if (isHoliday) return;
+        const isHoliday =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("holiday-");
+        if (isHoliday) return;
 
-    const isVacation =
-        event.extendedProps?.wrapText &&
-        event.id?.startsWith("vacation-");
+        const isVacation =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("vacation-");
 
-    const confirmed = await confirmCustom(
-        `Är du säker på att du vill ta bort händelsen '${event.title}'?`
-    );
-    if (!confirmed) return;
+        const confirmed = await confirmCustom(
+            `Är du säker på att du vill ta bort händelsen '${event.title}'?`
+        );
+        if (!confirmed) return;
 
-    try {
-        if (isVacation) {
-            const vacationId = event.id.replace("vacation-", "");
-            await deleteVacation(vacationId);
-        } else {
-            const eventId = parseInt(event.id, 10);
-
-            const parent = [...listOfCourses, ...listOfMiscs].find(
-                p => p.event.some(e => e.id === eventId)
-            );
-
-            if (!parent) {
-                await alertCustom("Kunde inte ta bort händelsen förälder saknas");
-                return;
-            }
-            if (parent.type === "COURSE") {
-                await updateCourseEventTime(eventId, null, null);
-            } else if (parent.type === "MISC"||parent.type=="MEETING") {
-                await updateMiscEventTime(eventId, null, null);
+        try {
+            if (isVacation) {
+                const vacationId = event.id.replace("vacation-", "");
+                await deleteVacation(vacationId);
             } else {
-                await alertCustom("Kunde inte ta bort händelsen okänd typ");
-                return;
+                const eventId = parseInt(event.id, 10);
+
+                const parent = [...listOfCourses, ...listOfMiscs].find(
+                    p => p.event.some(e => e.id === eventId)
+                );
+
+                if (!parent) {
+                    await alertCustom("Kunde inte ta bort händelsen förälder saknas");
+                    return;
+                }
+                if (parent.type === "COURSE") {
+                    await updateCourseEventTime(eventId, null, null);
+                } else if (parent.type === "MISC" || parent.type == "MEETING") {
+                    await updateMiscEventTime(eventId, null, null);
+                } else {
+                    await alertCustom("Kunde inte ta bort händelsen okänd typ");
+                    return;
+                }
             }
+
+            event.remove();
+
+        } catch (err) {
+            console.error("Could not remove event:", err);
+            alertCustom("Kunde inte ta bort händelsen");
         }
-
-        event.remove();
-
-    } catch (err) {
-        console.error("Could not remove event:", err);
-        alertCustom("Kunde inte ta bort händelsen");
     }
-}
 
 
 
