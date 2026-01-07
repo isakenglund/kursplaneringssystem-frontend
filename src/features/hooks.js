@@ -554,10 +554,8 @@ export function useReorderCourseEvents() {
         setErr(null);
 
         try {
-            // Se till att API.reorderCourseEvents finns importerat och definierat!
-            const res = await API.reorderCourseEvents(courseId, orderedIds);
-            setData(pickList(res)); // Om pickList används, se till att den finns
-            return res;
+            await API.reorderCourseEvents(courseId, orderedIds);
+            return true;
         } catch (e) {
             setErr(e);
             throw e;
@@ -566,9 +564,8 @@ export function useReorderCourseEvents() {
         }
     }
 
-    // --- HÄR SAKNADES RETURN-SATSEN ---
     return {
-        saveOrder: update, // Vi mappar "update" så den heter "saveOrder" utåt
+        saveOrder: update,
         loading,
         err,
         data
