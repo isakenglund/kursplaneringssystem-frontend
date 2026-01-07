@@ -6,9 +6,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { INITIAL_EVENTS } from '../../event-utils.js'
 import useGetCourses, {
-    useGetAllEvents,
     useGetAllCategories,
     useGetHolidays,
     useGetVacation,
@@ -21,35 +19,13 @@ import useGetCourses, {
 } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
-import { Snowfall } from "react-snowfall";
 import { confirmCustom, alertCustom } from '../functions/alertFunctions.jsx'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const { data: allEvents } = useGetAllEvents();
     const { data: allCategories } = useGetAllCategories();
-    const filteredCalendarEvents = useMemo(() => {
-        if (!allEvents || allEvents.length === 0) return [];
-        if (selectedCategories.length === 0) return allEvents;
-
-        return allEvents.filter(event => {
-            if (!event.id) return false;
-            console.log(event.extendedProps)
-            const courseId = event.extendedProps?.courseId;
-            const miscId = event.extendedProps?.miscId;
-            console.log(courseId)
-            console.log(miscId)
-
-            return selectedCategories.some(choice =>
-                choice.value === courseId || choice.value === miscId
-            );
-        });
-
-    }, [allEvents, selectedCategories]);
-    console.log(filteredCalendarEvents)
-    console.log(selectedCategories)
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -60,7 +36,7 @@ export default function DemoApp() {
     const { remove: deleteVacation } = useDeleteVacation();
 
     const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs, loading: loadingMisc } = useGetMiscs();
+    const { data: listOfMiscs} = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -176,6 +152,27 @@ export default function DemoApp() {
         return [...courseEvents, ...miscEvents];
     }, [listOfCourses, listOfMiscs]);
 
+    const filteredPersistantEvents = useMemo(() => {
+        if (!selectedCategories || selectedCategories.length === 0) return listOfPersistantEvents;
+
+        const selectedIds = new Set(selectedCategories.map(c => c.value));
+        return listOfPersistantEvents.filter(e => {
+            const courseId = e.extendedProps?.courseId;
+            const miscId = e.extendedProps?.miscId;
+            return selectedIds.has(courseId) || selectedIds.has(miscId);
+        });
+    }, [listOfPersistantEvents, selectedCategories]);
+
+    const calendarRef = useRef(null)
+
+    const eventsForCalendar = useMemo(() => {
+        return [
+            ...filteredPersistantEvents,
+            ...vacationEvents,
+            ...holidayEvents,
+        ];
+    }, [filteredPersistantEvents, vacationEvents, holidayEvents]);
+
     const handleDatesSet = (dateInfo) => {
         const startYear = dateInfo.start.getFullYear();
         const endYear = dateInfo.end.getFullYear();
@@ -223,15 +220,6 @@ export default function DemoApp() {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
     }
 
-    const calendarRef = useRef(null)
-
-    const eventsForCalendar = useMemo(() => {
-        if (selectedCategories.length === 0) {
-            return [...listOfPersistantEvents, ...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
-        } else {
-            return [...filteredCalendarEvents, ...vacationEvents, ...holidayEvents];
-        }
-    }, [listOfPersistantEvents, filteredCalendarEvents, vacationEvents, holidayEvents, selectedCategories]);
 
 
 
@@ -413,7 +401,7 @@ export default function DemoApp() {
                 }
                 if (parent.type === "COURSE") {
                     await updateCourseEventTime(eventId, null, null);
-                } else if (parent.type === "MISC" || parent.type == "MEETING") {
+                } else if (parent.type === "MISC" || parent.type === "MEETING") {
                     await updateMiscEventTime(eventId, null, null);
                 } else {
                     await alertCustom("Kunde inte ta bort händelsen okänd typ");
