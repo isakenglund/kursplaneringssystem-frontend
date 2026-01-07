@@ -548,28 +548,29 @@ export function useReorderCourseEvents() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
-    console.log("kör hooken")
 
     async function update(courseId, orderedIds) {
         setLoading(true);
         setErr(null);
-        console.log(courseId)
 
-    try {
-        const res = await API.reorderCourseEvents(courseId, orderedIds);
-        setData(pickList(res));
-        return res;
-    } catch (e) {
-        setErr(e);
-        throw e;
-    } finally {
-        setLoading(false);
+        try {
+            // Se till att API.reorderCourseEvents finns importerat och definierat!
+            const res = await API.reorderCourseEvents(courseId, orderedIds);
+            setData(pickList(res)); // Om pickList används, se till att den finns
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
     }
 
-}
-
-    return {data, loading, err, update};
-
-
-
+    // --- HÄR SAKNADES RETURN-SATSEN ---
+    return {
+        saveOrder: update, // Vi mappar "update" så den heter "saveOrder" utåt
+        loading,
+        err,
+        data
+    };
 }

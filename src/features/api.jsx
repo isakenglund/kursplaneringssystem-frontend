@@ -146,7 +146,7 @@ export const API = {
         }),
 
     reorderCourseEvents: (courseId, orderedIds) =>
-        api(`course-events/${courseId}/reorder`, { // OBS: course-events, inte courses
+        api(`/course-events/${courseId}/reorder`, { // OBS: course-events, inte courses
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
