@@ -6,9 +6,8 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { INITIAL_EVENTS } from '../../event-utils.js'
 import useGetCourses, {
-    useGetAllEvents,
+    useGetAllCategories,
     useGetHolidays,
     useGetVacation,
     useDeleteVacation,
@@ -20,24 +19,13 @@ import useGetCourses, {
 } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
-import { Snowfall } from "react-snowfall";
 import { confirmCustom, alertCustom } from '../functions/alertFunctions.jsx'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const [selectedCourses, setSelectedCourses] = useState([]);
-    const { data: allEvents } = useGetAllEvents();
-
-    const filteredCalendarEvents = useMemo(() => {
-        if (selectedCourses.length === 0) return allEvents;
-
-        return allEvents.filter(event => {
-            const props = event.extendedProps || event;
-            const courseId = props.courseId;
-            return selectedCourses.some(choice => choice.value === courseId);
-        });
-    }, [allEvents, selectedCourses]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const { data: allCategories } = useGetAllCategories();
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -48,7 +36,7 @@ export default function DemoApp() {
     const { remove: deleteVacation } = useDeleteVacation();
 
     const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs, loading: loadingMisc } = useGetMiscs();
+    const { data: listOfMiscs} = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -143,6 +131,7 @@ export default function DemoApp() {
                     extendedProps: {
                         courseId: course.id,
                         description: event.description || '',
+                        teachers: event.teachers,
                     },
                 }))
         );
@@ -167,6 +156,27 @@ export default function DemoApp() {
         // Combine both
         return [...courseEvents, ...miscEvents];
     }, [listOfCourses, listOfMiscs]);
+
+    const filteredPersistantEvents = useMemo(() => {
+        if (!selectedCategories || selectedCategories.length === 0) return listOfPersistantEvents;
+
+        const selectedIds = new Set(selectedCategories.map(c => c.value));
+        return listOfPersistantEvents.filter(e => {
+            const courseId = e.extendedProps?.courseId;
+            const miscId = e.extendedProps?.miscId;
+            return selectedIds.has(courseId) || selectedIds.has(miscId);
+        });
+    }, [listOfPersistantEvents, selectedCategories]);
+
+    const calendarRef = useRef(null)
+
+    const eventsForCalendar = useMemo(() => {
+        return [
+            ...filteredPersistantEvents,
+            ...vacationEvents,
+            ...holidayEvents,
+        ];
+    }, [filteredPersistantEvents, vacationEvents, holidayEvents]);
 
     const handleDatesSet = (dateInfo) => {
         const startYear = dateInfo.start.getFullYear();
@@ -215,12 +225,9 @@ export default function DemoApp() {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
     }
 
-    const calendarRef = useRef(null)
-
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
-
 
     async function validateEventDrop(info) {
         if (!info.event.extendedProps) return true;
@@ -265,10 +272,16 @@ export default function DemoApp() {
             if (earlierEventOnCalendar) {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
                 if (movedEventStart < earlierEventEnd) {
-                    alertCustom("Ogiltig ordning");
-                    info.revert();
-                    return false;
+                    const message = `Ogiltig ordning. Vill du ändå lägga eventet här?`;
+
+                    const override = await confirmCustom(message);
+
+                    if (!override) {
+                        info.revert();
+                        return false;
+                    }
                 }
+
             }
         }
 
@@ -278,12 +291,62 @@ export default function DemoApp() {
             if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
                 if (movedEventEnd > laterEventStart) {
-                    alertCustom("Ogiltig ordning");
+                    const message = `Ogiltig ordning. Vill du ändå lägga eventet här?`;
+
+                    const override = await confirmCustom(message);
+
+                    if (!override) {
+                        info.revert();
+                        return false;
+                    }
+                }
+            }
+        }
+
+        const currentTeachers = info.event.extendedProps.teachers || [];
+
+        if(currentTeachers.length > 0) {
+            const allEvents = calendar.getEvents();
+
+            let crashedTeacherNames = [];
+
+            const hasTeacherConflict = allEvents.some(otherEvent => {
+                if (parseInt(otherEvent.id, 10) === movedEventId) return false;
+
+                const otherStart = otherEvent.start;
+                const otherEnd = otherEvent.end || new Date(otherStart.getTime() + (otherEvent.allDay ? 24 : 1) * 60 * 60 * 1000);
+
+                const isTimeOverlapping = (movedEventStart < otherEnd && movedEventEnd > otherStart);
+                if (!isTimeOverlapping) return false;
+
+                const otherTeachers = otherEvent.extendedProps.teachers || [];
+
+                const conflictsInThisEvent = currentTeachers.filter(current =>
+                    otherTeachers.some(other => String(other.id) === String(current.id))
+                );
+
+                if (conflictsInThisEvent.length > 0) {
+                    conflictsInThisEvent.forEach(t => crashedTeacherNames.push(t.firstName + " " + t.lastName));
+                    return true;
+                }
+                return false;
+            });
+
+            if (hasTeacherConflict) {
+                const uniqueNames = [...new Set(crashedTeacherNames)];
+                const namesString = uniqueNames.join(", ");
+
+                const message = `${namesString} är redan bokade under denna tid. Vill du ändå lägga eventet här?`;
+
+                const override = await confirmCustom(message);
+
+                if (!override) {
                     info.revert();
                     return false;
                 }
             }
         }
+
         if (checkForHoliday(info)) return true;
 
         const dayOfWeek = movedEventStart.getDay();
@@ -315,8 +378,6 @@ export default function DemoApp() {
         return true;
     }
 
-
-
     function checkForHoliday(info) {
         const eventDate = info.event.start;
         const eventMonth = eventDate.getMonth() + 1;
@@ -347,14 +408,19 @@ export default function DemoApp() {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
+
     async function handleEventResize(info) {
-          if (isCourseEvent) {
-            await updateCourseEventEndTime(movedEventId, eventEnd);
+        const event = info.event;
+        const isCourseEvent = !!info.event.extendedProps.courseId;
+        const isMiscEvent = !!info.event.extendedProps.miscId;
+        if (isCourseEvent) {
+            await updateCourseEventEndTime(event.id, event.end);
         } else if (isMiscEvent) {
-            await updateMiscEventEndTime(movedEventId, eventEnd);
+            await updateMiscEventEndTime(event.id, event.end);
         } else {
             await alertCustom("Något blev fel");
         }
+
     }
 
     async function handleEventClick(clickInfo) {
@@ -391,7 +457,7 @@ export default function DemoApp() {
                 }
                 if (parent.type === "COURSE") {
                     await updateCourseEventTime(eventId, null, null);
-                } else if (parent.type === "MISC" || parent.type == "MEETING") {
+                } else if (parent.type === "MISC" || parent.type === "MEETING") {
                     await updateMiscEventTime(eventId, null, null);
                 } else {
                     await alertCustom("Kunde inte ta bort händelsen okänd typ");
@@ -423,6 +489,7 @@ export default function DemoApp() {
                 setVacationDate={setVacationDate}
                 vacationDate={vacationDate}
                 showLeftSidebar={showLeftSidebar}
+                selectedCategories={selectedCategories}
             />
 
             <div className='demo-app-main flex-grow p-4'>
@@ -488,7 +555,6 @@ export default function DemoApp() {
                 <div className="fc">
                     {showDateInputs && (
                         <div className="flex ml-auto">
-
                             <input
                                 className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
                             focus:ring-blue-500 focus:border-blue-500"
@@ -550,6 +616,7 @@ export default function DemoApp() {
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
+                    expandRows={true}
                     datesSet={handleDatesSet}
                     initialView='timeGridWeek'
                     multiMonthMaxColumns={1}
@@ -567,7 +634,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...listOfPersistantEvents, ...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
+                    events={eventsForCalendar}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -602,9 +669,9 @@ export default function DemoApp() {
                 currentEvents={currentEvents}
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
-                selectedCourses={selectedCourses}
-                setSelectedCourses={setSelectedCourses}
-                listOfCourses={listOfCourses}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+                listOfCategories={allCategories}
                 loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents}
                 showRightSidebar={showRightSidebar}

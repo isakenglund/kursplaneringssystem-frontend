@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { API } from './api';
+import {API} from './api';
 
 const USE_MOCK = (import.meta.env?.VITE_USE_MOCK ?? 'true') === 'false';
 
@@ -63,7 +63,7 @@ export default function useGetCourses() {
         };
     }, [refreshIndex]); // refetch triggers this
 
-    return { data, loading, err, refetch };
+    return {data, loading, err, refetch };
 }
 
 
@@ -153,8 +153,133 @@ export function useSaveMisc() {
             setLoading(false);
         }
     }
-    return { data, loading, err, save };
+
+    return {data, loading, err, save};
 }
+
+export function useDeleteCourse() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function remove(courseId) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.deleteCourse(courseId);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {data, loading, err, remove};
+}
+
+export function useUpdateCourse() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(course) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.updateCourse(course);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {data, loading, err, update};
+}
+
+export function useUpdateMisc() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(misc) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.updateMisc(misc);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {data, loading, err, update};
+}
+
+    export function useDeleteMisc() {
+        const [data, setData] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function remove(miscId) {
+            setLoading(true);
+            setErr(null);
+
+            try {
+                if (USE_MOCK) {
+                    await delay(100);
+                    setData(true);
+                    return true;
+                }
+
+                const res = await API.deleteMisc(miscId);
+                setData(res ?? true);
+                return true;
+
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, remove};
+    }
 
 export function useGetTeachers() {
   const [teachers, setTeachers] = useState([]);
@@ -205,238 +330,245 @@ export function useGetTeachers() {
   return { teachers, loading, err, refetch };
 }
 
-export function useEventTeacherUpdater() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    export function useEventTeacherUpdater() {
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState(null);
 
-    const addTeacher = async (eventId, personId) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const updatedEvent = await API.addTeacherToEvent(eventId, personId);
-            return updatedEvent;
-        } catch (e) {
-            setError(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const removeTeacher = async (eventId, personId) => {
-        setLoading(true);
-        setError(null);
-        try {
-            await API.removeTeacherFromEvent(eventId, personId);
-        } catch (e) {
-            setError(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return { addTeacher, removeTeacher, loading, error };
-}
-
-export function useSaveCourseEvent() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function save(courseEvent) {
-        setLoading(true);
-        setErr(null);
-        try {
-            const res = await API.saveCourseEvent(courseEvent);
-            setData(pickList(res));
-            return res;
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-    return { data, loading, err, save };
-}
-
-export function useSaveMiscEvent() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function save(miscEvent) {
-        setLoading(true);
-        setErr(null);
-        try {
-            const res = await API.saveMiscEvent(miscEvent);
-            setData(pickList(res));
-            return res;
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-    return { data, loading, err, save };
-}
-
-export function useUpdateCourseEvent() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function save(courseEvent) {
-        setLoading(true);
-        setErr(null);
-        try {
-            const res = await API.updateCourseEvent(courseEvent);
-            setData(pickList(res));
-            return res;
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-    return { data, loading, err, save };
-}
-
-export function useUpdateMiscEvent() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function save(miscEvent) {
-        setLoading(true);
-        setErr(null);
-        try {
-            const res = await API.updateMiscEvent(miscEvent);
-            setData(pickList(res));
-            return res;
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-    return { data, loading, err, save };
-}
-
-export function useGetHolidays() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    useEffect(() => {
-        let live = true;
-
-        (async () => {
+        const addTeacher = async (eventId, personId) => {
+            setLoading(true);
+            setError(null);
             try {
-                setLoading(true);
-                setErr(null);
-
-                const res = await API.holidays(); // fetch from DB
-                if (!live) return;
-                setData(res); // assign directly
+                const updatedEvent = await API.addTeacherToEvent(eventId, personId);
+                return updatedEvent;
             } catch (e) {
-                if (live) setErr(e);
+                setError(e);
+                throw e;
             } finally {
-                if (live) setLoading(false);
+                setLoading(false);
             }
-        })();
+        };
 
-        return () => { live = false; };
-    }, []);
-
-    return { data, loading, err };
-}
-
-export function useDeleteCourseEvent() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function remove(eventId) {
-        setLoading(true);
-        setErr(null);
-
-        try {
-            if (USE_MOCK) {
-                await delay(100);
-                setData(true);
-                return true;
-            }
-
-            const res = await API.deleteCourseEvent(eventId);
-            setData(res ?? true);
-            return true;
-
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    return { data, loading, err, remove };
-}
-
-export function useDeleteMiscEvent() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function remove(eventId) {
-        setLoading(true);
-        setErr(null);
-
-        try {
-            if (USE_MOCK) {
-                await delay(100);
-                setData(true);
-                return true;
-            }
-
-            const res = await API.deleteMiscEvent(eventId);
-            setData(res ?? true);
-            return true;
-
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    return { data, loading, err, remove };
-}
-
-export function useGetAllEvents() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    useEffect(() => {
-        let live = true;
-
-        (async () => {
+        const removeTeacher = async (eventId, personId) => {
+            setLoading(true);
+            setError(null);
             try {
-                setLoading(true);
-                setErr(null);
+                await API.removeTeacherFromEvent(eventId, personId);
+            } catch (e) {
+                setError(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        };
 
-                const [courses, misc] = await Promise.all([
-                    API.courseEvents(),
-                    API.miscEvents()
-                ]);
+        return {addTeacher, removeTeacher, loading, error};
+    }
+
+    export function useSaveCourseEvent() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function save(courseEvent) {
+            setLoading(true);
+            setErr(null);
+            try {
+                const res = await API.saveCourseEvent(courseEvent);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, save};
+    }
+
+    export function useSaveMiscEvent() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function save(miscEvent) {
+            setLoading(true);
+            setErr(null);
+            try {
+                const res = await API.saveMiscEvent(miscEvent);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, save};
+    }
+
+    export function useUpdateCourseEvent() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function save(courseEvent) {
+            setLoading(true);
+            setErr(null);
+            try {
+                const res = await API.updateCourseEvent(courseEvent);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, save};
+    }
+
+    export function useUpdateMiscEvent() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function save(miscEvent) {
+            setLoading(true);
+            setErr(null);
+            try {
+                const res = await API.updateMiscEvent(miscEvent);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, save};
+    }
+
+    export function useGetHolidays() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        useEffect(() => {
+            let live = true;
+
+            (async () => {
+                try {
+                    setLoading(true);
+                    setErr(null);
+
+                    const res = await API.holidays(); // fetch from DB
+                    if (!live) return;
+                    setData(res); // assign directly
+                } catch (e) {
+                    if (live) setErr(e);
+                } finally {
+                    if (live) setLoading(false);
+                }
+            })();
+
+            return () => {
+                live = false;
+            };
+        }, []);
+
+        return {data, loading, err};
+    }
+
+    export function useDeleteCourseEvent() {
+        const [data, setData] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function remove(eventId) {
+            setLoading(true);
+            setErr(null);
+
+            try {
+                if (USE_MOCK) {
+                    await delay(100);
+                    setData(true);
+                    return true;
+                }
+
+                const res = await API.deleteCourseEvent(eventId);
+                setData(res ?? true);
+                return true;
+
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, remove};
+    }
+
+    export function useDeleteMiscEvent() {
+        const [data, setData] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function remove(eventId) {
+            setLoading(true);
+            setErr(null);
+
+            try {
+                if (USE_MOCK) {
+                    await delay(100);
+                    setData(true);
+                    return true;
+                }
+
+                const res = await API.deleteMiscEvent(eventId);
+                setData(res ?? true);
+                return true;
+
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        return {data, loading, err, remove};
+    }
+
+    export function useGetAllEvents() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        useEffect(() => {
+            let live = true;
+
+            (async () => {
+                try {
+                    setLoading(true);
+                    setErr(null);
+
+                    const [courses, misc] = await Promise.all([
+                        API.courseEvents(),
+                        API.miscEvents()
+                    ]);
 
                 const allEvents = [...courses, ...misc];
+                console.log("ALL EVENTS",allEvents);
                 if (!live) return;
                 setData(allEvents);
             } catch (e) {
@@ -452,8 +584,7 @@ export function useGetAllEvents() {
     return { data, loading, err };
 }
 
-
-export function useGetVacation() {
+export function useGetAllCategories(){
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -466,9 +597,14 @@ export function useGetVacation() {
                 setLoading(true);
                 setErr(null);
 
-                const res = await API.getVacation(); // fetch from DB
+                const [courses, misc] = await Promise.all([
+                    API.courses(),
+                    API.miscs()
+                ]);
+
+                const allEvents = [...courses, ...misc];
                 if (!live) return;
-                setData(res); // assign directly
+                setData(allEvents);
             } catch (e) {
                 if (live) setErr(e);
             } finally {
@@ -476,64 +612,98 @@ export function useGetVacation() {
             }
         })();
 
-        return () => { live = false; };
-    }, []);
+            return () => {
+                live = false;
+            };
+        }, []);
 
-    return { data, loading, err };
-}
+        return {data, loading, err};
+    }
 
-export function useDeleteVacation() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
+    export function useGetVacation() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
 
-    async function remove(vacationId) {
-        setLoading(true);
-        setErr(null);
+        useEffect(() => {
+            let live = true;
 
-        try {
-            if (USE_MOCK) {
-                await delay(100);
-                setData(true);
+            (async () => {
+                try {
+                    setLoading(true);
+                    setErr(null);
+
+                    const res = await API.getVacation(); // fetch from DB
+                    if (!live) return;
+                    setData(res); // assign directly
+                } catch (e) {
+                    if (live) setErr(e);
+                } finally {
+                    if (live) setLoading(false);
+                }
+            })();
+
+            return () => {
+                live = false;
+            };
+        }, []);
+
+        return {data, loading, err};
+    }
+
+    export function useDeleteVacation() {
+        const [data, setData] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
+
+        async function remove(vacationId) {
+            setLoading(true);
+            setErr(null);
+
+            try {
+                if (USE_MOCK) {
+                    await delay(100);
+                    setData(true);
+                    return true;
+                }
+
+                const res = await API.deleteVacation(vacationId);
+                setData(res ?? true);
                 return true;
+
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
             }
-
-            const res = await API.deleteVacation(vacationId);
-            setData(res ?? true);
-            return true;
-
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
         }
+
+        return {data, loading, err, remove};
     }
 
-    return { data, loading, err, remove };
-}
+    export function useSaveVacation() {
+        const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState(null);
 
-export function useSaveVacation() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState(null);
-
-    async function save(vacation) {
-        setLoading(true);
-        setErr(null);
-        try {
-            const res = await API.saveVacation(vacation);
-            setData(pickList(res));
-            return res;
-        } catch (e) {
-            setErr(e);
-            throw e;
-        } finally {
-            setLoading(false);
+        async function save(vacation) {
+            setLoading(true);
+            setErr(null);
+            try {
+                const res = await API.saveVacation(vacation);
+                setData(pickList(res));
+                return res;
+            } catch (e) {
+                setErr(e);
+                throw e;
+            } finally {
+                setLoading(false);
+            }
         }
+
+        return {data, loading, err, save};
     }
-    return { data, loading, err, save };
-}
 
 export function useUpdateCourseEventTime() {
     const [data, setData] = useState([]);

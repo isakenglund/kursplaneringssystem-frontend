@@ -11,6 +11,7 @@ export default function LeftSidebar({
     setVacationDate,
     vacationDate,
     showLeftSidebar,
+    selectedCategories
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -56,10 +57,14 @@ export default function LeftSidebar({
     }, []);
 
 
+    if(!showLeftSidebar){return null}
+
 
     return (
         <div
-            className={`h-full overflow-hidden transition-[width] duration-300 ${showLeftSidebar ? "w-96" : "w-0"}`}
+            className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 
+            ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
             
 
