@@ -56,12 +56,15 @@ export default function LeftSidebar({
         }
     }, []);
 
-    if(!showLeftSidebar){return showLeftSidebar}
+
+    if(!showLeftSidebar){return null}
+
 
     return (
         <div
-            className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
-                }`}
+            className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 
+            ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
 
             {isCategoryModalOpen && (
@@ -89,7 +92,6 @@ export default function LeftSidebar({
                     miscs={miscs}
                     setCourses={setCourses}
                     setMiscs={setMiscs}
-                    selectedCategories={selectedCategories}
                 />
 
             </div>

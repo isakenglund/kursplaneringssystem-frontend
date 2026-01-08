@@ -56,7 +56,8 @@ showRightSidebar,
 
     return (
         <div
-            className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 ${showRightSidebar ? "translate-x-0" : "translate-x-full"
+            className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 
+            ${showRightSidebar ? "translate-x-0" : "translate-x-full"
                 }`}
         >
             <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
