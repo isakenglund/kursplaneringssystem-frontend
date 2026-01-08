@@ -20,6 +20,8 @@ export default function CreateEvent({
     courses,
     miscs,
     setMiscs,
+    refetchCourses,
+    refetchMiscs,
 }) {
 
 
@@ -335,19 +337,21 @@ export default function CreateEvent({
             {showEditModal && (
                 <EditEventModal
                     selectedTeachers={selectedTeachers}
+                    setSelectedTeachers={setSelectedTeachers}
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
                         const courseId = editEventData.categoryId;
-
-
+                        refetchMiscs();
+                        refetchCourses();
+                        
                         setCourses(prev =>
                             prev.map(course =>
                                 String(course.id) === String(courseId)
                                     ? {
                                         ...course,
                                         event: course.event.map(ev =>
-                                            ev.id === updatedEvent.id ? { ...ev, ...updatedEvent } : ev
+                                            ev.id === updatedEvent.id ? { ...ev, ...updatedEvent , teachers: updatedEvent.teachers??[]} : ev
                                         ),
                                     }
                                     : course

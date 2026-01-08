@@ -54,54 +54,58 @@ export default function RightSideBar({
 
     return (
         <div
-            className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 ${showRightSidebar ? "translate-x-0" : "translate-x-full"
-                }`}
+            className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-80" : "w-0"}`}
         >
-            <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                    <input
-                        type='checkbox'
-                        checked={weekendsVisible}
-                        onChange={handleWeekendsToggle}
-                        className="
+            <div
+                className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 ${showRightSidebar ? "translate-x-0" : "translate-x-full"
+                    }`}
+            >
+                <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
+                    <label className="flex items-center gap-3 cursor-pointer select-none">
+                        <input
+                            type='checkbox'
+                            checked={weekendsVisible}
+                            onChange={handleWeekendsToggle}
+                            className="
                             h-5 w-5 rounded-md
                              h-5 w-5 rounded-md
     border border-gray-400
     accent-blue-600
                             flex items-center justify-center
                             "
-                    ></input>
-                    <span className="text-lg font-bold text-gray-600">Visa helger</span>
-                </label>
-            </div>
+                        ></input>
+                        <span className="text-lg font-bold text-gray-600">Visa helger</span>
+                    </label>
+                </div>
 
-            <div className='pt-6 border-t border-gray-200'>
-                <Select
-                    closeMenyOnSelect={false}
-                    components={animatedComponents}
-                    isMulti
-                    isLoading={loadingCourses}
-                    onChange={(selectedOptions) => setSelectedCourses(selectedOptions)}
-                    options={listOfCourses.map(category => ({ value: category.id, label: category.name }))}
-                    placeholder="Filtrera på kategorier..."
-                />
-            </div>
+                <div className='pt-6 border-t border-gray-200'>
+                    <Select
+                        closeMenyOnSelect={false}
+                        components={animatedComponents}
+                        isMulti
+                        isLoading={loadingCourses}
+                        onChange={(selectedOptions) => setSelectedCourses(selectedOptions)}
+                        options={listOfCourses.map(category => ({ value: category.id, label: category.name }))}
+                        placeholder="Filtrera på kategorier..."
+                    />
+                </div>
 
-            <div className='demo-app-sidebar-section'>
-                <h2
-                    className={`text-lg font-bold mb-3 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
-                        }`}
-                >
-                    Aktiva i kalendern {activeCount} / {totalCount}
-                </h2>
+                <div className='demo-app-sidebar-section'>
+                    <h2
+                        className={`text-lg font-bold mb-3 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
+                            }`}
+                    >
+                        Aktiva i kalendern {activeCount} / {totalCount}
+                    </h2>
 
 
 
-                <ul className="space-y-2">
-                    {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
-                        <SidebarEvent key={event.id} event={event} />
-                    ))}
-                </ul>
+                    <ul className="space-y-2">
+                        {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (
+                            <SidebarEvent key={event.id} event={event} />
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
     )

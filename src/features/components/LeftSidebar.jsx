@@ -59,37 +59,44 @@ export default function LeftSidebar({
 
     return (
         <div
-            className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
-                }`}
+            className={`h-full overflow-hidden transition-[width] duration-300 ${showLeftSidebar ? "w-96" : "w-0"}`}
         >
+            
 
-            {isCategoryModalOpen && (
-                <CreateCategory
-                    setIsCategoryModalOpen={setIsCategoryModalOpen}
-                    setVacationDate={setVacationDate}
-                    vacationDate={vacationDate}
-                    onCreated={fetchCategories} />
-            )}
+                {isCategoryModalOpen && (
+                    <CreateCategory
+                        setIsCategoryModalOpen={setIsCategoryModalOpen}
+                        setVacationDate={setVacationDate}
+                        vacationDate={vacationDate}
+                        onCreated={fetchCategories} />
+                )}
 
-            <div className='demo-app-sidebar-section mb-8'>
-                <button
-                    className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
-                    onClick={() => setIsCategoryModalOpen(true)}>Skapa kategori
-                </button>
+                <div className='demo-app-sidebar-section mb-8'>
+                    <button
+                        className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
+                        onClick={() => setIsCategoryModalOpen(true)}>Skapa kategori
+                    </button>
 
-                <CreateEvent
-                    draggableContainerRef={draggableContainerRef}
-                    currentEvents={currentEvents}
-                    openModal={() => setIsModalOpen(true)}
-                    closeModal={() => setIsModalOpen(false)}
-                    isModalOpen={isModalOpen}
-                    removeExternalEvent={removeExternalEvent}
-                    courses={courses}
-                    miscs={miscs}
-                    setCourses={setCourses}
-                    setMiscs={setMiscs}
-                />
+                    <CreateEvent
+                        draggableContainerRef={draggableContainerRef}
+                        currentEvents={currentEvents}
+                        openModal={() => setIsModalOpen(true)}
+                        closeModal={() => setIsModalOpen(false)}
+                        isModalOpen={isModalOpen}
+                        removeExternalEvent={removeExternalEvent}
+                        courses={courses}
+                        miscs={miscs}
+                        setCourses={setCourses}
+                        setMiscs={setMiscs}
+                        refetchMiscs={refetchMiscs}
+                        refetchCourses={refetchCourses}
+                    />
 
+                </div>
+                <div
+                className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
+                    }`}
+            >
             </div>
         </div>
     )

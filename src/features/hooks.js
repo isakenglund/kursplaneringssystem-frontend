@@ -157,37 +157,52 @@ export function useSaveMisc() {
 }
 
 export function useGetTeachers() {
-    const [teachers, setTeachers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [err, setErr] = useState(null);
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(null);
 
-    useEffect(() => {
-        let live = true;
-        (async () => {
-            try {
-                setLoading(true);
-                setErr(null);
+  // change this to force the effect to re-run
+  const [refreshIndex, setRefreshIndex] = useState(0);
 
-                const data = await API.teachers();
-                if (!live) return;
+  const refetch = useCallback(() => {
+    setRefreshIndex((i) => i + 1);
+  }, []);
 
-                setTeachers(data);
+  useEffect(() => {
+    let live = true;
 
-            } catch (e) {
-                if (live) {
-                    setErr(e);
-                    setTeachers([]);
-                }
-            } finally {
-                if (live) setLoading(false);
-            }
-        })();
-        return () => { live = false; };
+    (async () => {
+      try {
+        setLoading(true);
+        setErr(null);
 
-    }, []);
+        if (USE_MOCK) {
+          await delay(150);
+          if (!live) return;
+          // add MOCK.teachers if you have it; otherwise default to []
+          setTeachers(MOCK.teachers ?? []);
+        } else {
+          const res = await API.teachers();
+          if (!live) return;
+          // if API returns { teachers: [...] } you can use pickList(res, "teachers")
+          setTeachers(Array.isArray(res) ? res : (res ?? []));
+        }
+      } catch (e) {
+        if (live) {
+          setErr(e);
+          setTeachers([]);
+        }
+      } finally {
+        if (live) setLoading(false);
+      }
+    })();
 
-    return { teachers, loading, err };
+    return () => {
+      live = false;
+    };
+  }, [refreshIndex]); // refetch triggers this
 
+  return { teachers, loading, err, refetch };
 }
 
 export function useEventTeacherUpdater() {

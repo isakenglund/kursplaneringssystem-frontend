@@ -347,9 +347,14 @@ export default function DemoApp() {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
-    function handleEventResize(info) {
-        const event = info.event;
-        updateEventEndTime(event.id, event.end);
+    async function handleEventResize(info) {
+          if (isCourseEvent) {
+            await updateCourseEventEndTime(movedEventId, eventEnd);
+        } else if (isMiscEvent) {
+            await updateMiscEventEndTime(movedEventId, eventEnd);
+        } else {
+            await alertCustom("Något blev fel");
+        }
     }
 
     async function handleEventClick(clickInfo) {
