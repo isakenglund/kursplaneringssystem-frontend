@@ -56,6 +56,8 @@ export default function LeftSidebar({
         }
     }, []);
 
+    if(!showLeftSidebar){return showLeftSidebar}
+
     return (
         <div
             className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
