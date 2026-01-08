@@ -52,7 +52,7 @@ export const API = {
         })
     },),
 
-    updateCourse: (course) => api ('/courses/${course.id}', {
+    updateCourse: (course) => api (`/courses/${course.id}`, {
         method: "PUT",
         body: JSON.stringify({
             id: course.id,
@@ -64,7 +64,7 @@ export const API = {
         })
     }),
 
-    updateMisc: (misc) => api ('/miscs/${misc.id}', {
+    updateMisc: (misc) => api (`/miscs/${misc.id}`, {
         method: "PUT",
         body: JSON.stringify({
             id: misc.id,
