@@ -139,6 +139,7 @@ export default function DemoApp() {
                     extendedProps: {
                         courseId: course.id,
                         description: event.description || '',
+                        teachers: event.teachers,
                     },
                 }))
         );
@@ -261,10 +262,16 @@ export default function DemoApp() {
             if (earlierEventOnCalendar) {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
                 if (movedEventStart < earlierEventEnd) {
-                    alertCustom("Ogiltig ordning");
-                    info.revert();
-                    return false;
+                    const message = `Ogiltig ordning`;
+
+                    const override = await confirmCustom(message);
+
+                    if (!override) {
+                        info.revert();
+                        return false;
+                    }
                 }
+
             }
         }
 
@@ -274,12 +281,62 @@ export default function DemoApp() {
             if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
                 if (movedEventEnd > laterEventStart) {
-                    alertCustom("Ogiltig ordning");
+                    const message = `Ogiltig ordning`;
+
+                    const override = await confirmCustom(message);
+
+                    if (!override) {
+                        info.revert();
+                        return false;
+                    }
+                }
+            }
+        }
+
+        const currentTeachers = info.event.extendedProps.teachers || [];
+
+        if(currentTeachers.length > 0) {
+            const allEvents = calendar.getEvents();
+
+            let crashedTeacherNames = [];
+
+            const hasTeacherConflict = allEvents.some(otherEvent => {
+                if (parseInt(otherEvent.id, 10) === movedEventId) return false;
+
+                const otherStart = otherEvent.start;
+                const otherEnd = otherEvent.end || new Date(otherStart.getTime() + (otherEvent.allDay ? 24 : 1) * 60 * 60 * 1000);
+
+                const isTimeOverlapping = (movedEventStart < otherEnd && movedEventEnd > otherStart);
+                if (!isTimeOverlapping) return false;
+
+                const otherTeachers = otherEvent.extendedProps.teachers || [];
+
+                const conflictsInThisEvent = currentTeachers.filter(current =>
+                    otherTeachers.some(other => String(other.id) === String(current.id))
+                );
+
+                if (conflictsInThisEvent.length > 0) {
+                    conflictsInThisEvent.forEach(t => crashedTeacherNames.push(t.firstName + " " + t.lastName));
+                    return true;
+                }
+                return false;
+            });
+
+            if (hasTeacherConflict) {
+                const uniqueNames = [...new Set(crashedTeacherNames)];
+                const namesString = uniqueNames.join(", ");
+
+                const message = `${namesString} är redan bokade under denna tid. Vill du ändå lägga eventet här?`;
+
+                const override = await confirmCustom(message);
+
+                if (!override) {
                     info.revert();
                     return false;
                 }
             }
         }
+
         if (checkForHoliday(info)) return true;
 
         const dayOfWeek = movedEventStart.getDay();
