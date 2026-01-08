@@ -1,4 +1,4 @@
-import {api} from "../lib/fetcher.jsx";
+import { api } from "../lib/fetcher.jsx";
 
 export const API = {
 
@@ -132,18 +132,71 @@ export const API = {
         method: "GET",
     }),
 
-    updateEventStartTime: (eventId, startTime) =>
-        api(`/course-events/${eventId}/start-time`, {
+    updateCourseEventTime: (eventId, startTime, endTime) => {
+
+        api(`/course-events/${eventId}/course-update-time`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 startTime: startTime instanceof Date
-                    ? startTime.toISOString()
+                    ? formatToISO(startTime)
                     : startTime,
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
             }),
-        }),
+        });
+    },
+
+
+    updateCourseEventEndTime: (eventId, endTime) => {
+        api(`/course-events/${eventId}/course-end-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
+
+    updateMiscEventTime: (eventId, startTime, endTime) => {
+
+        api(`/misc-events/${eventId}/misc-update-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                startTime: startTime instanceof Date
+                    ? formatToISO(startTime)
+                    : startTime,
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
+
+
+    updateMiscEventEndTime: (eventId, endTime) => {
+        api(`/misc-events/${eventId}/misc-end-time`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                endTime: endTime instanceof Date
+                    ? formatToISO(endTime)
+                    : endTime,
+            }),
+        });
+    },
 
     reorderCourseEvents: (courseId, orderedIds) =>
         api(`/course-events/${courseId}/reorder`, { // OBS: course-events, inte courses
@@ -153,4 +206,19 @@ export const API = {
             },
             body: JSON.stringify(orderedIds),
         }),
+
 };
+
+function formatToISO(date) {
+    const pad = (num) => String(num).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+}

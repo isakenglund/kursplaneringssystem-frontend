@@ -6,17 +6,28 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import {INITIAL_EVENTS} from '../../event-utils.js'
-import useGetCourses, {useGetAllEvents, useGetHolidays, useGetVacation, useDeleteVacation, useUpdateEventStartTime } from '../hooks.js'
+import { INITIAL_EVENTS } from '../../event-utils.js'
+import useGetCourses, {
+    useGetAllEvents,
+    useGetHolidays,
+    useGetVacation,
+    useDeleteVacation,
+    useUpdateCourseEventTime,
+    useUpdateCourseEventEndTime,
+    useGetMiscs,
+    useUpdateMiscEventTime,
+    useUpdateMiscEventEndTime
+} from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
 import { Snowfall } from "react-snowfall";
+import { confirmCustom, alertCustom } from '../functions/alertFunctions.jsx'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCourses, setSelectedCourses] = useState([]);
-    const {data: allEvents} = useGetAllEvents();
+    const { data: allEvents } = useGetAllEvents();
 
     const filteredCalendarEvents = useMemo(() => {
         if (selectedCourses.length === 0) return allEvents;
@@ -28,8 +39,6 @@ export default function DemoApp() {
         });
     }, [allEvents, selectedCourses]);
 
-
-
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
@@ -39,6 +48,7 @@ export default function DemoApp() {
     const { remove: deleteVacation } = useDeleteVacation();
 
     const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
+    const { data: listOfMiscs, loading: loadingMisc } = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -47,10 +57,12 @@ export default function DemoApp() {
     })
     const [showDateInputs, setShowDateInputs] = useState(false);
     const [vacationDate, setVacationDate] = useState(todayDate);
-    const { update: updateEventStartTime, loading, err } = useUpdateEventStartTime();
-
-    const {holidayEvents, holidaySet} = useMemo(() => {
-        if (!holidays || visibleYears.length === 0) return {holidayEvents: [], holidaySet: new Set()};
+    const { update: updateCourseEventTime } = useUpdateCourseEventTime();
+    const { update: updateCourseEventEndTime } = useUpdateCourseEventEndTime();
+    const { update: updateMiscEventTime } = useUpdateMiscEventTime();
+    const { update: updateMiscEventEndTime } = useUpdateMiscEventEndTime();
+    const { holidayEvents, holidaySet } = useMemo(() => {
+        if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
 
         const events = [];
         const set = new Set();
@@ -95,7 +107,7 @@ export default function DemoApp() {
             const start = new Date(v.date);
             events.push({
                 id: `vacation-${v.id}`,
-                title: "Vacation",
+                title: "Semester",
                 start,
                 end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1),
                 allDay: true,
@@ -112,6 +124,45 @@ export default function DemoApp() {
         return { vacationEvents: events, vacationSet: set };
     }, [vacations]);
 
+
+    const listOfPersistantEvents = useMemo(() => {
+        // Flatten course events
+        const courseEvents = listOfCourses.flatMap(course =>
+            course.event
+                .filter(event => event.startTime)
+                .map(event => ({
+                    id: event.id,
+                    title: event.name,
+                    start: event.startTime,
+                    end: event.endTime || undefined,
+                    color: course.colorHex || '#3788d8',
+                    extendedProps: {
+                        courseId: course.id,
+                        description: event.description || '',
+                    },
+                }))
+        );
+
+        // Flatten misc events
+        const miscEvents = listOfMiscs.flatMap(misc =>
+            misc.event
+                .filter(event => event.startTime)
+                .map(event => ({
+                    id: event.id,
+                    title: event.name || misc.name,
+                    start: event.startTime,
+                    end: event.endTime || undefined,
+                    color: misc.colorHex || '#3788d8',
+                    extendedProps: {
+                        miscId: misc.id,
+                        description: event.description || '',
+                    },
+                }))
+        );
+
+        // Combine both
+        return [...courseEvents, ...miscEvents];
+    }, [listOfCourses, listOfMiscs]);
 
     const handleDatesSet = (dateInfo) => {
         const startYear = dateInfo.start.getFullYear();
@@ -149,7 +200,7 @@ export default function DemoApp() {
             newStart.setDate(newStart.getDate() + diffDays * sign);
             newEnd.setDate(newEnd.getDate() + diffDays * sign);
 
-            setDateRange({start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0]});
+            setDateRange({ start: newStart.toISOString().split('T')[0], end: newEnd.toISOString().split('T')[0] });
         } else {
             calendarApi[direction]();
         }
@@ -157,7 +208,7 @@ export default function DemoApp() {
     }
 
     const updateDateRange = (e) => {
-        setDateRange({...dateRange, [e.target.name]: e.target.value});
+        setDateRange({ ...dateRange, [e.target.name]: e.target.value });
     }
 
     const calendarRef = useRef(null)
@@ -166,87 +217,101 @@ export default function DemoApp() {
         setWeekendsVisible(!weekendsVisible)
     }
 
-    function validateEventDrop(info) {
-        if (!info.event.extendedProps || !info.event.extendedProps.courseId) {
-            return true;
-        }
+
+    async function validateEventDrop(info) {
+        if (!info.event.extendedProps) return true;
+
         const movedEventId = parseInt(info.event.id, 10);
-        const courseId = parseInt(info.event.extendedProps.courseId, 10);
-        const course = listOfCourses.find(c => c.id === courseId);
+        const isCourseEvent = !!info.event.extendedProps.courseId;
+        const isMiscEvent = !!info.event.extendedProps.miscId;
 
-        if (!course) { return true; }
 
-        const courseEvents = course.event;
-        const currentIndex = courseEvents.findIndex(e => e.id === movedEventId);
-        if (currentIndex === -1) {
+        let eventList, currentIndex;
+
+        if (isCourseEvent) {
+            const courseId = parseInt(info.event.extendedProps.courseId, 10);
+            const course = listOfCourses.find(c => c.id === courseId);
+            if (!course) return true;
+
+            eventList = course.event;
+            currentIndex = eventList.findIndex(e => e.id === movedEventId);
+            if (currentIndex === -1) return true;
+
+        } else if (isMiscEvent) {
+            const miscId = parseInt(info.event.extendedProps.miscId, 10);
+            const misc = listOfMiscs.find(m => m.id === miscId);
+            if (!misc) return true;
+
+            eventList = misc.event;
+            currentIndex = eventList.findIndex(e => e.id === movedEventId);
+            if (currentIndex === -1) return true;
+
+        } else {
             return true;
         }
+
 
         const calendar = info.view.calendar;
         const movedEventStart = info.event.start;
         const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
 
         for (let i = 0; i < currentIndex; i++) {
-            const earlierEventData = courseEvents[i];
+            const earlierEventData = eventList[i];
             const earlierEventOnCalendar = calendar.getEventById(String(earlierEventData.id));
-
             if (earlierEventOnCalendar) {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
-
                 if (movedEventStart < earlierEventEnd) {
-                    alert("ogiltig ordning")
-                    console.log("Ogiltig ordning")
+                    alertCustom("Ogiltig ordning");
                     info.revert();
                     return false;
                 }
             }
         }
 
-        for (let i = currentIndex + 1; i < courseEvents.length; i++) {
-            const laterEventData = courseEvents[i];
+        for (let i = currentIndex + 1; i < eventList.length; i++) {
+            const laterEventData = eventList[i];
             const laterEventOnCalendar = calendar.getEventById(String(laterEventData.id));
-
             if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
-
                 if (movedEventEnd > laterEventStart) {
-                    alert("ogiltig ordning")
-                    console.log("Ogiltig ordning")
+                    alertCustom("Ogiltig ordning");
                     info.revert();
                     return false;
                 }
             }
         }
+        if (checkForHoliday(info)) return true;
 
-        const isHoliday = checkForHoliday(info);
-        if (isHoliday) {
-            return;
-        }
-        const dayOfWeek = movedEventStart.getDay(); // 0 = Sunday, 6 = Saturday
+        const dayOfWeek = movedEventStart.getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) {
-            const override = confirm("Du håller på att sätta detta event på en helg, vill du fortsätta?");
-            if(override){
-                return true;
-            }else{
+            const override = await confirmCustom("Du håller på att sätta detta event på en helg, vill du fortsätta?");
+            if (!override) {
                 info.revert();
                 return false;
             }
         }
-
         const month = movedEventStart.getMonth() + 1;
         const day = movedEventStart.getDate();
         if (vacationSet.has(`${month}-${day}`)) {
-           const override = confirm("Du håller på att sätta detta event på en semesterdag, vill du fortsätta?");
-            if(override){
-                return true;
-            }else{
+            const override = await confirmCustom("Du håller på att sätta detta event på en semesterdag, vill du fortsätta?");
+            if (!override) {
                 info.revert();
                 return false;
             }
         }
-        updateEventStartTime(info.event.id,info.event.start)
+
+        if (isCourseEvent) {
+            await updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
+        } else if (isMiscEvent) {
+            await updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
+        } else {
+            await alertCustom("Något blev fel");
+        }
+
         return true;
     }
+
+
 
     function checkForHoliday(info) {
         const eventDate = info.event.start;
@@ -259,7 +324,7 @@ export default function DemoApp() {
 
         if (matchingHoliday) {
             const holidayName = matchingHoliday.name;
-            alert(`You cannot drop events on a holiday: ${holidayName}`);
+            alertCustom(`Du kan inte lägga event på högtiden: ${holidayName}`);
             info.revert();
             return true;
         }
@@ -278,37 +343,62 @@ export default function DemoApp() {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
+    function handleEventResize(info) {
+        const event = info.event;
+        updateEventEndTime(event.id, event.end);
+    }
 
-    async function handleEventClick(clickInfo) {
-        const { event } = clickInfo;
-        const isHoliday =
-            event.extendedProps?.wrapText &&
-            event.id?.startsWith("holiday-");
+   async function handleEventClick(clickInfo) {
+    const { event } = clickInfo;
 
-        if (isHoliday) {
-            return;
+    const isHoliday =
+        event.extendedProps?.wrapText &&
+        event.id?.startsWith("holiday-");
+    if (isHoliday) return;
+
+    const isVacation =
+        event.extendedProps?.wrapText &&
+        event.id?.startsWith("vacation-");
+
+    const confirmed = await confirmCustom(
+        `Är du säker på att du vill ta bort händelsen '${event.title}'?`
+    );
+    if (!confirmed) return;
+
+    try {
+        if (isVacation) {
+            const vacationId = event.id.replace("vacation-", "");
+            await deleteVacation(vacationId);
+        } else {
+            const eventId = parseInt(event.id, 10);
+
+            const parent = [...listOfCourses, ...listOfMiscs].find(
+                p => p.event.some(e => e.id === eventId)
+            );
+
+            if (!parent) {
+                await alertCustom("Kunde inte ta bort händelsen förälder saknas");
+                return;
+            }
+            if (parent.type === "COURSE") {
+                await updateCourseEventTime(eventId, null, null);
+            } else if (parent.type === "MISC"||parent.type=="MEETING") {
+                await updateMiscEventTime(eventId, null, null);
+            } else {
+                await alertCustom("Kunde inte ta bort händelsen okänd typ");
+                return;
+            }
         }
-        const isVacation =
-            event.extendedProps?.wrapText &&
-            event.id?.startsWith("vacation-");
-
-        const confirmed = confirm(
-            `Är du säker på att du vill ta bort händelsen '${event.title}'?`
-        );
-        if (!confirmed) return;
 
         event.remove();
 
-        if (isVacation) {
-            try {
-                const vacationId = event.id.replace("vacation-", "");
-                await deleteVacation(vacationId);
-            } catch (err) {
-                console.error("Could not delete vacation via hook:", err);
-                alert("Kunde inte ta bort vacation på servern.");
-            }
-        }
+    } catch (err) {
+        console.error("Could not remove event:", err);
+        alertCustom("Kunde inte ta bort händelsen");
     }
+}
+
+
 
     function handleEvents(events) {
         setCurrentEvents(events)
@@ -316,7 +406,7 @@ export default function DemoApp() {
 
     return (
         <div className='demo-app relative h-screen flex'>
-            <Snowfall snowflakeCount={400} radius={[0.5, 4]} />
+
             <LeftSidebar
                 currentEvents={currentEvents}
                 listOfCourses={listOfCourses || []}
@@ -407,7 +497,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
+                    events={[...listOfPersistantEvents, ...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -431,6 +521,7 @@ export default function DemoApp() {
                     eventContent={renderEventContent}
                     eventClick={handleEventClick}
                     eventsSet={handleEvents}
+                    eventResize={handleEventResize}
                     eventColor={function (info) {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
@@ -445,7 +536,8 @@ export default function DemoApp() {
                 setSelectedCourses={setSelectedCourses}
                 listOfCourses={listOfCourses}
                 loadingCourses={loadingCourses}
-                holidayEvents={holidayEvents} />
+                holidayEvents={holidayEvents}
+            />
         </div>
     )
 }

@@ -1,45 +1,51 @@
 import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
+import { alertCustom } from "../functions/alertFunctions.jsx";
 
-export default function EditEventModal({ event, onClose, onSaved }) {
+export default function EditEventModal({ event, onClose, onSaved ,}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
-    const [description, setDescription] = useState('')
+    const [description, setDescription] = useState("")
     const [selectedTeachers, setSelectedTeachers] = useState([]);
-    const [teachers, setTeachers] = useState([])
 
     useEffect(() => {
         if (event) {
+            console.log("event", event);
             setName(event.name ?? "");
             setDescription(event.description ?? "");
-            setTeachers(teachers ?? [])
+
+            if(event.teachers && Array.isArray(event.teachers)) {
+                setSelectedTeachers(event.teachers);
+            } else {
+                setSelectedTeachers([]);
+            }
         }
-    }, [event, teachers]);
+    }, [event]);
 
 
     async function handleFormSubmit(e) {
         e.preventDefault();
-        const courseEvent = {
+        const courseEventToSave = {
             id: event.id,
             name: name,
             description: description,
             startDate: event.startDate,
             endDate: event.endDate,
-            courseId: event.categoryId,
-            teachers: selectedTeachers.map((t) => t.id),
+            courseId: event.categoryId.id,
+            teachers: selectedTeachers,
         }
 
+        console.log(courseEventToSave);
 
         try {
-            console.log(courseEvent.teachers)
-            const updatedEvent = await save(courseEvent);
-            onSaved(updatedEvent);
+            const updatedEvent = await save(courseEventToSave);
+            if(onSaved) onSaved(updatedEvent);
             onClose();
         } catch (e) {
             console.error("Kunde inte spara eventet:", e);
-            alert("Ett fel inträffade vid sparande.");
+            await alertCustom("Ett fel inträffade vid sparande");
         }
     }
 
@@ -65,9 +71,8 @@ export default function EditEventModal({ event, onClose, onSaved }) {
                             onChange={(e) => setDescription(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <label className="block text-sm font-medium text-gray-700">Lärare</label>
                         <label className="block text-sm font-medium text-gray-700">
-                            {teachers.map(teacher => (
+                            {selectedTeachers.map(teacher => (
                                 <span key={teacher.id}>{teacher.name} </span>
                             ))}
                         </label>

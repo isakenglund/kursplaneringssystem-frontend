@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
+import { alertCustom } from "../functions/alertFunctions.jsx";
 import useGetCourses, {
     useDeleteCourseEvent,
     useSaveCourseEvent,
@@ -20,7 +21,7 @@ export default function CreateEvent({
                                         currentEvents,
                                         openModal,
                                         closeModal,
-                                        isModalOpen,
+                                        isModalOpen
                                     }) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
@@ -41,14 +42,38 @@ export default function CreateEvent({
     const [editEventData, setEditEventData] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
 
+    const [showExpandedEvents, setShowExpandedEvents] = useState({});
+
     // Load courses
     useEffect(() => {
         if (fetchedCourses) setCourses(fetchedCourses);
     }, [fetchedCourses, fetchedMiscs]);
 
+        const defaultOpen = {};
+        fetchedCourses.forEach(course => {
+            defaultOpen[`course-${course.id}`] = true;
+        });
+
+        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
+    }, [fetchedCourses]);
+
     useEffect(() => {
         if (fetchedMiscs) setMiscs(fetchedMiscs);
+
+        const defaultOpen = {};
+        fetchedMiscs.forEach(misc => {
+            defaultOpen[`misc-${misc.id}`] = true;
+        });
+
+        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
     }, [fetchedMiscs]);
+
+    const toggleEventSection = (sectionId) => {
+        setShowExpandedEvents(prev => ({
+            ...prev,
+            [sectionId]: !prev[sectionId]
+        }));
+    };
 
     const isEventOnCalendar = (eventId) => {
         return currentEvents.some((ce) => String(ce.id) === String(eventId));
@@ -119,7 +144,7 @@ export default function CreateEvent({
         e.preventDefault();
 
         if (!name) {
-            alert("Vänligen fyll i en titel");
+            await alertCustom("Vänligen fyll i namn på eventet");
             return;
         }
 
@@ -131,7 +156,7 @@ export default function CreateEvent({
                     startTime: startDate,
                     endTime: endDate,
                     courseId: categoryId,
-                    teachers: selectedTeachers.map((t) => t.id)
+                    teachers: selectedTeachers
                 };
 
                 const savedEvent = await saveCourseEvent(payload);
@@ -167,7 +192,7 @@ export default function CreateEvent({
 
         } catch (error) {
             console.error("DEBUG-FEL:", error);
-            alert(`Fel: ${error.message}`);
+            await alertCustom(`Fel: ${error.message}`)
         }
     }
 
@@ -280,51 +305,109 @@ export default function CreateEvent({
                     {courses.length > 0 &&
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 mt-4">Kurser</h3>}
                     <div className="space-y-4">
-                        {courses.map((course) => (
-                            <div key={course.id} className="border border-gray-300 rounded-lg p-3 bg-gray-50">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h2 className="text-base font-bold">{course.name}</h2>
+                        {courses.map((course) => {
+                            const toggleEventsId = `course-${course.id}`;
+                            const isOpen = showExpandedEvents[toggleEventsId];
 
-                                    <button
-                                        onClick={() => {
-                                            setCategoryId(course.id);
-                                            setCategoryName(course.name);
-                                            setCategoryType("COURSE");
-                                            openModal();
-                                        }}
-                                        className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
+                            return (
+                                <div key={course.id}
+                                     className="border border-gray-300 rounded-lg bg-gray-50 transition-all">
+                                    <div
+                                        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 rounded-lg select-none"
+                                        onClick={() => toggleEventSection(toggleEventsId)}
                                     >
-                                        +
-                                    </button>
-                                </div>
+                                        <div className="flex items-center gap-2">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                                className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+                                            >
+                                                <path fillRule="evenodd"
+                                                      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                      clipRule="evenodd"/>
+                                            </svg>
 
-                                {renderEvents(course.event, course, "COURSE")}
-                            </div>
-                        ))}
+                                            <h2 className="text-base font-bold text-gray-700">{course.name}</h2>
+                                        </div>
+
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCategoryId(course.id);
+                                                setCategoryName(course.name);
+                                                setCategoryType("COURSE");
+                                                setCourseId(course.courseId);
+                                                openModal();
+                                            }}
+                                            className="bg-blue-600 text-white font-bold px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+
+                                    {isOpen && (
+                                        <div className="p-3 border-t border-gray-200 mt-2">
+                                            {renderEvents(course.event, course, "COURSE")}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {miscs.length > 0 &&
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 mt-6">Övrigt</h3>}
                     <div className="space-y-4">
-                        {miscs.map((misc) => (
-                            <div key={misc.id} className="border border-gray-300 rounded-lg p-3 bg-gray-50">
-                                <div className="flex items-center justify-between mb-1">
-                                    <h2 className="text-sm font-bold">{misc.name}</h2>
-                                    <button
-                                        onClick={() => {
-                                            setCategoryId(misc.id);
-                                            setCategoryName(misc.name);
-                                            setCategoryType("MISC"); // Sätter typ till MISC
-                                            openModal();
-                                        }}
-                                        className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
+                        {miscs.map((misc) => {
+                            const toggleEventsId = `misc-${misc.id}`;
+                            const isOpen = showExpandedEvents[toggleEventsId];
+
+                            return (
+                                <div key={misc.id}
+                                     className="border border-gray-300 rounded-lg bg-gray-50 transition-all">
+                                    <div
+                                        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 rounded-lg select-none"
+                                        onClick={() => toggleEventSection(toggleEventsId)}
                                     >
-                                        +
-                                    </button>
+                                        <div className="flex items-center gap-2">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                                className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+                                            >
+                                                <path fillRule="evenodd"
+                                                      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                      clipRule="evenodd"/>
+                                            </svg>
+
+                                            <h2 className="text-base font-bold text-gray-700">{misc.name}</h2>
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCategoryId(misc.id);
+                                                setCategoryName(misc.name);
+                                                setCategoryType("MISC");
+                                                openModal();
+                                            }}
+                                            className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
+                                        >
+                                            +
+                                        </button>
+
+                                    </div>
+
+                                    {isOpen && (
+                                        <div className="p-3 border-t border-gray-200 mt-2">
+                                            {renderEvents(misc.event, misc, "MISC")}
+                                        </div>
+                                    )}
+
                                 </div>
-                                {renderEvents(misc.event, misc, "MISC")}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
 
