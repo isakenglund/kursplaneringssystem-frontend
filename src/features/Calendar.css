@@ -1,6 +1,13 @@
 .fc-day-mon {
     border-left: 5px solid #ccc !important;
 }
+
+.fc { /* the calendar root */
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
 @layer components {
   /* Wrap normal events */
   .fc-event-title {
@@ -16,4 +23,9 @@
   .fc-daygrid-event {
     height: auto !important;
   }
+}
+.fc {
+    width: 100%;
+    max-width: none;
+    margin: 0;
 }

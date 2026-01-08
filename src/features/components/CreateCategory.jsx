@@ -4,7 +4,7 @@ import { useSaveCourse, useSaveVacation, useSaveMisc } from "../hooks.js";
 import VacationPicker from "./VacationPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
 
-export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate }) {
+export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate,onCreated}) {
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -20,17 +20,11 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
     const [endDate, setEndDate] = useState(todayDate);
 
     const {data: savedMisc, loading: savingMisc, err: miscSaveErr, save: saveMisc} = useSaveMisc();
-    const course = {
-        type: categoryType,
-        name: name,
-        colorHex: colorHex,
-        numOfStudents: numOfStudents,
-        startDate: startDate,
-        endDate: endDate
-    }
-
     const { data: savedVacation, loading: savingCourse, err: courseSaveErr, save: saveVacation } = useSaveVacation();
     const { data: savedCourse, loading: savingVacation, err: vacationSaveErr, save: saveCourse } = useSaveCourse();
+
+
+
 
     const handleColorHex = (colorHex) => {
         setColorHex(colorHex);
@@ -40,57 +34,42 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
         if(!name.trim() && categoryType!=="vacation") {
             await alertCustom("Vänligen fyll i ett kategori namn.")
             return;
-             
+
         }
-        switch (categoryType) {
-            case "course":
-                console.log(course);
-                try {
-                    await saveCourse(course);
-                    setIsCategoryModalOpen(false);
-                } catch (e) {
-                    console.error("Kunde inte spara", e);
+        try {
+            if (categoryType === "course") {
+                const course = {
+                    type: categoryType,
+                    name: name,
+                    colorHex: colorHex,
+                    numOfStudents: numOfStudents,
+                    startDate: startDate,
+                    endDate: endDate
                 }
-                break;
-
-            case "vacation":
-                try {
-                    await saveVacation({ date: vacationDate });
-                    setIsCategoryModalOpen(false);
-                } catch (e) {
-                    console.error("Kunde inte spara", e);
-                }
-                break;
-
-            case "misc":
-                try {
-                    const miscPayLoad = {
-                        type: "MISC",
-                        name: name,
-                        colorHex: colorHex
-                    }
-                    console.log(miscPayLoad)
-                    await saveMisc(miscPayLoad);
-
-                setIsCategoryModalOpen(false);
-                } catch (e) {
-                    console.error("Kunde inte spara", e);
-                }
-                break;
-
-            default:
+                await saveCourse(course);
+            } else if (categoryType === "vacation") {
+                await saveVacation({ date: vacationDate });
+            } else if (categoryType === "misc") {
+                await saveMisc({ type: "MISC", name, colorHex });
+            } else {
                 console.warn("Unknown categoryType:", categoryType);
+                return;
+            }
+
+            await onCreated?.();
+
+            setIsCategoryModalOpen(false);
+        } catch (e) {
+            console.error("Kunde inte spara", e);
         }
     }
-
-    const isLoading = savingCourse || savingMisc;
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96 gap-y-4">
-                <h3 className="text-xl font-bold mb-4">Skapa Kategori</h3>
+                <h3 className="text-xl font-bold mb-4">Skapa kategori</h3>
                 {/* Kategorinamn */}
-                {categoryType !== "vacation" && categoryType === "course" &&( 
+                {categoryType !== "vacation" && categoryType === "course" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
                         <input
@@ -104,7 +83,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                         />
                     </div>
                 )}
-                 {categoryType !== "vacation" && categoryType === "misc" &&( 
+                 {categoryType !== "vacation" && categoryType === "misc" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
                         <input
