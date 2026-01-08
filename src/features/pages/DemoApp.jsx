@@ -6,9 +6,8 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import svLocale from "@fullcalendar/core/locales/sv"
 import interactionPlugin from '@fullcalendar/interaction'
 import LeftSidebar from "../components/LeftSidebar.jsx";
-import { INITIAL_EVENTS } from '../../event-utils.js'
 import useGetCourses, {
-    useGetAllEvents,
+    useGetAllCategories,
     useGetHolidays,
     useGetVacation,
     useDeleteVacation,
@@ -20,24 +19,13 @@ import useGetCourses, {
 } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
-import { Snowfall } from "react-snowfall";
 import { confirmCustom, alertCustom } from '../functions/alertFunctions.jsx'
 
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
-    const [selectedCourses, setSelectedCourses] = useState([]);
-    const { data: allEvents } = useGetAllEvents();
-
-    const filteredCalendarEvents = useMemo(() => {
-        if (selectedCourses.length === 0) return allEvents;
-
-        return allEvents.filter(event => {
-            const props = event.extendedProps || event;
-            const courseId = props.courseId;
-            return selectedCourses.some(choice => choice.value === courseId);
-        });
-    }, [allEvents, selectedCourses]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const { data: allCategories } = useGetAllCategories();
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -48,7 +36,7 @@ export default function DemoApp() {
     const { remove: deleteVacation } = useDeleteVacation();
 
     const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs, loading: loadingMisc } = useGetMiscs();
+    const { data: listOfMiscs} = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -61,6 +49,10 @@ export default function DemoApp() {
     const { update: updateCourseEventEndTime } = useUpdateCourseEventEndTime();
     const { update: updateMiscEventTime } = useUpdateMiscEventTime();
     const { update: updateMiscEventEndTime } = useUpdateMiscEventEndTime();
+
+    const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+    const [showRightSidebar, setShowRightSidebar] = useState(true);
+
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
 
@@ -165,6 +157,27 @@ export default function DemoApp() {
         return [...courseEvents, ...miscEvents];
     }, [listOfCourses, listOfMiscs]);
 
+    const filteredPersistantEvents = useMemo(() => {
+        if (!selectedCategories || selectedCategories.length === 0) return listOfPersistantEvents;
+
+        const selectedIds = new Set(selectedCategories.map(c => c.value));
+        return listOfPersistantEvents.filter(e => {
+            const courseId = e.extendedProps?.courseId;
+            const miscId = e.extendedProps?.miscId;
+            return selectedIds.has(courseId) || selectedIds.has(miscId);
+        });
+    }, [listOfPersistantEvents, selectedCategories]);
+
+    const calendarRef = useRef(null)
+
+    const eventsForCalendar = useMemo(() => {
+        return [
+            ...filteredPersistantEvents,
+            ...vacationEvents,
+            ...holidayEvents,
+        ];
+    }, [filteredPersistantEvents, vacationEvents, holidayEvents]);
+
     const handleDatesSet = (dateInfo) => {
         const startYear = dateInfo.start.getFullYear();
         const endYear = dateInfo.end.getFullYear();
@@ -212,12 +225,9 @@ export default function DemoApp() {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
     }
 
-    const calendarRef = useRef(null)
-
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
-
 
     async function validateEventDrop(info) {
         if (!info.event.extendedProps) return true;
@@ -368,8 +378,6 @@ export default function DemoApp() {
         return true;
     }
 
-
-
     function checkForHoliday(info) {
         const eventDate = info.event.start;
         const eventMonth = eventDate.getMonth() + 1;
@@ -400,60 +408,70 @@ export default function DemoApp() {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
-    function handleEventResize(info) {
+
+    async function handleEventResize(info) {
         const event = info.event;
-        updateEventEndTime(event.id, event.end);
-    }
-
-   async function handleEventClick(clickInfo) {
-    const { event } = clickInfo;
-
-    const isHoliday =
-        event.extendedProps?.wrapText &&
-        event.id?.startsWith("holiday-");
-    if (isHoliday) return;
-
-    const isVacation =
-        event.extendedProps?.wrapText &&
-        event.id?.startsWith("vacation-");
-
-    const confirmed = await confirmCustom(
-        `Är du säker på att du vill ta bort händelsen '${event.title}'?`
-    );
-    if (!confirmed) return;
-
-    try {
-        if (isVacation) {
-            const vacationId = event.id.replace("vacation-", "");
-            await deleteVacation(vacationId);
+        const isCourseEvent = !!info.event.extendedProps.courseId;
+        const isMiscEvent = !!info.event.extendedProps.miscId;
+        if (isCourseEvent) {
+            await updateCourseEventEndTime(event.id, event.end);
+        } else if (isMiscEvent) {
+            await updateMiscEventEndTime(event.id, event.end);
         } else {
-            const eventId = parseInt(event.id, 10);
-
-            const parent = [...listOfCourses, ...listOfMiscs].find(
-                p => p.event.some(e => e.id === eventId)
-            );
-
-            if (!parent) {
-                await alertCustom("Kunde inte ta bort händelsen förälder saknas");
-                return;
-            }
-            if (parent.type === "COURSE") {
-                await updateCourseEventTime(eventId, null, null);
-            } else if (parent.type === "MISC"||parent.type=="MEETING") {
-                await updateMiscEventTime(eventId, null, null);
-            } else {
-                await alertCustom("Kunde inte ta bort händelsen okänd typ");
-                return;
-            }
+            await alertCustom("Något blev fel");
         }
 
-        event.remove();
-
-    } catch (err) {
-        console.error("Could not remove event:", err);
-        alertCustom("Kunde inte ta bort händelsen");
     }
-}
+
+    async function handleEventClick(clickInfo) {
+        const { event } = clickInfo;
+
+        const isHoliday =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("holiday-");
+        if (isHoliday) return;
+
+        const isVacation =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("vacation-");
+
+        const confirmed = await confirmCustom(
+            `Är du säker på att du vill ta bort händelsen '${event.title}'?`
+        );
+        if (!confirmed) return;
+
+        try {
+            if (isVacation) {
+                const vacationId = event.id.replace("vacation-", "");
+                await deleteVacation(vacationId);
+            } else {
+                const eventId = parseInt(event.id, 10);
+
+                const parent = [...listOfCourses, ...listOfMiscs].find(
+                    p => p.event.some(e => e.id === eventId)
+                );
+
+                if (!parent) {
+                    await alertCustom("Kunde inte ta bort händelsen förälder saknas");
+                    return;
+                }
+                if (parent.type === "COURSE") {
+                    await updateCourseEventTime(eventId, null, null);
+                } else if (parent.type === "MISC" || parent.type === "MEETING") {
+                    await updateMiscEventTime(eventId, null, null);
+                } else {
+                    await alertCustom("Kunde inte ta bort händelsen okänd typ");
+                    return;
+                }
+            }
+
+            event.remove();
+
+        } catch (err) {
+            console.error("Could not remove event:", err);
+            alertCustom("Kunde inte ta bort händelsen");
+        }
+    }
 
 
 
@@ -470,9 +488,70 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 setVacationDate={setVacationDate}
                 vacationDate={vacationDate}
+                showLeftSidebar={showLeftSidebar}
+                selectedCategories={selectedCategories}
             />
 
             <div className='demo-app-main flex-grow p-4'>
+                <div className="flex justify-between mb-2 w-full">
+                    <button
+                        onClick={() => setShowLeftSidebar(prev => !prev)}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
+                    >
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${showLeftSidebar ? "rotate-180" : ""
+                                }`}
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                        {showLeftSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Göm vänster sidebar</span>
+                        )}
+
+                        {!showLeftSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Visa vänster sidebar</span>
+                        )}
+                    </button>
+
+
+                    <button
+                        onClick={() => {
+                            setShowRightSidebar(prev => !prev)
+                        }}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
+                    >
+                        {showRightSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Göm höger sidebar</span>
+                        )}
+
+                        {!showRightSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Visa höger sidebar</span>
+                        )}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${!showRightSidebar ? "rotate-180" : ""
+                                }`}
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+
                 <div className="fc">
                     {showDateInputs && (
                         <div className="flex ml-auto">
@@ -537,6 +616,7 @@ export default function DemoApp() {
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
+                    expandRows={true}
                     datesSet={handleDatesSet}
                     initialView='timeGridWeek'
                     multiMonthMaxColumns={1}
@@ -554,7 +634,7 @@ export default function DemoApp() {
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     //initialEvents={INITIAL_EVENTS}
-                    events={[...listOfPersistantEvents, ...filteredCalendarEvents, ...holidayEvents, ...vacationEvents]}
+                    events={eventsForCalendar}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
                         const month = arg.date.getMonth() + 1;
@@ -589,11 +669,12 @@ export default function DemoApp() {
                 currentEvents={currentEvents}
                 weekendsVisible={weekendsVisible}
                 handleWeekendsToggle={handleWeekendsToggle}
-                selectedCourses={selectedCourses}
-                setSelectedCourses={setSelectedCourses}
-                listOfCourses={listOfCourses}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+                listOfCategories={allCategories}
                 loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents}
+                showRightSidebar={showRightSidebar}
             />
         </div>
     )

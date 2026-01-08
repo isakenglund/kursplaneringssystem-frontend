@@ -23,7 +23,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
     const { data: savedVacation, loading: savingCourse, err: courseSaveErr, save: saveVacation } = useSaveVacation();
     const { data: savedCourse, loading: savingVacation, err: vacationSaveErr, save: saveCourse } = useSaveCourse();
 
-    
+
 
 
     const handleColorHex = (colorHex) => {
@@ -34,7 +34,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
         if(!name.trim() && categoryType!=="vacation") {
             await alertCustom("Vänligen fyll i ett kategori namn.")
             return;
-             
+
         }
         try {
             if (categoryType === "course") {
@@ -64,14 +64,12 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
         }
     }
 
-    const isLoading = savingCourse || savingMisc;
-
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96 gap-y-4">
-                <h3 className="text-xl font-bold mb-4">Skapa Kategori</h3>
+                <h3 className="text-xl font-bold mb-4">Skapa kategori</h3>
                 {/* Kategorinamn */}
-                {categoryType !== "vacation" && categoryType === "course" &&( 
+                {categoryType !== "vacation" && categoryType === "course" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
                         <input
@@ -85,7 +83,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                         />
                     </div>
                 )}
-                 {categoryType !== "vacation" && categoryType === "misc" &&( 
+                 {categoryType !== "vacation" && categoryType === "misc" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
                         <input
