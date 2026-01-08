@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
@@ -25,7 +25,10 @@ export default function CreateEvent({
     courses,
     miscs,
     setMiscs,
-}) {
+                                        selectedCategories
+                                    }) {
+    const {data: fetchedCourses} = useGetCourses();
+    const {data: fetchedMiscs} = useGetMiscs();
 
 
     const {remove: deleteCourse} = useDeleteCourse();
@@ -76,6 +79,12 @@ export default function CreateEvent({
     const isEventOnCalendar = (eventId) => {
         return currentEvents.some((ce) => String(ce.id) === String(eventId));
     };
+
+    const isEventFiltered = (parentCategoryId) => {
+        if (!selectedCategories || selectedCategories.length === 0) return false;
+        return !selectedCategories.some((c) => String(c.value) === String(parentCategoryId));
+    };
+
 
     async function handleRemoveEvent(parentId, eventId, type) {
 
@@ -221,6 +230,10 @@ export default function CreateEvent({
             <div className="space-y-1">
                 {eventsArray.map((event, index) => {
                     const disabled = isEventOnCalendar(event.id);
+                    const filtered = isEventFiltered(parentCategory.id)
+
+                    const isDraggable = !disabled && !filtered;
+
                     return (
                         <div
                             key={event.id}
@@ -236,12 +249,14 @@ export default function CreateEvent({
                                     teachers: event.teachers,
                                 })
                             })}
-                            style={{ borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}` }}
-                            className={`p-3 rounded border shadow-sm text-sm font-medium flex flex-col transition
-    ${disabled
-                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                    : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move fc-event-external"
-                                }`}
+                            style={{borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}`}}
+                            className={`p-3 rounded border shadow-sm text-sm font-medium flex justify-between items-center transition
+                                ${isDraggable ? "fc-event-external" : ""}
+                                ${
+                                disabled || filtered
+                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
+                                    : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
+                            }`}
                         >
                             <div className="flex items-center w-full">
                                 <div className="min-w-0 flex-1">
@@ -329,7 +344,6 @@ export default function CreateEvent({
                             </div>
 
                         </div>
-
                     );
                 })}
             </div>
@@ -409,7 +423,7 @@ export default function CreateEvent({
                                     ? {
                                         ...course,
                                         event: course.event.map(ev =>
-                                            ev.id === updatedEvent.id ? { ...ev, ...updatedEvent } : ev
+                                            ev.id === updatedEvent.id ? {...ev, ...updatedEvent} : ev
                                         ),
                                     }
                                     : course
@@ -461,7 +475,6 @@ export default function CreateEvent({
                                             </svg>
 
                                             <h2 className="text-base font-bold text-gray-700">{course.name}</h2>
-
                                         </div>
 
                                         <div className="flex items-center gap-2">
