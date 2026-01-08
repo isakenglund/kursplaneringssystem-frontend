@@ -41,7 +41,6 @@ export default function CreateEvent({
     const [startDate, setStartDate] = useState(new Date());
     const [editEventData, setEditEventData] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
-
     const [showExpandedEvents, setShowExpandedEvents] = useState({});
 
     // Load courses
@@ -49,6 +48,7 @@ export default function CreateEvent({
         if (fetchedCourses) setCourses(fetchedCourses);
     }, [fetchedCourses, fetchedMiscs]);
 
+    useEffect(() => {
         const defaultOpen = {};
         fetchedCourses.forEach(course => {
             defaultOpen[`course-${course.id}`] = true;
