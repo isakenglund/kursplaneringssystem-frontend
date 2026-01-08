@@ -9,7 +9,8 @@ export default function LeftSidebar({
     currentEvents,
     removeExternalEvent,
     setVacationDate,
-    vacationDate
+    vacationDate,
+    selectedCategories
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -57,6 +58,7 @@ export default function LeftSidebar({
                     closeModal={() => setIsModalOpen(false)}
                     isModalOpen={isModalOpen}
                     removeExternalEvent={removeExternalEvent}
+                    selectedCategories={selectedCategories}
                 />
 
             </div>

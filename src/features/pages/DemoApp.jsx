@@ -220,13 +220,9 @@ export default function DemoApp() {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
     }
 
-
-
-
     function handleWeekendsToggle() {
         setWeekendsVisible(!weekendsVisible)
     }
-
 
     async function validateEventDrop(info) {
         if (!info.event.extendedProps) return true;
@@ -321,8 +317,6 @@ export default function DemoApp() {
         return true;
     }
 
-
-
     function checkForHoliday(info) {
         const eventDate = info.event.start;
         const eventMonth = eventDate.getMonth() + 1;
@@ -353,6 +347,7 @@ export default function DemoApp() {
     function handleEventDrop(info) {
         validateEventDrop(info);
     }
+
     async function handleEventResize(info) {
         const event = info.event;
         const isCourseEvent = !!info.event.extendedProps.courseId;
@@ -421,6 +416,7 @@ export default function DemoApp() {
 
     function handleEvents(events) {
         setCurrentEvents(events)
+
     }
 
     return (
@@ -432,6 +428,7 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 setVacationDate={setVacationDate}
                 vacationDate={vacationDate}
+                selectedCategories={selectedCategories}
             />
 
             <div className='demo-app-main flex-grow p-4'>

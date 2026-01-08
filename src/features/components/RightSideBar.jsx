@@ -1,9 +1,7 @@
-import React, { useState } from "react";
 import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
-import { useGetHolidays, useGetVacation } from "../hooks.js";
-import { useGetMiscs } from "../hooks.js";
+import { useGetVacation } from "../hooks.js";
 
 export default function RightSideBar({
                                          currentEvents,
@@ -19,18 +17,17 @@ export default function RightSideBar({
 
     const animatedComponents = makeAnimated();
 
-        const filteredEvents = currentEvents.filter(event => {
+    const filteredEvents = currentEvents.filter(event => {
         if (selectedCategories.length === 0) return true;
         const eventCourseId = event.extendedProps?.courseId;
-        return selectedCategories.some(choice => choice.value === eventCourseId);
+        const eventMiscId = event.extendedProps?.miscId;
+        return selectedCategories.some(choice => choice.value === eventCourseId || choice.value === eventMiscId);
     }).sort((a, b) => {
         return new Date(a.start) - new Date(b.start);
     });
 
 
     
-    const [selectedVal, setSelectedVal] = useState('');
-    const { data: holidays = [] } = useGetHolidays();
     const { data: vacation = [] } = useGetVacation();
 
     const totalCount = listOfCategories.reduce((sum, course) => sum + course.event.length, 0);
