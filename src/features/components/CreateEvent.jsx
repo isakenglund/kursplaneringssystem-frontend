@@ -25,7 +25,7 @@ export default function CreateEvent({
     courses,
     miscs,
     setMiscs,
-                                        selectedCategories
+                                        selectedCategories,
                                         refetchCourses,
     refetchMiscs,
 }) {
