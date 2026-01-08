@@ -17,8 +17,19 @@ export default function LeftSidebar({
    // const { data: courses = [], isLoading: loadingCourses, refetch: refetchCourses, } = ;
     //const { data: miscs = [], isLoading: loadingMiscs, refetch: refetchMiscs, } = ;
 
-    const { data: courses, refetch: refetchCourses } = useGetCourses();
-    const { data: miscs, refetch: refetchMiscs } = useGetMiscs();
+    const { data: coursesData, refetch: refetchCourses } = useGetCourses();
+    const { data: miscsData, refetch: refetchMiscs } = useGetMiscs();
+
+    const [courses, setCourses] = useState([]);
+const [miscs, setMiscs] = useState([]);
+
+useEffect(() => {
+    if (coursesData) setCourses(coursesData);
+}, [coursesData]);
+
+useEffect(() => {
+    if (miscsData) setMiscs(miscsData);
+}, [miscsData]);
 
     function fetchCategories() {
         refetchCourses();
@@ -70,8 +81,10 @@ export default function LeftSidebar({
                     closeModal={() => setIsModalOpen(false)}
                     isModalOpen={isModalOpen}
                     removeExternalEvent={removeExternalEvent}
-                    courses={courses}   // PASS FROM PARENT
-                    miscs={miscs}       // PASS FROM PARENT
+                    courses={courses}   
+                    miscs={miscs} 
+                    setCourses={setCourses}
+                    setMiscs={setMiscs}     
                 />
 
             </div>
