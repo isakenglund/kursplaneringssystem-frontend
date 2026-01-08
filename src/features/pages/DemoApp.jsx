@@ -61,6 +61,10 @@ export default function DemoApp() {
     const { update: updateCourseEventEndTime } = useUpdateCourseEventEndTime();
     const { update: updateMiscEventTime } = useUpdateMiscEventTime();
     const { update: updateMiscEventEndTime } = useUpdateMiscEventEndTime();
+
+    const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+    const [showRightSidebar, setShowRightSidebar] = useState(true);
+
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
 
@@ -348,55 +352,55 @@ export default function DemoApp() {
         updateEventEndTime(event.id, event.end);
     }
 
-   async function handleEventClick(clickInfo) {
-    const { event } = clickInfo;
+    async function handleEventClick(clickInfo) {
+        const { event } = clickInfo;
 
-    const isHoliday =
-        event.extendedProps?.wrapText &&
-        event.id?.startsWith("holiday-");
-    if (isHoliday) return;
+        const isHoliday =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("holiday-");
+        if (isHoliday) return;
 
-    const isVacation =
-        event.extendedProps?.wrapText &&
-        event.id?.startsWith("vacation-");
+        const isVacation =
+            event.extendedProps?.wrapText &&
+            event.id?.startsWith("vacation-");
 
-    const confirmed = await confirmCustom(
-        `Är du säker på att du vill ta bort händelsen '${event.title}'?`
-    );
-    if (!confirmed) return;
+        const confirmed = await confirmCustom(
+            `Är du säker på att du vill ta bort händelsen '${event.title}'?`
+        );
+        if (!confirmed) return;
 
-    try {
-        if (isVacation) {
-            const vacationId = event.id.replace("vacation-", "");
-            await deleteVacation(vacationId);
-        } else {
-            const eventId = parseInt(event.id, 10);
-
-            const parent = [...listOfCourses, ...listOfMiscs].find(
-                p => p.event.some(e => e.id === eventId)
-            );
-
-            if (!parent) {
-                await alertCustom("Kunde inte ta bort händelsen förälder saknas");
-                return;
-            }
-            if (parent.type === "COURSE") {
-                await updateCourseEventTime(eventId, null, null);
-            } else if (parent.type === "MISC"||parent.type=="MEETING") {
-                await updateMiscEventTime(eventId, null, null);
+        try {
+            if (isVacation) {
+                const vacationId = event.id.replace("vacation-", "");
+                await deleteVacation(vacationId);
             } else {
-                await alertCustom("Kunde inte ta bort händelsen okänd typ");
-                return;
+                const eventId = parseInt(event.id, 10);
+
+                const parent = [...listOfCourses, ...listOfMiscs].find(
+                    p => p.event.some(e => e.id === eventId)
+                );
+
+                if (!parent) {
+                    await alertCustom("Kunde inte ta bort händelsen förälder saknas");
+                    return;
+                }
+                if (parent.type === "COURSE") {
+                    await updateCourseEventTime(eventId, null, null);
+                } else if (parent.type === "MISC" || parent.type == "MEETING") {
+                    await updateMiscEventTime(eventId, null, null);
+                } else {
+                    await alertCustom("Kunde inte ta bort händelsen okänd typ");
+                    return;
+                }
             }
+
+            event.remove();
+
+        } catch (err) {
+            console.error("Could not remove event:", err);
+            alertCustom("Kunde inte ta bort händelsen");
         }
-
-        event.remove();
-
-    } catch (err) {
-        console.error("Could not remove event:", err);
-        alertCustom("Kunde inte ta bort händelsen");
     }
-}
 
 
 
@@ -413,12 +417,73 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 setVacationDate={setVacationDate}
                 vacationDate={vacationDate}
+                showLeftSidebar={showLeftSidebar}
             />
 
             <div className='demo-app-main flex-grow p-4'>
+                <div className="flex justify-between mb-2 w-full">
+                    <button
+                        onClick={() => setShowLeftSidebar(prev => !prev)}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
+                    >
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${showLeftSidebar ? "rotate-180" : ""
+                                }`}
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                        {showLeftSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Göm vänster sidebar</span>
+                        )}
+
+                        {!showLeftSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Visa vänster sidebar</span>
+                        )}
+                    </button>
+
+
+                    <button
+                        onClick={() => {
+                            setShowRightSidebar(prev => !prev)
+                        }}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
+                    >
+                        {showRightSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Göm höger sidebar</span>
+                        )}
+
+                        {!showRightSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Visa höger sidebar</span>
+                        )}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${!showRightSidebar ? "rotate-180" : ""
+                                }`}
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+
                 <div className="fc">
                     {showDateInputs && (
                         <div className="flex ml-auto">
+
                             <input
                                 className="mb-1 block w-39 rounded-md border border-gray-300 p-2 shadow-sm
                             focus:ring-blue-500 focus:border-blue-500"
@@ -537,6 +602,7 @@ export default function DemoApp() {
                 listOfCourses={listOfCourses}
                 loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents}
+                showRightSidebar={showRightSidebar}
             />
         </div>
     )
