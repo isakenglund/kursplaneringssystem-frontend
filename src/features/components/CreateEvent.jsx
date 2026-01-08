@@ -6,7 +6,9 @@ import useGetCourses, {
     useSaveCourseEvent,
     useGetMiscs,
     useSaveMiscEvent,
-    useDeleteMiscEvent
+    useDeleteMiscEvent,
+    useDeleteCourse,
+    useDeleteMisc
 } from "../hooks.js";
 
 export default function CreateEvent({
@@ -18,6 +20,9 @@ export default function CreateEvent({
                                     }) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
+
+    const {remove: deleteCourse} = useDeleteCourse();
+    const {remove: deleteMisc} = useDeleteMisc();
 
     const {remove: deleteCourseEvent} = useDeleteCourseEvent();
     const {remove: deleteMiscEvent} = useDeleteMiscEvent();
@@ -54,7 +59,7 @@ export default function CreateEvent({
             defaultOpen[`course-${course.id}`] = true;
         });
 
-        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
+        setShowExpandedEvents(prev => ({...prev, ...defaultOpen}));
     }, [fetchedCourses]);
 
     useEffect(() => {
@@ -65,7 +70,7 @@ export default function CreateEvent({
             defaultOpen[`misc-${misc.id}`] = true;
         });
 
-        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
+        setShowExpandedEvents(prev => ({...prev, ...defaultOpen}));
     }, [fetchedMiscs]);
 
     const toggleEventSection = (sectionId) => {
@@ -105,6 +110,25 @@ export default function CreateEvent({
                 console.error("Failed to delete misc event", error);
                 setMiscs(previous);
             }
+        }
+    }
+
+    async function handleRemoveCategory(id, type) {
+        if (!confirm("Är du säker på att du vill ta bort denna kategori och alla dess event?")) {
+            return;
+        }
+
+        try {
+            if (type === "COURSE") {
+                await deleteCourse(id);
+                setCourses(prev => prev.filter(c => c.id !== id));
+            } else {
+                await deleteMisc(id);
+                setMiscs(prev => prev.filter(m => m.id !== id));
+            }
+        } catch (error) {
+            console.error("Kunde inte ta bort kategorin", error);
+            alert("Fel vid borttagning");
         }
     }
 
@@ -198,7 +222,7 @@ export default function CreateEvent({
                         >
                             <div className="min-w-0 flex-1">
                                 <span className="block truncate" title={event.name}>
-                                    {index + 1}.{event.teachers} {event.name}
+                                    {index + 1}. {event.name}
                                 </span>
                             </div>
 
@@ -363,19 +387,36 @@ export default function CreateEvent({
                                             <h2 className="text-base font-bold text-gray-700">{course.name}</h2>
                                         </div>
 
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setCategoryId(course.id);
-                                                setCategoryName(course.name);
-                                                setCategoryType("COURSE");
-                                                setCourseId(course.courseId);
-                                                openModal();
-                                            }}
-                                            className="bg-blue-600 text-white font-bold px-3 py-1 rounded hover:bg-blue-700 text-sm"
-                                        >
-                                            +
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemoveCategory(course.id, "COURSE");
+                                                }}
+                                                className="w-5 h-5 text-gray-700 hover:text-red-500"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                     viewBox="0 0 24 24" strokeWidth={1.5}
+                                                     stroke="currentColor" className="w-full h-full">
+                                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                                          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                                                </svg>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCategoryId(course.id);
+                                                    setCategoryName(course.name);
+                                                    setCategoryType("COURSE");
+                                                    setCourseId(course.courseId);
+                                                    openModal();
+                                                }}
+                                                className="bg-blue-600 text-white font-bold px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {isOpen && (
@@ -416,19 +457,37 @@ export default function CreateEvent({
 
                                             <h2 className="text-base font-bold text-gray-700">{misc.name}</h2>
                                         </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setCategoryId(misc.id);
-                                                setCategoryName(misc.name);
-                                                setCategoryType("MISC");
-                                                openModal();
-                                            }}
-                                            className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
-                                        >
-                                            +
-                                        </button>
 
+                                        <div className="flex items-center gap-2">
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemoveCategory(misc.id, "MISC");
+                                                }}
+                                                className="w-5 h-5 text-gray-700 hover:text-red-500"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                     viewBox="0 0 24 24" strokeWidth={1.5}
+                                                     stroke="currentColor" className="w-full h-full">
+                                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                                          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                                                </svg>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCategoryId(misc.id);
+                                                    setCategoryName(misc.name);
+                                                    setCategoryType("MISC");
+                                                    openModal();
+                                                }}
+                                                className="bg-blue-600 text-white font-bold px-3 py-1 rounded"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {isOpen && (

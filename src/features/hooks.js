@@ -136,6 +136,68 @@ export function useSaveMisc(){
     return { data, loading, err, save };
 }
 
+export function useDeleteCourse() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function remove(courseId) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.deleteCourse(courseId);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return { data, loading, err, remove };
+}
+
+export function useDeleteMisc() {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function remove(miscId) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            if (USE_MOCK) {
+                await delay(100);
+                setData(true);
+                return true;
+            }
+
+            const res = await API.deleteMisc(miscId);
+            setData(res ?? true);
+            return true;
+
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return { data, loading, err, remove };
+}
+
 export function useGetTeachers() {
     const [teachers, setTeachers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -419,7 +481,6 @@ export function useGetAllEvents(){
 
     return { data, loading, err };
 }
-
 
 export function useGetVacation() {
     const [data, setData] = useState([]);

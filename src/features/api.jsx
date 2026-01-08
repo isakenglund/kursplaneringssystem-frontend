@@ -17,6 +17,14 @@ export const API = {
 
     }),
 
+    deleteCourse: (courseId) => api(`/courses/${courseId}`, {
+        method: "DELETE"
+    }),
+
+    deleteMisc: (miscId) => api(`/miscs/${miscId}`, {
+        method: "DELETE"
+    }),
+
     miscEvents: () => api('/misc-events', {
         method: "GET",
     }),
@@ -43,6 +51,27 @@ export const API = {
             endDate: misc.endDate,
         })
     },),
+
+    updateCourse: (course) => api ('/courses/${course.id}', {
+        method: "PUT",
+        body: JSON.stringify({
+            id: course.id,
+            name: course.name,
+            colorHex: course.colorHex,
+            numOfStudents: course.numOfStudents,
+            startDate: course.startDate,
+            endDate: course.endDate
+        })
+    }),
+
+    updateMisc: (misc) => api ('/miscs/${misc.id}', {
+        method: "PUT",
+        body: JSON.stringify({
+            id: misc.id,
+            name: misc.name,
+            colorHex: misc.colorHex,
+        })
+    }),
 
     saveCourseEvent: (courseEvent) => api ('/course-events', {
         method: "POST",
@@ -91,7 +120,7 @@ export const API = {
     }),
 
     updateMiscEvent: (miscEvent) => api ('/misc-events', {
-        method: "POST",
+        method: "PUT",
         body: JSON.stringify({
             description: miscEvent.description,
             endDate: miscEvent.endDate,
@@ -103,7 +132,6 @@ export const API = {
 
 
     holidays: () => api('/holidays'),
-
 
     deleteCourseEvent: (eventId) => api(`/course-events/${eventId}`, {
         method: "DELETE"

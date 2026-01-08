@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ColorPicker from "./ColorPicker.jsx";
 import { useSaveCourse, useSaveVacation, useSaveMisc } from "../hooks.js";
 import VacationPicker from "./VacationPicker.jsx";
+//import { alertCustom } from "../functions/alertFunctions.jsx";
 
 export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate }) {
 
@@ -81,14 +82,26 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
         }
     }
 
-    const isLoading = savingCourse || savingMisc;
-
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96 gap-y-4">
-                <h3 className="text-xl font-bold mb-4">Skapa category</h3>
+                <h3 className="text-xl font-bold mb-4">Skapa kategori</h3>
                 {/* Kategorinamn */}
-                {categoryType !== "vacation" && (
+                {categoryType !== "vacation" && categoryType === "course" &&(
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
+                        <input
+                            type="text"
+                            value={name}
+                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="T.ex Datasystem"
+                            onChange={(t) => {
+                                setName(t.target.value)
+                            }}
+                        />
+                    </div>
+                )}
+                 {categoryType !== "vacation" && categoryType === "misc" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
                         <input
