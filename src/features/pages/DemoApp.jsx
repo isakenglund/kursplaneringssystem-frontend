@@ -272,7 +272,7 @@ export default function DemoApp() {
             if (earlierEventOnCalendar) {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
                 if (movedEventStart < earlierEventEnd) {
-                    const message = `Ogiltig ordning`;
+                    const message = `Ogiltig ordning, vill du lägga eventet här ändå?`;
 
                     const override = await confirmCustom(message);
 
@@ -291,7 +291,7 @@ export default function DemoApp() {
             if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
                 if (movedEventEnd > laterEventStart) {
-                    const message = `Ogiltig ordning`;
+                    const message = `Ogiltig ordning, vill du lägga eventet här ändå?`;
 
                     const override = await confirmCustom(message);
 
