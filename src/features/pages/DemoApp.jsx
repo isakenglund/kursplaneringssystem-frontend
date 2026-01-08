@@ -496,6 +496,7 @@ export default function DemoApp() {
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
                     }}
                     height="100%"
+                    expandRows={true}
                     datesSet={handleDatesSet}
                     initialView='timeGridWeek'
                     multiMonthMaxColumns={1}
