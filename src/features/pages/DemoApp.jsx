@@ -49,6 +49,10 @@ export default function DemoApp() {
     const { update: updateCourseEventEndTime } = useUpdateCourseEventEndTime();
     const { update: updateMiscEventTime } = useUpdateMiscEventTime();
     const { update: updateMiscEventEndTime } = useUpdateMiscEventEndTime();
+
+    const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+    const [showRightSidebar, setShowRightSidebar] = useState(true);
+
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
 
@@ -416,7 +420,6 @@ export default function DemoApp() {
 
     function handleEvents(events) {
         setCurrentEvents(events)
-
     }
 
     return (
@@ -428,10 +431,70 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 setVacationDate={setVacationDate}
                 vacationDate={vacationDate}
+                showLeftSidebar={showLeftSidebar}
                 selectedCategories={selectedCategories}
             />
 
             <div className='demo-app-main flex-grow p-4'>
+                <div className="flex justify-between mb-2 w-full">
+                    <button
+                        onClick={() => setShowLeftSidebar(prev => !prev)}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
+                    >
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${showLeftSidebar ? "rotate-180" : ""
+                                }`}
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                        {showLeftSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Göm vänster sidebar</span>
+                        )}
+
+                        {!showLeftSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Visa vänster sidebar</span>
+                        )}
+                    </button>
+
+
+                    <button
+                        onClick={() => {
+                            setShowRightSidebar(prev => !prev)
+                        }}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
+                    >
+                        {showRightSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Göm höger sidebar</span>
+                        )}
+
+                        {!showRightSidebar && (
+                            <span className="text-xs font-bold text-gray-600">Visa höger sidebar</span>
+                        )}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${!showRightSidebar ? "rotate-180" : ""
+                                }`}
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+
                 <div className="fc">
                     {showDateInputs && (
                         <div className="flex ml-auto">
@@ -554,6 +617,7 @@ export default function DemoApp() {
                 listOfCategories={allCategories}
                 loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents}
+                showRightSidebar={showRightSidebar}
             />
         </div>
     )

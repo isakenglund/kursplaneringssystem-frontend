@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { API } from './api';
 
 const USE_MOCK = (import.meta.env?.VITE_USE_MOCK ?? 'true') === 'false';
@@ -6,8 +6,8 @@ const USE_MOCK = (import.meta.env?.VITE_USE_MOCK ?? 'true') === 'false';
 const MOCK = {
 
     courses: [
-        {  },
-        {  },
+        {},
+        {},
     ],
 
 
@@ -27,6 +27,13 @@ export default function useGetCourses() {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
 
+    // change this to force the effect to re-run
+    const [refreshIndex, setRefreshIndex] = useState(0);
+
+    const refetch = useCallback(() => {
+        setRefreshIndex((i) => i + 1);
+    }, []);
+
     useEffect(() => {
         let live = true;
 
@@ -42,7 +49,7 @@ export default function useGetCourses() {
                 } else {
                     const res = await API.courses();
                     if (!live) return;
-                    setData(pickList(res, 'type'));
+                    setData(pickList(res, "type"));
                 }
             } catch (e) {
                 if (live) setErr(e);
@@ -51,16 +58,27 @@ export default function useGetCourses() {
             }
         })();
 
-        return () => { live = false; };
-    }, []);
+        return () => {
+            live = false;
+        };
+    }, [refreshIndex]); // refetch triggers this
 
-    return { data, loading, err};
+    return { data, loading, err, refetch };
 }
+
+
+
 
 export function useGetMiscs() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
+
+    const [refreshIndex, setRefreshIndex] = useState(0);
+
+    const refetch = useCallback(() => {
+        setRefreshIndex((i) => i + 1);
+    }, []);
 
     useEffect(() => {
         let live = true;
@@ -77,7 +95,7 @@ export function useGetMiscs() {
                 } else {
                     const res = await API.miscs();
                     if (!live) return;
-                    setData(pickList(res, 'type'));
+                    setData(pickList(res, "type"));
                 }
             } catch (e) {
                 if (live) setErr(e);
@@ -86,13 +104,15 @@ export function useGetMiscs() {
             }
         })();
 
-        return () => { live = false; };
-    }, []);
+        return () => {
+            live = false;
+        };
+    }, [refreshIndex]);
 
-    return { data, loading, err};
+    return { data, loading, err, refetch };
 }
 
-export function useSaveCourse(){
+export function useSaveCourse() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -100,21 +120,21 @@ export function useSaveCourse(){
     async function save(course) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.saveCourse(course);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.saveCourse(course);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
+    }
     return { data, loading, err, save: save };
 }
 
-export function useSaveMisc(){
+export function useSaveMisc() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -159,14 +179,14 @@ export function useGetTeachers() {
                     setTeachers([]);
                 }
             } finally {
-                if(live) setLoading(false);
+                if (live) setLoading(false);
             }
         })();
         return () => { live = false; };
 
     }, []);
 
-    return {teachers, loading, err};
+    return { teachers, loading, err };
 
 }
 
@@ -383,7 +403,7 @@ export function useDeleteMiscEvent() {
     return { data, loading, err, remove };
 }
 
-export function useGetAllEvents(){
+export function useGetAllEvents() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -535,7 +555,7 @@ export function useSaveVacation() {
     return { data, loading, err, save };
 }
 
-export function useUpdateCourseEventTime(){
+export function useUpdateCourseEventTime() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -543,21 +563,21 @@ export function useUpdateCourseEventTime(){
     async function update(eventId, startTime, endTime) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.updateCourseEventTime(eventId, startTime, endTime);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.updateCourseEventTime(eventId, startTime, endTime);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
+    }
     return { data, loading, err, update };
 }
 
-export function useUpdateCourseEventEndTime(){
+export function useUpdateCourseEventEndTime() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -565,21 +585,21 @@ export function useUpdateCourseEventEndTime(){
     async function update(eventId, endTime) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.updateCourseEventEndTime(eventId, endTime);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.updateCourseEventEndTime(eventId, endTime);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
+    }
     return { data, loading, err, update };
 }
 
-export function useUpdateMiscEventTime(){
+export function useUpdateMiscEventTime() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -587,21 +607,21 @@ export function useUpdateMiscEventTime(){
     async function update(eventId, startTime, endTime) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.updateMiscEventTime(eventId, startTime, endTime);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.updateMiscEventTime(eventId, startTime, endTime);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
+    }
     return { data, loading, err, update };
 }
 
-export function useUpdateMiscEventEndTime(){
+export function useUpdateMiscEventEndTime() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
@@ -609,17 +629,17 @@ export function useUpdateMiscEventEndTime(){
     async function update(eventId, endTime) {
         setLoading(true);
         setErr(null);
-         try {
-                const res = await API.updateMiscEventEndTime(eventId, endTime);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-             setErr(e);
-             throw e;
-            } finally {
-             setLoading(false);
-            }
+        try {
+            const res = await API.updateMiscEventEndTime(eventId, endTime);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
+    }
     return { data, loading, err, update };
 }
 

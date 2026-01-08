@@ -1,7 +1,9 @@
+import React, { useState } from "react";
 import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
-import { useGetVacation } from "../hooks.js";
+import { useGetHolidays, useGetVacation } from "../hooks.js";
+import { useGetMiscs } from "../hooks.js";
 
 export default function RightSideBar({
                                          currentEvents,
@@ -12,11 +14,12 @@ export default function RightSideBar({
                                          listOfCategories,
                                          loadingCourses,
                                          holidayEvents,
-
+showRightSidebar,
                                      }) {
 
     const animatedComponents = makeAnimated();
 
+    const { data: fetchedMiscs } = useGetMiscs();
     const filteredEvents = currentEvents.filter(event => {
         if (selectedCategories.length === 0) return true;
         const eventCourseId = event.extendedProps?.courseId;
@@ -27,7 +30,7 @@ export default function RightSideBar({
     });
 
 
-    
+
     const { data: vacation = [] } = useGetVacation();
 
     const totalCount = listOfCategories.reduce((sum, course) => sum + course.event.length, 0);
@@ -49,7 +52,10 @@ export default function RightSideBar({
         )
     }
     return (
-        <div className='w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto'>
+        <div
+            className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 ${showRightSidebar ? "translate-x-0" : "translate-x-full"
+                }`}
+        >
             <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                     <input
