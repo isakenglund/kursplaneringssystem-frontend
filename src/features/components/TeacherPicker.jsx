@@ -11,7 +11,7 @@ export default function TeacherPicker({
                                           setSelectedTeachers,
                                       }) {
 
-    console.log("teachers in TeacherPicker:", teachers);
+    //console.log("teachers in TeacherPicker:", teachers);
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
     const isSelected = (teacher) => selectedTeachers.some((t) => t.id === teacher.id);

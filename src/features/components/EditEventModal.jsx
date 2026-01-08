@@ -14,7 +14,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
 
     useEffect(() => {
         if (event) {
-            console.log("event", event);
+            //console.log("event", event);
             setName(event.name ?? "");
             setDescription(event.description ?? "");
 
