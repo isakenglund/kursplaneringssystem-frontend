@@ -15,20 +15,21 @@ export default function CreateEvent({
                                         currentEvents,
                                         openModal,
                                         closeModal,
-                                        isModalOpen
+                                        isModalOpen,
+                                        setCourses,
+                                        courses,
+                                        miscs,
+                                        setMiscs,
                                     }) {
-    const {data: fetchedCourses} = useGetCourses();
-    const {data: fetchedMiscs} = useGetMiscs();
 
+                                        
     const {remove: deleteCourseEvent} = useDeleteCourseEvent();
     const {remove: deleteMiscEvent} = useDeleteMiscEvent();
 
     const {save: saveCourseEvent} = useSaveCourseEvent();
     const {save: saveMiscEvent} = useSaveMiscEvent();
 
-    const [courses, setCourses] = useState([]);
-    const [miscs, setMiscs] = useState([]);
-
+   
     const [categoryId, setCategoryId] = useState("");
     const [categoryType, setCategoryType] = useState("COURSE");
     const [categoryName, setCategoryName] = useState("");
@@ -45,29 +46,6 @@ export default function CreateEvent({
     const [showEditModal, setShowEditModal] = useState(false);
 
     const [showExpandedEvents, setShowExpandedEvents] = useState({});
-
-    // Load courses
-    useEffect(() => {
-        if (fetchedCourses) setCourses(fetchedCourses);
-
-        const defaultOpen = {};
-        fetchedCourses.forEach(course => {
-            defaultOpen[`course-${course.id}`] = true;
-        });
-
-        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
-    }, [fetchedCourses]);
-
-    useEffect(() => {
-        if (fetchedMiscs) setMiscs(fetchedMiscs);
-
-        const defaultOpen = {};
-        fetchedMiscs.forEach(misc => {
-            defaultOpen[`misc-${misc.id}`] = true;
-        });
-
-        setShowExpandedEvents(prev => ({ ...prev, ...defaultOpen }));
-    }, [fetchedMiscs]);
 
     const toggleEventSection = (sectionId) => {
         setShowExpandedEvents(prev => ({

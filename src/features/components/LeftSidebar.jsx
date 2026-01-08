@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
-
-
+import useGetCourses, { useGetMiscs, } from '../hooks.js'
+import { set } from "date-fns";
 
 export default function LeftSidebar({
     currentEvents,
@@ -14,8 +14,18 @@ export default function LeftSidebar({
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+   // const { data: courses = [], isLoading: loadingCourses, refetch: refetchCourses, } = ;
+    //const { data: miscs = [], isLoading: loadingMiscs, refetch: refetchMiscs, } = ;
 
- 
+    const { data: courses, refetch: refetchCourses } = useGetCourses();
+    const { data: miscs, refetch: refetchMiscs } = useGetMiscs();
+
+    function fetchCategories() {
+        refetchCourses();
+        refetchMiscs();
+    }
+
+
     useEffect(() => {
         let draggable = null;
 
@@ -33,15 +43,18 @@ export default function LeftSidebar({
         }
     }, []);
 
+
+
     return (
         <div
             className='w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto'>
 
             {isCategoryModalOpen && (
-                <CreateCategory 
-                    setIsCategoryModalOpen={setIsCategoryModalOpen} 
+                <CreateCategory
+                    setIsCategoryModalOpen={setIsCategoryModalOpen}
                     setVacationDate={setVacationDate}
-                    vacationDate={vacationDate}/>
+                    vacationDate={vacationDate}
+                    onCreated={fetchCategories} />
             )}
 
             <div className='demo-app-sidebar-section mb-8'>
@@ -57,6 +70,8 @@ export default function LeftSidebar({
                     closeModal={() => setIsModalOpen(false)}
                     isModalOpen={isModalOpen}
                     removeExternalEvent={removeExternalEvent}
+                    courses={courses}   // PASS FROM PARENT
+                    miscs={miscs}       // PASS FROM PARENT
                 />
 
             </div>
