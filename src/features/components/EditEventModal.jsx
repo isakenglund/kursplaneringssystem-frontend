@@ -1,7 +1,7 @@
 import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
-import { alertCustom } from "../functions/alertFunctions.jsx";
+import { alertCustom, confirmCustom } from "../functions/alertFunctions.jsx";
 import {useGetTeachers, useDeleteTeacher} from "../hooks.js";
 import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
@@ -12,13 +12,15 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
     const [description, setDescription] = useState("")
     //const [selectedTeachers, setSelectedTeachers] = useState([]);
     const {teachers, loading, err, refetch} = useGetTeachers();
-    const {removeTeacher} = useDeleteTeacher();
+    const {remove: removeTeacher} = useDeleteTeacher();
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
 
     const handleDeleteTeacher = async (teacherToDelete) => {
-        const confirmDelete = window.confirm(
+
+        const confirmDelete = await confirmCustom(
             `Är du säker på att du vill radera ${teacherToDelete.firstName} ${teacherToDelete.lastName} permanent?`
         );
+
 
         if (!confirmDelete) return;
 
@@ -31,7 +33,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
 
         } catch (error) {
             console.error("Kunde inte radera lärare:", error);
-            alert("Kunde inte radera läraren.");
+            await alertCustom("Kunde inte radera läraren.");
         }
     };
 

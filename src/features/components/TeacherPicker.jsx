@@ -29,6 +29,7 @@ export default function TeacherPicker({
     };
 
     const handleDeleteClick = (e, teacher) => {
+        e.preventDefault()
         e.stopPropagation();
         if (onDelete) {
             onDelete(teacher);
@@ -83,6 +84,7 @@ export default function TeacherPicker({
                                             <CheckIcon className="h-4 w-4 text-blue-600" aria-hidden="true" />
                                         </div>
                                         <button
+                                            type="button"
                                             onClick={(e) => handleDeleteClick(e, teacher)}
                                             className="hidden group-hover:block p-1 text-blue-400 hover:text-red-600 rounded"
                                             title="Radera lärare permanent"
@@ -115,6 +117,7 @@ export default function TeacherPicker({
                                         <span>{teacher.firstName} {teacher.lastName}</span>
 
                                         <button
+                                            type="button"
                                             onClick={(e) => handleDeleteClick(e, teacher)}
                                             className="text-gray-300 hover:text-red-500 p-1 rounded transition-colors"
                                             title="Radera lärare permanent"
