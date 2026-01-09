@@ -41,64 +41,61 @@ export default function LeftSidebar({
 
 
     useEffect(() => {
-        let draggable = null;
+        if (!showLeftSidebar) return;
 
-        if (draggableContainerRef.current) {
-            draggable = new Draggable(draggableContainerRef.current, {
-                itemSelector: '.fc-event-external',
-                eventData: function (eventEl) {
-                    return JSON.parse(eventEl.dataset.event);
-                }
-            });
-        }
+        const el = draggableContainerRef.current;
+        if (!el) return;
 
-        return () => {
-            if (draggable) draggable.destroy();
-        }
-    }, []);
+        const draggable = new Draggable(el, {
+            itemSelector: ".fc-event-external",
+            eventData: (eventEl) => JSON.parse(eventEl.dataset.event),
+        });
+
+        return () => draggable.destroy();
+    }, [showLeftSidebar, courses, miscs]);
 
 
-    if(!showLeftSidebar){return null}
+    if (!showLeftSidebar) { return null }
 
 
     return (
-       <div className="w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto">
+        <div className="w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto">
 
-                {isCategoryModalOpen && (
-                    <CreateCategory
-                        setIsCategoryModalOpen={setIsCategoryModalOpen}
-                        setVacationDate={setVacationDate}
-                        vacationDate={vacationDate}
-                        onCreated={fetchCategories} />
-                )}
+            {isCategoryModalOpen && (
+                <CreateCategory
+                    setIsCategoryModalOpen={setIsCategoryModalOpen}
+                    setVacationDate={setVacationDate}
+                    vacationDate={vacationDate}
+                    onCreated={fetchCategories} />
+            )}
 
-                <div className='demo-app-sidebar-section mb-8'>
-                    <button
-                        className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
-                        onClick={() => setIsCategoryModalOpen(true)}>Skapa kategori
-                    </button>
+            <div className='demo-app-sidebar-section mb-8'>
+                <button
+                    className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
+                    onClick={() => setIsCategoryModalOpen(true)}>Skapa kategori
+                </button>
 
-                    <CreateEvent
-                        draggableContainerRef={draggableContainerRef}
-                        currentEvents={currentEvents}
-                        openModal={() => setIsModalOpen(true)}
-                        closeModal={() => setIsModalOpen(false)}
-                        isModalOpen={isModalOpen}
-                        removeExternalEvent={removeExternalEvent}
-                        courses={courses}
-                        miscs={miscs}
-                        setCourses={setCourses}
-                        setMiscs={setMiscs}
-                        selectedCategories={selectedCategories}
-                        refetchMiscs={refetchMiscs}
-                        refetchCourses={refetchCourses}
-                        onCategoryUpdate={onCategoryUpdate}
-                        onCategoryDelete={onCategoryDelete}
-                    />
+                <CreateEvent
+                    draggableContainerRef={draggableContainerRef}
+                    currentEvents={currentEvents}
+                    openModal={() => setIsModalOpen(true)}
+                    closeModal={() => setIsModalOpen(false)}
+                    isModalOpen={isModalOpen}
+                    removeExternalEvent={removeExternalEvent}
+                    courses={courses}
+                    miscs={miscs}
+                    setCourses={setCourses}
+                    setMiscs={setMiscs}
+                    selectedCategories={selectedCategories}
+                    refetchMiscs={refetchMiscs}
+                    refetchCourses={refetchCourses}
+                    onCategoryUpdate={onCategoryUpdate}
+                    onCategoryDelete={onCategoryDelete}
+                />
 
-                </div>
             </div>
-       
-        
+        </div>
+
+
     )
 }
