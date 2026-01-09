@@ -227,131 +227,156 @@ const {teachers, loading, err, refetch} = useGetTeachers();
     // Unified event renderer (edit + delete + drag + disabled)
     // ------------------------------------------------------------
     function renderEvents(eventsArray, parentCategory, type) {
-        if (!eventsArray || eventsArray.length === 0)
-            return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
-        return (
-            <div className="space-y-1">
-                {eventsArray.map((event, index) => {
-                    const disabled = isEventOnCalendar(event.id);
-                    const filtered = isEventFiltered(parentCategory.id)
+    if (!eventsArray || eventsArray.length === 0)
+        return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
 
-                    const isDraggable = !disabled && !filtered;
+    return (
+        <div className="space-y-1">
+            {eventsArray.map((event, index) => {
+                const disabled = isEventOnCalendar(event.id);
+                const filtered = isEventFiltered(parentCategory.id);
 
-                    return (
-                        <div
-                            key={event.id}
-                            {...(!disabled && {
-                                "data-event": JSON.stringify({
-                                    id: event.id,
-                                    title: event.name,
-                                    start: event.startDate || event.startTime,
-                                    end: event.endDate || event.endTime,
-                                    courseId: type === "COURSE" ? parentCategory.id : undefined,
-                                    miscId: type !== "COURSE" ? parentCategory.id : undefined,
-                                    color: parentCategory.colorHex || "#3b82f6",
-                                    teachers: event.teachers,
-                                })
-                            })}
-                            style={{borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}`}}
-                            className={`p-3 rounded border shadow-sm text-sm font-medium flex justify-between items-center transition
-                                ${isDraggable ? "fc-event-external" : ""}
-                                ${
-                                disabled || filtered
-                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
-                                    : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700 cursor-move"
+                const isDraggable = !disabled && !filtered;
+
+                return (
+                    <div
+                        key={event.id}
+                        {...(isDraggable && {
+                            "data-event": JSON.stringify({
+                                id: event.id,
+                                title: event.name,
+                                start: event.startDate || event.startTime,
+                                end: event.endDate || event.endTime,
+                                courseId: type === "COURSE" ? parentCategory.id : undefined,
+                                miscId: type !== "COURSE" ? parentCategory.id : undefined,
+                                color: parentCategory.colorHex || "#3b82f6",
+                                teachers: event.teachers,
+                            }),
+                        })}
+                        style={{ borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}` }}
+                        className={`p-3 rounded border shadow-sm text-sm font-medium flex flex-col transition
+          ${isDraggable ? "fc-event-external cursor-move" : "cursor-not-allowed"}
+          ${disabled || filtered
+                                ? "bg-gray-200 text-gray-400"
+                                : "bg-white border-gray-200 hover:bg-blue-50 border-l-4 border-l-blue-500 text-gray-700"
                             }`}
-                        >
-                            <div className="flex items-center w-full">
-                                <div className="min-w-0 flex-1">
-                                    <span className="block truncate text-sm font-bold text-black-600" title={event.name}>
-                                        {index + 1}. {event.name}
-                                    </span>
+                    >
+                        <div className="flex items-center w-full">
+                            <div className="min-w-0 flex-1">
+                                <span
+                                    className="block truncate text-sm font-bold text-black-600"
+                                    title={event.name}
+                                >
+                                    {index + 1}. {event.name}
+                                </span>
+                            </div>
+
+                            {/* Allow edit/delete when NOT disabled (even if filtered) */}
+                            {!disabled && (
+                                <div className="flex gap-2 flex-shrink-0 ml-auto">
+                                    {/* EDIT */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditEventData({ ...event, categoryId: parentCategory, type });
+                                            setShowEditModal(true);
+                                        }}
+                                        className="w-5 h-5 text-gray-700 hover:text-green-500"
+                                        type="button"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            strokeWidth={1.5}
+                                            stroke="currentColor"
+                                            className="w-full h-full"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"
+                                            />
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                                            />
+                                        </svg>
+                                    </button>
+
+                                    {/* DELETE */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveEvent(parentCategory.id, event.id, type);
+                                        }}
+                                        className="w-5 h-5 text-gray-700 hover:text-red-500"
+                                        type="button"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            strokeWidth={1.5}
+                                            stroke="currentColor"
+                                            className="w-full h-full"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                            />
+                                        </svg>
+                                    </button>
                                 </div>
-
-                                {!disabled && (
-                                    <div className="flex gap-2 flex-shrink-0 ml-auto">
-                                        {/* EDIT */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setEditEventData({ ...event, categoryId: parentCategory, type: type });
-                                                setShowEditModal(true);
-                                            }}
-                                            className="w-5 h-5 text-gray-700 hover:text-green-500"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" strokeWidth={1.5}
-                                                stroke="currentColor" className="w-full h-full">
-                                                <path strokeLinecap="round" strokeLinejoin="round"
-                                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round"
-                                                    d="M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                            </svg>
-                                        </button>
-
-                                        {/* DELETE */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRemoveEvent(parentCategory.id, event.id, type);
-                                            }}
-                                            className="w-5 h-5 text-gray-700 hover:text-red-500"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" strokeWidth={1.5}
-                                                stroke="currentColor" className="w-full h-full">
-                                                <path strokeLinecap="round" strokeLinejoin="round"
-                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-
-                                {event.teachers?.length > 0 && (
-                                    <div className="pt-2 text-xs text-gray-500 pl-2">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleTeachers(event.id);
-                                            }}
-                                            className="font-bold flex items-center gap-1"
-                                        >
-                                            Lärare
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                                className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${openTeachers[event.id] ? "rotate-90" : ""}`}
-                                            >
-                                                <path fillRule="evenodd"
-                                                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                                                    clipRule="evenodd" />
-                                            </svg>
-                                        </button>
-
-                                        {openTeachers[event.id] && (
-                                            <div className="mt-1 flex flex-col">
-                                                {event.teachers.map(t => (
-                                                    <div key={t.id} className="pl-6">
-                                                        {t.firstName} {t.lastName}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                            </div>
-
+                            )}
                         </div>
-                    );
-                })}
-            </div>
-        );
-    }
+
+                        {/* Teachers under the event title, still clickable */}
+                        {event.teachers?.length > 0 && (
+                            <div className="pt-2 text-xs text-gray-500 pl-2">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleTeachers(event.id);
+                                    }}
+                                    className="font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                                >
+                                    Lärare
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${openTeachers[event.id] ? "rotate-90" : ""
+                                            }`}
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                </button>
+
+                                {openTeachers[event.id] && (
+                                    <div className="mt-1 flex flex-col">
+                                        {event.teachers.map((t) => (
+                                            <div key={t.id} className="pl-6">
+                                                {t.firstName} {t.lastName}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
 
     return (
         <div>
