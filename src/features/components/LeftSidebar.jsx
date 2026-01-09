@@ -87,6 +87,7 @@ export default function LeftSidebar({
                         miscs={miscs}
                         setCourses={setCourses}
                         setMiscs={setMiscs}
+                        selectedCategories={selectedCategories}
                         refetchMiscs={refetchMiscs}
                         refetchCourses={refetchCourses}
                     />
