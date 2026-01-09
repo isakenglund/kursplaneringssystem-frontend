@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
-import { alertCustom } from "../functions/alertFunctions.jsx";
+import { confirmCustom, alertCustom } from "../functions/alertFunctions.jsx";
 import useGetCourses, {
     useDeleteCourseEvent,
     useSaveCourseEvent,
@@ -119,7 +119,8 @@ export default function CreateEvent({
     }
 
     async function handleRemoveCategory(id, type) {
-        if (!confirm("Är du säker på att du vill ta bort denna kategori och alla dess event?")) {
+        const isConfirmed = await confirmCustom("Är du säker på att du vill ta bort denna kategori och alla dess event?")
+        if (!isConfirmed) {
             return;
         }
 
@@ -133,7 +134,7 @@ export default function CreateEvent({
             }
         } catch (error) {
             console.error("Kunde inte ta bort kategorin", error);
-            alert("Fel vid borttagning");
+            await alertCustom("Fel vid borttagning");
         }
     }
 
@@ -167,7 +168,7 @@ export default function CreateEvent({
             setEditEventData(null);
         } catch (error) {
             console.error("Fel vid uppdatering av kategori: ", error);
-            alert("Det gick inte att spara ändringarna.");
+            await alertCustom("Det gick inte att spara ändringarna.");
         }
     }
 

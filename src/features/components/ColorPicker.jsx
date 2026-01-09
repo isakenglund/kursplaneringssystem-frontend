@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { HexColorPicker } from "react-colorful";
 
-export default function ColorPicker({ handleColorHex }) {
-  const [color, setColor] = useState("#0077ff");
+export default function ColorPicker({ handleColorHex, categoryToEdit }) {
+  const [color, setColor] = useState(categoryToEdit?.colorHex ||"#0077ff");
   const [showPicker, setShowPicker] = useState(false);
 
   const pickerRef = useRef(null);
