@@ -3,7 +3,6 @@ import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
 import useGetCourses, { useGetMiscs, } from '../hooks.js'
-import { set } from "date-fns";
 
 export default function LeftSidebar({
     currentEvents,
@@ -63,7 +62,8 @@ export default function LeftSidebar({
 
 
     return (
-        <div className={`h-full overflow-hidden transition-[width] duration-300 ${showLeftSidebar ? "w-96" : "w-0"}`} >
+       <div className="w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto">
+
                 {isCategoryModalOpen && (
                     <CreateCategory
                         setIsCategoryModalOpen={setIsCategoryModalOpen}
@@ -89,6 +89,7 @@ export default function LeftSidebar({
                         miscs={miscs}
                         setCourses={setCourses}
                         setMiscs={setMiscs}
+                        selectedCategories={selectedCategories}
                         refetchMiscs={refetchMiscs}
                         refetchCourses={refetchCourses}
                         onCategoryUpdate={onCategoryUpdate}
@@ -96,12 +97,8 @@ export default function LeftSidebar({
                     />
 
                 </div>
-                <div
-                className={`w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto transition-transform duration-300 ${showLeftSidebar ? "translate-x-0" : "-translate-x-full"
-                    }`}
-            >
             </div>
-        </div>
+       
         
     )
 }

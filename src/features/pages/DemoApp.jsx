@@ -511,7 +511,8 @@ export default function DemoApp() {
                 onCategoryDelete={handleCleanupEvents}
             />
 
-            <div className='demo-app-main flex-grow p-4'>
+            <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>
+
                 <div className="flex justify-between mb-2 w-full">
                     <button
                         onClick={() => setShowLeftSidebar(prev => !prev)}
@@ -682,6 +683,7 @@ export default function DemoApp() {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
                 />
+                
             </div>
 
             <RightSideBar
