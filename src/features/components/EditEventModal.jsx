@@ -2,15 +2,14 @@ import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
-import {useGetTeachers} from "../hooks.js";
 
-export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved ,}) {
+
+export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved , teachers, loading, err, refetch}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("")
-    //const [selectedTeachers, setSelectedTeachers] = useState([]);
-    const {teachers, loading, err, refetch} = useGetTeachers();
+
 
     useEffect(() => {
         if (event) {

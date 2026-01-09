@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
-import useGetCourses, { useGetMiscs, } from '../hooks.js'
 
 export default function LeftSidebar({
     currentEvents,
@@ -12,7 +11,15 @@ export default function LeftSidebar({
     showLeftSidebar,
     selectedCategories,
     onCategoryUpdate,
-    onCategoryDelete
+    onCategoryDelete,
+    teachers,
+    loading,
+    err,
+    coursesData,
+    miscsData,
+    refetchCourses,
+    refetchMiscs,
+    refetchTeachers
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -20,8 +27,7 @@ export default function LeftSidebar({
     // const { data: courses = [], isLoading: loadingCourses, refetch: refetchCourses, } = ;
     //const { data: miscs = [], isLoading: loadingMiscs, refetch: refetchMiscs, } = ;
 
-    const { data: coursesData, refetch: refetchCourses } = useGetCourses();
-    const { data: miscsData, refetch: refetchMiscs } = useGetMiscs();
+    
 
     const [courses, setCourses] = useState([]);
     const [miscs, setMiscs] = useState([]);
@@ -91,6 +97,10 @@ export default function LeftSidebar({
                     refetchCourses={refetchCourses}
                     onCategoryUpdate={onCategoryUpdate}
                     onCategoryDelete={onCategoryDelete}
+                    teachers={teachers}
+                    loading={loading}
+                    err={err}
+                    refetch={refetchTeachers}
                 />
 
             </div>

@@ -3,17 +3,17 @@ import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
 import { confirmCustom, alertCustom } from "../functions/alertFunctions.jsx";
-import useGetCourses, {
+import  {
     useDeleteCourseEvent,
     useSaveCourseEvent,
-    useGetMiscs,
+
     useSaveMiscEvent,
     useDeleteMiscEvent,
     useDeleteCourse,
     useDeleteMisc,
     useUpdateCourse,
     useUpdateMisc,
-    useGetTeachers,
+
 } from "../hooks.js";
 
 export default function CreateEvent({
@@ -30,11 +30,13 @@ export default function CreateEvent({
                                         refetchCourses,
     refetchMiscs,
     onCategoryUpdate,
-    onCategoryDelete
+    onCategoryDelete,
+    teachers, 
+    loading, 
+    err,
+    refetch
 }) {
-    const {data: fetchedCourses} = useGetCourses();
-    const {data: fetchedMiscs} = useGetMiscs();
-const {teachers, loading, err, refetch} = useGetTeachers();
+
 
     const {remove: deleteCourse} = useDeleteCourse();
     const {remove: deleteMisc} = useDeleteMisc();
@@ -475,7 +477,10 @@ const {teachers, loading, err, refetch} = useGetTeachers();
                             )
                         );
                     }}
-
+                    teachers={teachers}
+                    loading={loading}
+                    err={err}
+                    refetch={refetch}
                 />
             )}
 
