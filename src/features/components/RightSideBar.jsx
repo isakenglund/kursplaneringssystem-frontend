@@ -55,6 +55,7 @@ showRightSidebar,
     if(!showRightSidebar){return null}
 
     return (
+        <div className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-96" : "w-0"}`} >
         <div
             className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 
             ${showRightSidebar ? "translate-x-0" : "translate-x-full"
@@ -87,13 +88,13 @@ showRightSidebar,
                 />
             </div>
 
-            <div className='demo-app-sidebar-section'>
-                <h2
-                    className={`text-lg font-bold mb-3 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
-                        }`}
-                >
-                    Aktiva i kalendern {activeCount} / {totalCount}
-                </h2>
+                <div className='demo-app-sidebar-section'>
+                    <h2
+                        className={`text-lg font-bold mb-3 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
+                            }`}
+                    >
+                        Aktiva i kalendern {activeCount} / {totalCount}
+                    </h2>
 
 
 
@@ -103,6 +104,7 @@ showRightSidebar,
                     ))}
                 </ul>
             </div>
+        </div>
         </div>
     )
 }

@@ -2,17 +2,19 @@ import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
+import {useGetTeachers} from "../hooks.js";
 
-export default function EditEventModal({ event, onClose, onSaved ,}) {
+export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved ,}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("")
-    const [selectedTeachers, setSelectedTeachers] = useState([]);
+    //const [selectedTeachers, setSelectedTeachers] = useState([]);
+    const {teachers, loading, err, refetch} = useGetTeachers();
 
     useEffect(() => {
         if (event) {
-            console.log("event", event);
+            //console.log("event", event);
             setName(event.name ?? "");
             setDescription(event.description ?? "");
 
@@ -37,7 +39,7 @@ export default function EditEventModal({ event, onClose, onSaved ,}) {
             teachers: selectedTeachers,
         }
 
-        console.log(courseEventToSave);
+       // console.log(courseEventToSave);
 
         try {
             const updatedEvent = await save(courseEventToSave);
@@ -77,13 +79,16 @@ export default function EditEventModal({ event, onClose, onSaved ,}) {
                             ))}
                         </label>
                         <TeacherPicker
+                        teachers={teachers}
+                            loading={loading}
+                            err={err}
                             selectedTeachers={selectedTeachers}
                             setSelectedTeachers={setSelectedTeachers}
                         />
 
                     </div>
                     <div className="flex justify-end gap-2 mt-4">
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" onClick={refetch}>
                             Spara
                         </button>
                         <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">

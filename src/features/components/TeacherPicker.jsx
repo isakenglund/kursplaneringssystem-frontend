@@ -1,14 +1,17 @@
 import {useEffect, useRef, useState} from "react";
-import {useGetTeachers} from "../hooks.js";
+
 import { CheckIcon, UserPlusIcon } from "@heroicons/react/20/solid";
 
 
 export default function TeacherPicker({
+                             teachers,
+                            loading,
+                            err,
                                           selectedTeachers,
                                           setSelectedTeachers,
                                       }) {
 
-    const {teachers, loading, err} = useGetTeachers();
+    //console.log("teachers in TeacherPicker:", teachers);
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
     const isSelected = (teacher) => selectedTeachers.some((t) => t.id === teacher.id);
@@ -21,7 +24,6 @@ export default function TeacherPicker({
             setSelectedTeachers((prev) => [...prev, teacherToToggle]);
         }
     };
-
 
     useEffect(() => {
         const handleClickOutside = (e) => {

@@ -12,7 +12,8 @@ import useGetCourses, {
     useDeleteCourse,
     useDeleteMisc,
     useUpdateCourse,
-    useUpdateMisc
+    useUpdateMisc,
+    useGetTeachers,
 } from "../hooks.js";
 import ButtonEdit from "./ButtonEdit.jsx"
 import ButtonRemove from "./ButtonRemove.jsx";
@@ -31,11 +32,13 @@ export default function CreateEvent({
     courses,
     miscs,
     setMiscs,
-                                        selectedCategories
-                                    }) {
+                                        selectedCategories,
+                                        refetchCourses,
+    refetchMiscs,
+}) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
-const {remove: deleteCourse} = useDeleteCourse();
+const {teachers, loading, err, refetch} = useGetTeachers();const {remove: deleteCourse} = useDeleteCourse();
     const {remove: deleteMisc} = useDeleteMisc();    const {remove: deleteCourseEvent} = useDeleteCourseEvent();
     const {remove: deleteMiscEvent} = useDeleteMiscEvent();
     const {update: updateCourse } = useUpdateCourse();
@@ -323,6 +326,9 @@ const {remove: deleteCourse} = useDeleteCourse();
                                         <TeacherPicker
                                             selectedTeachers={selectedTeachers}
                                             setSelectedTeachers={setSelectedTeachers}
+                                            teachers={teachers}
+                                            loading={loading}
+                                            err={err}
                                         />
                                     </div>
                                 )}
@@ -347,17 +353,21 @@ const {remove: deleteCourse} = useDeleteCourse();
             {showEditModal && (
                 <EditEventModal
                     selectedTeachers={selectedTeachers}
+                    setSelectedTeachers={setSelectedTeachers}
                     event={editEventData}
                     onClose={() => setShowEditModal(false)}
                     onSaved={(updatedEvent) => {
                         const courseId = editEventData.categoryId;
+                        refetchMiscs();
+                        refetchCourses();
+
                         setCourses(prev =>
                             prev.map(course =>
                                 String(course.id) === String(courseId)
                                     ? {
                                         ...course,
                                         event: course.event.map(ev =>
-                                            ev.id === updatedEvent.id ? {...ev, ...updatedEvent} : ev
+                                            ev.id === updatedEvent.id ? { ...ev, ...updatedEvent , teachers: updatedEvent.teachers??[]} : ev
                                         ),
                                     }
                                     : course
