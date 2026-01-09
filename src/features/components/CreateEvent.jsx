@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
-import { alertCustom } from "../functions/alertFunctions.jsx";
+import { confirmCustom, alertCustom } from "../functions/alertFunctions.jsx";
 import useGetCourses, {
     useDeleteCourseEvent,
     useSaveCourseEvent,
@@ -35,6 +35,8 @@ export default function CreateEvent({
                                         selectedCategories,
                                         refetchCourses,
     refetchMiscs,
+    onCategoryUpdate,
+    onCategoryDelete
 }) {
     const {data: fetchedCourses} = useGetCourses();
     const {data: fetchedMiscs} = useGetMiscs();
@@ -164,7 +166,8 @@ const {teachers, loading, err, refetch} = useGetTeachers();const {remove: delete
     }
 
     async function handleRemoveCategory(id, type) {
-        if (!confirm("Är du säker på att du vill ta bort denna kategori och alla dess event?")) {
+        const isConfirmed = await confirmCustom("Är du säker på att du vill ta bort denna kategori och alla dess event?")
+        if (!isConfirmed) {
             return;
         }
 
@@ -176,9 +179,14 @@ const {teachers, loading, err, refetch} = useGetTeachers();const {remove: delete
                 await deleteMisc(id);
                 setMiscs(prev => prev.filter(m => m.id !== id));
             }
+
+            if (onCategoryDelete) {
+                onCategoryDelete(id, type);
+            }
+
         } catch (error) {
             console.error("Kunde inte ta bort kategorin", error);
-            alert("Fel vid borttagning");
+            await alertCustom("Fel vid borttagning");
         }
     }
 
@@ -204,11 +212,15 @@ const {teachers, loading, err, refetch} = useGetTeachers();const {remove: delete
                 ));
             }
 
+            if(onCategoryUpdate) {
+                onCategoryUpdate(updatedData);
+            }
+
             setShowEditCategoryModal(false);
             setEditEventData(null);
         } catch (error) {
             console.error("Fel vid uppdatering av kategori: ", error);
-            alert("Det gick inte att spara ändringarna.");
+            await alertCustom("Det gick inte att spara ändringarna.");
         }
     }
 

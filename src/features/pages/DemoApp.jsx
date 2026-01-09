@@ -35,8 +35,8 @@ export default function DemoApp() {
     const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear() + 1]);
     const { remove: deleteVacation } = useDeleteVacation();
 
-    const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs} = useGetMiscs();
+    const { data: listOfCourses, loading: loadingCourses, setData: setCourses } = useGetCourses();
+    const { data: listOfMiscs, loading: loadingMiscs, setData: setMiscs} = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -87,7 +87,6 @@ export default function DemoApp() {
         return { holidayEvents: events, holidaySet: set };
     }, [holidays, visibleYears]);
 
-
     // vacations = [{ id: 1, date: "2025-12-25" }, { id: 2, date: "2025-12-26" }]
     const { vacationEvents, vacationSet } = useMemo(() => {
         if (!vacations || vacations.length === 0)
@@ -115,7 +114,6 @@ export default function DemoApp() {
 
         return { vacationEvents: events, vacationSet: set };
     }, [vacations]);
-
 
     const listOfPersistantEvents = useMemo(() => {
         // Flatten course events
@@ -197,6 +195,27 @@ export default function DemoApp() {
         }
     }
 
+    const handleCategoryUpdate = (updatedCategory) => {
+        const type = (updatedCategory.type || "").toUpperCase();
+
+        if(type === "COURSE") {
+            setCourses(prev => prev.map(c =>
+                c.id === updatedCategory.id ? { ...c, ...updatedCategory } : c
+            ));
+        } else {
+            setMiscs(prev => prev.map(m =>
+                m.id === updatedCategory.id ? { ...m, ...updatedCategory } : m
+            ));
+        }
+    };
+
+    const handleCleanupEvents = (deletedId, type) => {
+        if (type === "COURSE") {
+            setCourses(prev => prev.filter(c => c.id !== deletedId));
+        } else {
+            setMiscs(prev => prev.filter(m => m.id !== deletedId));
+        }
+    }
 
     const handleCustomDateChange = (direction) => {
 
@@ -473,8 +492,6 @@ export default function DemoApp() {
         }
     }
 
-
-
     function handleEvents(events) {
         setCurrentEvents(events)
     }
@@ -490,6 +507,8 @@ export default function DemoApp() {
                 vacationDate={vacationDate}
                 showLeftSidebar={showLeftSidebar}
                 selectedCategories={selectedCategories}
+                onCategoryUpdate={handleCategoryUpdate}
+                onCategoryDelete={handleCleanupEvents}
             />
 
             <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>
@@ -696,5 +715,3 @@ function renderEventContent(eventInfo) {
         </>
     );
 }
-
-

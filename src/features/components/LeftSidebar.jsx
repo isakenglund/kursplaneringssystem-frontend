@@ -10,7 +10,9 @@ export default function LeftSidebar({
     setVacationDate,
     vacationDate,
     showLeftSidebar,
-    selectedCategories
+    selectedCategories,
+    onCategoryUpdate,
+    onCategoryDelete
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -90,6 +92,8 @@ export default function LeftSidebar({
                         selectedCategories={selectedCategories}
                         refetchMiscs={refetchMiscs}
                         refetchCourses={refetchCourses}
+                        onCategoryUpdate={onCategoryUpdate}
+                        onCategoryDelete={onCategoryDelete}
                     />
 
                 </div>

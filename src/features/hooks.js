@@ -62,7 +62,7 @@ export default function useGetCourses() {
         };
     }, [refreshIndex]); // refetch triggers this
 
-    return {data, loading, err, refetch };
+    return {data, loading, err, refetch, setData };
 }
 
 
@@ -108,7 +108,7 @@ export function useGetMiscs() {
         };
     }, [refreshIndex]);
 
-    return { data, loading, err, refetch };
+    return { data, loading, err, refetch, setData };
 }
 
 export function useSaveCourse() {
