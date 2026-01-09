@@ -2,7 +2,7 @@ import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
-import {useGetTeachers} from "../hooks.js";
+import {useGetTeachers, useDeleteTeacher} from "../hooks.js";
 import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
 export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved ,}) {
@@ -12,7 +12,28 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
     const [description, setDescription] = useState("")
     //const [selectedTeachers, setSelectedTeachers] = useState([]);
     const {teachers, loading, err, refetch} = useGetTeachers();
+    const {removeTeacher} = useDeleteTeacher();
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
+
+    const handleDeleteTeacher = async (teacherToDelete) => {
+        const confirmDelete = window.confirm(
+            `Är du säker på att du vill radera ${teacherToDelete.firstName} ${teacherToDelete.lastName} permanent?`
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            await removeTeacher(teacherToDelete.id);
+
+            setSelectedTeachers((prev) => prev.filter(t => t.id !== teacherToDelete.id));
+
+            await refetch();
+
+        } catch (error) {
+            console.error("Kunde inte radera lärare:", error);
+            alert("Kunde inte radera läraren.");
+        }
+    };
 
     const handleTeacherCreated = async (newTeacher) => {
         setSelectedTeachers((prev) => [...prev, newTeacher]);
@@ -96,6 +117,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
                                 selectedTeachers={selectedTeachers}
                                 setSelectedTeachers={setSelectedTeachers}
                                 onCreate={() => setIsCreateTeacherModalOpen(true)}
+                                onDelete={handleDeleteTeacher}
                             />
                         </div>
 

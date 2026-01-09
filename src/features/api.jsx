@@ -234,6 +234,10 @@ export const API = {
         })
     },),
 
+    deletePerson: (personId) => api(`/persons/${personId}`, {
+        method: "DELETE"
+    }),
+
 };
 
 
