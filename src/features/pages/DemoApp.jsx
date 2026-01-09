@@ -27,6 +27,7 @@ export default function DemoApp() {
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
     const { data: allCategories } = useGetAllCategories();
+    
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -38,8 +39,7 @@ export default function DemoApp() {
 
     const { data: listOfCourses, loading: loadingCourses, setData: setCourses, refetch: refetchCourses} = useGetCourses();
     const { data: listOfMiscs, loading: loadingMiscs, setData: setMiscs, refetch: refetchMiscs} = useGetMiscs();
-    const { data: teachers, loading, err, refetch: refetchTeachers} = useGetTeachers();
-
+    const { teachers, loading, err, refetch: refetchTeachers} = useGetTeachers();;
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
