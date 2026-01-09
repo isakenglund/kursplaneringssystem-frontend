@@ -28,6 +28,7 @@ export default function CreateEvent({
     selectedCategories,
     refetchCourses,
     refetchMiscs,
+    onCategoryUpdate
 }) {
     const { data: fetchedCourses } = useGetCourses();
     const { data: fetchedMiscs } = useGetMiscs();
@@ -156,6 +157,10 @@ export default function CreateEvent({
                         ? { ...m, ...updatedData }
                         : m
                 ));
+            }
+
+            if(onCategoryUpdate) {
+                onCategoryUpdate(updatedData);
             }
 
             setShowEditCategoryModal(false);

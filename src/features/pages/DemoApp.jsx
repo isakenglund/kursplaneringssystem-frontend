@@ -35,8 +35,8 @@ export default function DemoApp() {
     const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear() + 1]);
     const { remove: deleteVacation } = useDeleteVacation();
 
-    const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs} = useGetMiscs();
+    const { data: listOfCourses, loading: loadingCourses, setData: setCourses } = useGetCourses();
+    const { data: listOfMiscs, loading: loadingMiscs, setData, setMiscs} = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -197,6 +197,19 @@ export default function DemoApp() {
         }
     }
 
+    const handleCategoryUpdate = (updatedCategory) => {
+        const type = (updatedCategory.type || "").toUpperCase();
+
+        if(type === "COURSE") {
+            setCourses(prev => prev.map(c =>
+                c.id === updatedCategory.id ? { ...c, ...updatedCategory } : c
+            ));
+        } else {
+            setMiscs(prev => prev.map(m =>
+                m.id === updatedCategory.id ? { ...m, ...updatedCategory } : m
+            ));
+        }
+    };
 
     const handleCustomDateChange = (direction) => {
 
@@ -490,6 +503,7 @@ export default function DemoApp() {
                 vacationDate={vacationDate}
                 showLeftSidebar={showLeftSidebar}
                 selectedCategories={selectedCategories}
+                onCategoryUpdate={handleCategoryUpdate}
             />
 
             <div className='demo-app-main flex-grow p-4'>
