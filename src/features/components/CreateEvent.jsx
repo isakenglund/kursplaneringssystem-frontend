@@ -28,7 +28,8 @@ export default function CreateEvent({
     selectedCategories,
     refetchCourses,
     refetchMiscs,
-    onCategoryUpdate
+    onCategoryUpdate,
+    onCategoryDelete
 }) {
     const { data: fetchedCourses } = useGetCourses();
     const { data: fetchedMiscs } = useGetMiscs();
@@ -132,6 +133,11 @@ export default function CreateEvent({
                 await deleteMisc(id);
                 setMiscs(prev => prev.filter(m => m.id !== id));
             }
+
+            if (onCategoryDelete) {
+                onCategoryDelete(id, type);
+            }
+
         } catch (error) {
             console.error("Kunde inte ta bort kategorin", error);
             await alertCustom("Fel vid borttagning");

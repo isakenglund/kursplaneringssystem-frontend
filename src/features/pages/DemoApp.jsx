@@ -209,6 +209,14 @@ export default function DemoApp() {
         }
     };
 
+    const handleCleanupEvents = (deletedId, type) => {
+        if (type === "COURSE") {
+            setCourses(prev => prev.filter(c => c.id !== deletedId));
+        } else {
+            setMiscs(prev => prev.filter(m => m.id !== deletedId));
+        }
+    }
+
     const handleCustomDateChange = (direction) => {
 
         const calendarApi = calendarRef.current.getApi();
@@ -500,6 +508,7 @@ export default function DemoApp() {
                 showLeftSidebar={showLeftSidebar}
                 selectedCategories={selectedCategories}
                 onCategoryUpdate={handleCategoryUpdate}
+                onCategoryDelete={handleCleanupEvents}
             />
 
             <div className='demo-app-main flex-grow p-4'>
@@ -704,5 +713,3 @@ function renderEventContent(eventInfo) {
         </>
     );
 }
-
-
