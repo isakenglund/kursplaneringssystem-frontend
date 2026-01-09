@@ -5,6 +5,7 @@ export const ALERT_TYPES = {
     CONFIRM: "confirm",
 };
 
+
 export default function AlertModal({ alertData, onClose, onResult }) {
     if (!alertData) return null;
 

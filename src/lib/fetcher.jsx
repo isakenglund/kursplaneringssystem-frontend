@@ -13,6 +13,9 @@ export async function api(path, init = {}) {
         const text = await res.text();
         throw new Error(`${res.status} ${res.statusText}: ${text.slice(0,120)}`);
     }
+    if(res.status === 204) {
+        return null;
+    }
     if (!ct.includes('application/json')) {
         const text = await res.text();
         throw new Error(`Expected JSON but got ${ct}. First 120 chars: ${text.slice(0,120)}`);
