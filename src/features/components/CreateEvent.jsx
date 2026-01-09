@@ -81,6 +81,8 @@ const {teachers, loading, err, refetch} = useGetTeachers();const {remove: delete
 
     useEffect(() => {
         if (fetchedMiscs) setMiscs(fetchedMiscs);
+    }, [fetchedMiscs]); // Stänger useEffect här
+
     const [openTeachers, setOpenTeachers] = useState({});
 
     const toggleTeachers = (eventId) => {
