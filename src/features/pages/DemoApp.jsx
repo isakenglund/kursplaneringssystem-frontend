@@ -36,7 +36,7 @@ export default function DemoApp() {
     const { remove: deleteVacation } = useDeleteVacation();
 
     const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs} = useGetMiscs();
+    const { data: listOfMiscs } = useGetMiscs();
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -232,6 +232,8 @@ export default function DemoApp() {
     async function validateEventDrop(info) {
         if (!info.event.extendedProps) return true;
 
+    
+
         const movedEventId = parseInt(info.event.id, 10);
         const isCourseEvent = !!info.event.extendedProps.courseId;
         const isMiscEvent = !!info.event.extendedProps.miscId;
@@ -239,10 +241,27 @@ export default function DemoApp() {
 
         let eventList, currentIndex;
 
+        const calendar = info.view.calendar;
+        const movedEventStart = info.event.start;
+        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+
         if (isCourseEvent) {
             const courseId = parseInt(info.event.extendedProps.courseId, 10);
             const course = listOfCourses.find(c => c.id === courseId);
+
             if (!course) return true;
+
+            if(new Date(movedEventStart) < new Date(course.startDate)) {
+                alertCustom("Eventet kan inte starta före kursens startdatum.");
+                info.revert();
+                return false;
+            }
+
+            if(new Date(movedEventEnd) > new Date(course.endDate)) {
+                alertCustom("Eventet kan inte sluta efter kursens startdatum.");
+                info.revert();
+                return false;
+            }
 
             eventList = course.event;
             currentIndex = eventList.findIndex(e => e.id === movedEventId);
@@ -262,9 +281,7 @@ export default function DemoApp() {
         }
 
 
-        const calendar = info.view.calendar;
-        const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+      
 
         for (let i = 0; i < currentIndex; i++) {
             const earlierEventData = eventList[i];
@@ -305,7 +322,7 @@ export default function DemoApp() {
 
         const currentTeachers = info.event.extendedProps.teachers || [];
 
-        if(currentTeachers.length > 0) {
+        if (currentTeachers.length > 0) {
             const allEvents = calendar.getEvents();
 
             let crashedTeacherNames = [];
@@ -410,6 +427,10 @@ export default function DemoApp() {
     }
 
     async function handleEventResize(info) {
+        const isValidEventPlacement = validateEventDrop(info);
+        if (!isValidEventPlacement) {
+            return;
+        }
         const event = info.event;
         const isCourseEvent = !!info.event.extendedProps.courseId;
         const isMiscEvent = !!info.event.extendedProps.miscId;
@@ -664,7 +685,7 @@ export default function DemoApp() {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
                 />
-                
+
             </div>
 
             <RightSideBar
