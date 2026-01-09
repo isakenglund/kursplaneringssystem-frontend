@@ -3,6 +3,7 @@ import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
 import {useGetTeachers} from "../hooks.js";
+import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
 export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved ,}) {
 
@@ -11,6 +12,15 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
     const [description, setDescription] = useState("")
     //const [selectedTeachers, setSelectedTeachers] = useState([]);
     const {teachers, loading, err, refetch} = useGetTeachers();
+    const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
+
+    const handleTeacherCreated = async (newTeacher) => {
+        setSelectedTeachers((prev) => [...prev, newTeacher]);
+
+        await refetch();
+
+        setIsCreateTeacherModalOpen(false);
+    };
 
     useEffect(() => {
         if (event) {
@@ -73,18 +83,21 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
                             onChange={(e) => setDescription(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <label className="block text-sm font-medium text-gray-700">
-                            {selectedTeachers.map(teacher => (
-                                <span key={teacher.id}>{teacher.name} </span>
-                            ))}
-                        </label>
-                        <TeacherPicker
-                        teachers={teachers}
-                            loading={loading}
-                            err={err}
-                            selectedTeachers={selectedTeachers}
-                            setSelectedTeachers={setSelectedTeachers}
-                        />
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                                {selectedTeachers.map(teacher => (
+                                    <span key={teacher.id}>{teacher.name} </span>
+                                ))}
+                            </label>
+                            <TeacherPicker
+                            teachers={teachers}
+                                loading={loading}
+                                err={err}
+                                selectedTeachers={selectedTeachers}
+                                setSelectedTeachers={setSelectedTeachers}
+                                onCreate={() => setIsCreateTeacherModalOpen(true)}
+                            />
+                        </div>
 
                     </div>
                     <div className="flex justify-end gap-2 mt-4">
@@ -97,6 +110,12 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
                     </div>
                 </form>
             </div>
+            {isCreateTeacherModalOpen && (
+                <CreateTeacherModal
+                    onClose={() => setIsCreateTeacherModalOpen(false)}
+                    onSaved={handleTeacherCreated}
+                />
+            )}
         </div>
     );
 }

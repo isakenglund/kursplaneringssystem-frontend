@@ -793,3 +793,25 @@ export function useUpdateMiscEventEndTime() {
     return { data, loading, err, update };
 }
 
+export function useSaveTeacher() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function save(teacher) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.savePerson(teacher);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+    return { data, loading, err, save };
+}
+
