@@ -2,11 +2,12 @@ import React, {useEffect, useState} from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
+import CreateTeacherModal from "./CreateTeacherModal.jsx";
 import { confirmCustom, alertCustom } from "../functions/alertFunctions.jsx";
 import  {
     useDeleteCourseEvent,
     useSaveCourseEvent,
-
+    useDeleteTeacher,
     useSaveMiscEvent,
     useDeleteMiscEvent,
     useDeleteCourse,
@@ -26,8 +27,8 @@ export default function CreateEvent({
     courses,
     miscs,
     setMiscs,
-                                        selectedCategories,
-                                        refetchCourses,
+    selectedCategories,
+    refetchCourses,
     refetchMiscs,
     onCategoryUpdate,
     onCategoryDelete,
@@ -36,8 +37,8 @@ export default function CreateEvent({
     err,
     refetch
 }) {
-
-
+const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
+    const {remove: removeTeacher} = useDeleteTeacher();
     const {remove: deleteCourse} = useDeleteCourse();
     const {remove: deleteMisc} = useDeleteMisc();
 
@@ -92,6 +93,37 @@ export default function CreateEvent({
         return !selectedCategories.some((c) => String(c.value) === String(parentCategoryId));
     };
 
+
+const handleDeleteTeacher = async (teacherToDelete) => {
+
+        const confirmDelete = await confirmCustom(
+            `Är du säker på att du vill radera ${teacherToDelete.firstName} ${teacherToDelete.lastName} permanent?`
+        );
+
+
+        if (!confirmDelete) return;
+
+        try {
+            await removeTeacher(teacherToDelete.id);
+
+            setSelectedTeachers((prev) => prev.filter(t => t.id !== teacherToDelete.id));
+
+            await refetch();
+            await refetchCourses();
+
+        } catch (error) {
+            console.error("Kunde inte radera lärare:", error);
+            await alertCustom("Kunde inte radera läraren.");
+        }
+    };
+
+    const handleTeacherCreated = async (newTeacher) => {
+        setSelectedTeachers((prev) => [...prev, newTeacher]);
+
+        await refetch();
+
+        setIsCreateTeacherModalOpen(false);
+    };
 
     async function handleRemoveEvent(parentId, eventId, type) {
 
@@ -431,6 +463,8 @@ export default function CreateEvent({
                                             teachers={teachers}
                                             loading={loading}
                                             err={err}
+                                            onCreate={() => setIsCreateTeacherModalOpen(true)}
+                                            onDelete={handleDeleteTeacher}
                                         />
                                     </div>
                                 )}
@@ -570,6 +604,7 @@ export default function CreateEvent({
                                                     setCategoryType("COURSE");
                                                     setCourseId(course.courseId);
                                                     openModal();
+                                                    setSelectedTeachers([]);
                                                 }}
                                                 className="bg-blue-600 text-white font-bold px-3 py-1 rounded hover:bg-blue-700 text-sm"
                                             >
@@ -678,7 +713,12 @@ export default function CreateEvent({
                         })}
                     </div>
 
-
+            {isCreateTeacherModalOpen && (
+                <CreateTeacherModal
+                    onClose={() => setIsCreateTeacherModalOpen(false)}
+                    onSaved={handleTeacherCreated}
+                />
+            )}
                 </div>
             </div>
         </div>
