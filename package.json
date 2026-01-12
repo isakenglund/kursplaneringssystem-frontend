@@ -1,7 +1,12 @@
 {
   "name": "HoardBoard",
+  "author": {
+    "name": "HoardTeam",
+    "email": "imrantzaga@gmail.com",
+    "url": "https://hig.se"
+  },
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
@@ -32,10 +37,24 @@
       {
         "from": "java-runtime",
         "to": "java-runtime"
+      },
+      {
+        "from": "manual.pdf",
+        "to": "manual.pdf"
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true
     },
     "mac": {
       "target": "dmg"
