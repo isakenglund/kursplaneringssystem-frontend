@@ -4,7 +4,7 @@
 
 .fc { /* the calendar root */
     width: 100%;
-    max-width: none;
+    max-width: none !important;
     margin: 0;
 }
 
