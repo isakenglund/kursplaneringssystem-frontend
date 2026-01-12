@@ -27,6 +27,7 @@ export default function DemoApp() {
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
     const { data: allCategories } = useGetAllCategories();
+    
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -38,8 +39,7 @@ export default function DemoApp() {
 
     const { data: listOfCourses, loading: loadingCourses, setData: setCourses, refetch: refetchCourses} = useGetCourses();
     const { data: listOfMiscs, loading: loadingMiscs, setData: setMiscs, refetch: refetchMiscs} = useGetMiscs();
-    const { data: teachers, loading, err, refetch: refetchTeachers} = useGetTeachers();
-
+    const { teachers, loading, err, refetch: refetchTeachers} = useGetTeachers();;
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -564,13 +564,6 @@ export default function DemoApp() {
                                 clipRule="evenodd"
                             />
                         </svg>
-                        {showLeftSidebar && (
-                            <span className="text-xs font-bold text-gray-600">Göm vänster sidebar</span>
-                        )}
-
-                        {!showLeftSidebar && (
-                            <span className="text-xs font-bold text-gray-600">Visa vänster sidebar</span>
-                        )}
                     </button>
 
 
@@ -580,13 +573,6 @@ export default function DemoApp() {
                         }}
                         className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 flex gap-4"
                     >
-                        {showRightSidebar && (
-                            <span className="text-xs font-bold text-gray-600">Göm höger sidebar</span>
-                        )}
-
-                        {!showRightSidebar && (
-                            <span className="text-xs font-bold text-gray-600">Visa höger sidebar</span>
-                        )}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"

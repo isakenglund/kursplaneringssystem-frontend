@@ -1,15 +1,51 @@
 import {useUpdateCourseEvent} from "../hooks.js";
 import React, {useEffect,useState} from "react";
 import TeacherPicker from "./TeacherPicker.jsx";
-import { alertCustom } from "../functions/alertFunctions.jsx";
+import { alertCustom, confirmCustom } from "../functions/alertFunctions.jsx";
+import {useGetTeachers, useDeleteTeacher} from "../hooks.js";
+import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
-
-export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved , teachers, loading, err, refetch}) {
+export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved , 
+    teachers, loading, err, refetch
+}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("")
+    //const [selectedTeachers, setSelectedTeachers] = useState([]);
+    //const {teachers, loading, err, refetch} = useGetTeachers();
+    const {remove: removeTeacher} = useDeleteTeacher();
+    const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
 
+    const handleDeleteTeacher = async (teacherToDelete) => {
+
+        const confirmDelete = await confirmCustom(
+            `Är du säker på att du vill radera ${teacherToDelete.firstName} ${teacherToDelete.lastName} permanent?`
+        );
+
+
+        if (!confirmDelete) return;
+
+        try {
+            await removeTeacher(teacherToDelete.id);
+
+            setSelectedTeachers((prev) => prev.filter(t => t.id !== teacherToDelete.id));
+
+            await refetch();
+
+        } catch (error) {
+            console.error("Kunde inte radera lärare:", error);
+            await alertCustom("Kunde inte radera läraren.");
+        }
+    };
+
+    const handleTeacherCreated = async (newTeacher) => {
+        setSelectedTeachers((prev) => [...prev, newTeacher]);
+
+        await refetch();
+
+        setIsCreateTeacherModalOpen(false);
+    };
 
     useEffect(() => {
         if (event) {
@@ -72,18 +108,22 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
                             onChange={(e) => setDescription(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <label className="block text-sm font-medium text-gray-700">
-                            {selectedTeachers.map(teacher => (
-                                <span key={teacher.id}>{teacher.name} </span>
-                            ))}
-                        </label>
-                        <TeacherPicker
-                        teachers={teachers}
-                            loading={loading}
-                            err={err}
-                            selectedTeachers={selectedTeachers}
-                            setSelectedTeachers={setSelectedTeachers}
-                        />
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                                {selectedTeachers.map(teacher => (
+                                    <span key={teacher.id}>{teacher.name} </span>
+                                ))}
+                            </label>
+                            <TeacherPicker
+                            teachers={teachers}
+                                loading={loading}
+                                err={err}
+                                selectedTeachers={selectedTeachers}
+                                setSelectedTeachers={setSelectedTeachers}
+                                onCreate={() => setIsCreateTeacherModalOpen(true)}
+                                onDelete={handleDeleteTeacher}
+                            />
+                        </div>
 
                     </div>
                     <div className="flex justify-end gap-2 mt-4">
@@ -96,6 +136,12 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers,e
                     </div>
                 </form>
             </div>
+            {isCreateTeacherModalOpen && (
+                <CreateTeacherModal
+                    onClose={() => setIsCreateTeacherModalOpen(false)}
+                    onSaved={handleTeacherCreated}
+                />
+            )}
         </div>
     );
 }

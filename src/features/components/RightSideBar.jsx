@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
@@ -55,7 +55,7 @@ vacation,
     return (
         <div className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-96" : "w-0"}`} >
         <div
-            className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 
+            className={` bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 
             ${showRightSidebar ? "translate-x-0" : "translate-x-full"
                 }`}
         >

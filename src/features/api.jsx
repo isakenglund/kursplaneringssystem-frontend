@@ -225,7 +225,21 @@ export const API = {
         });
     },
 
+    savePerson: (person) => api('/persons', {
+        method: "POST",
+        body: JSON.stringify({
+            firstName: person.firstName,
+            lastName: person.lastName,
+            email: person.email,
+        })
+    },),
+
+    deletePerson: (personId) => api(`/persons/${personId}`, {
+        method: "DELETE"
+    }),
+
 };
+
 
 function formatToISO(date) {
     const pad = (num) => String(num).padStart(2, '0');

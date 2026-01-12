@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 
-import { CheckIcon, UserPlusIcon } from "@heroicons/react/20/solid";
+import { CheckIcon, UserPlusIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
 
 
 export default function TeacherPicker({
@@ -9,12 +9,15 @@ export default function TeacherPicker({
                             err,
                                           selectedTeachers,
                                           setSelectedTeachers,
+                                          onCreate,
+                                          onDelete,
                                       }) {
 
     //console.log("teachers in TeacherPicker:", teachers);
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
     const isSelected = (teacher) => selectedTeachers.some((t) => t.id === teacher.id);
+
     const toggleTeacher = (teacherToToggle) => {
         if (isSelected(teacherToToggle)) {
             setSelectedTeachers((prev) =>
@@ -22,6 +25,14 @@ export default function TeacherPicker({
             );
         } else {
             setSelectedTeachers((prev) => [...prev, teacherToToggle]);
+        }
+    };
+
+    const handleDeleteClick = (e, teacher) => {
+        e.preventDefault()
+        e.stopPropagation();
+        if (onDelete) {
+            onDelete(teacher);
         }
     };
 
@@ -54,53 +65,83 @@ export default function TeacherPicker({
             </button>
 
             {open && (
-                <div
-                    className="absolute z-20 mt-2 right-0 w-58 border border-gray-200 rounded-lg bg-white shadow-xl max-h-80 overflow-y-auto divide-y divide-gray-100">
-                    {selectedTeachers.length > 0 && (
-                        <div className="p-2 bg-gray-50">
-                            <h3 className="text-xs font-medium text-gray-500 uppercase px-2 mb-1">Valda ({selectedTeachers.length})</h3>
-                            {selectedTeachers.map((teacher) => (
-                                <div
-                                    key={teacher.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleTeacher(teacher);
-                                    }}
-                                    className="flex items-center justify-between px-2 py-1 text-sm cursor-pointer select-none bg-blue-100 text-blue-900 rounded my-1 hover:bg-blue-200"
-                                >
-                                    <span>{teacher.firstName} {teacher.lastName}</span>
-                                    <CheckIcon className="h-4 w-4 text-blue-600" aria-hidden="true"/>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {loading ? (
-                        <div className="px-3 py-2 text-gray-500">Laddar lärare...</div>
-                    ) : err ? (
-                        <div className="px-3 py-2 text-red-500">Kunde inte hämta lärare</div>
-                    ) : (
-                        <>
-                            {selectedTeachers.length > 0 && unSelectedTeachers.length > 0 && (
-                                <h3 className="text-xs font-medium text-gray-500 uppercase px-4 pt-2">Övriga</h3>
-                            )}
+                <div className="absolute z-20 mt-2 right-0 w-72 border border-gray-200 rounded-lg bg-white shadow-xl max-h-96 flex flex-col overflow-hidden">
+                    <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
 
-                            {unSelectedTeachers.map((teacher) => (
-                                <div
-                                    key={teacher.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleTeacher(teacher);
-                                    }}
-                                    className="flex items-center justify-between px-4 py-2 text-sm cursor-pointer select-none text-gray-900 hover:bg-gray-100"
-                                >
-                                    <span>{teacher.firstName} {teacher.lastName}</span>
-                                </div>
-                            ))}
+                        {selectedTeachers.length > 0 && (
+                            <div className="p-2 bg-gray-50">
+                                <h3 className="text-xs font-medium text-gray-500 uppercase px-2 mb-1">
+                                    Valda ({selectedTeachers.length})
+                                </h3>
+                                {selectedTeachers.map((teacher) => (
+                                    <div
+                                        key={teacher.id}
+                                        onClick={() => toggleTeacher(teacher)}
+                                        className="group flex items-center justify-between px-2 py-1 text-sm cursor-pointer select-none bg-blue-100 text-blue-900 rounded my-1 hover:bg-blue-200"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span>{teacher.firstName} {teacher.lastName}</span>
+                                            <CheckIcon className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleDeleteClick(e, teacher)}
+                                            className="hidden group-hover:block p-1 text-blue-400 hover:text-red-600 rounded"
+                                            title="Radera lärare permanent"
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
-                            {selectedTeachers.length === 0 && unSelectedTeachers.length === 0 && (
-                                <div className="px-4 py-2 text-gray-500 text-sm">Inga lärare tillgängliga.</div>
-                            )}
-                        </>
+                        {loading ? (
+                            <div className="px-3 py-4 text-center text-gray-500 text-sm">Laddar lärare...</div>
+                        ) : err ? (
+                            <div className="px-3 py-4 text-center text-red-500 text-sm">Kunde inte hämta lärare</div>
+                        ) : (
+                            <>
+                                {selectedTeachers.length > 0 && unSelectedTeachers.length > 0 && (
+                                    <h3 className="text-xs font-medium text-gray-500 uppercase px-4 pt-2 sticky top-0 bg-white">
+                                        Övriga
+                                    </h3>
+                                )}
+
+                                {unSelectedTeachers.map((teacher) => (
+                                    <div
+                                        key={teacher.id}
+                                        onClick={() => toggleTeacher(teacher)}
+                                        className="group flex items-center justify-between px-4 py-2 text-sm cursor-pointer select-none text-gray-900 hover:bg-gray-100"
+                                    >
+                                        <span>{teacher.firstName} {teacher.lastName}</span>
+
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleDeleteClick(e, teacher)}
+                                            className="text-gray-300 hover:text-red-500 p-1 rounded transition-colors"
+                                            title="Radera lärare permanent"
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                    </div>
+
+                    {onCreate && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setOpen(false);
+                                onCreate();
+                            }}
+                            className="flex items-center justify-start gap-2 w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 border-t border-gray-200 text-sm font-medium text-indigo-600 transition-colors"
+                        >
+                            <PlusIcon className="h-5 w-5 bg-indigo-100 text-indigo-600 rounded-full p-0.5" aria-hidden="true" />
+                            <span>Lägg till ny lärare</span>
+                        </button>
                     )}
 
                 </div>
