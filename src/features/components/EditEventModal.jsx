@@ -5,7 +5,7 @@ import { alertCustom, confirmCustom } from "../functions/alertFunctions.jsx";
 import {useGetTeachers, useDeleteTeacher} from "../hooks.js";
 import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
-export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved ,}) {
+export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved , teachers, loading, err, refetch}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");

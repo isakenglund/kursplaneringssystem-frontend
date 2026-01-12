@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
-import { useGetHolidays, useGetVacation } from "../hooks.js";
-import { useGetMiscs } from "../hooks.js";
 
 export default function RightSideBar({
                                          currentEvents,
@@ -15,11 +13,11 @@ export default function RightSideBar({
                                          loadingCourses,
                                          holidayEvents,
 showRightSidebar,
+vacation,
                                      }) {
 
     const animatedComponents = makeAnimated();
 
-    const { data: fetchedMiscs } = useGetMiscs();
     const filteredEvents = currentEvents.filter(event => {
         if (selectedCategories.length === 0) return true;
         const eventCourseId = event.extendedProps?.courseId;
@@ -31,7 +29,7 @@ showRightSidebar,
 
 
 
-    const { data: vacation = [] } = useGetVacation();
+   
 
     const totalCount = listOfCategories.reduce((sum, course) => sum + course.event.length, 0);
 
@@ -55,6 +53,7 @@ showRightSidebar,
     if(!showRightSidebar){return null}
 
     return (
+        <div className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-96" : "w-0"}`} >
         <div
             className={`w-80 bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 
             ${showRightSidebar ? "translate-x-0" : "translate-x-full"
@@ -103,6 +102,7 @@ showRightSidebar,
                     ))}
                 </ul>
             </div>
+        </div>
         </div>
     )
 }

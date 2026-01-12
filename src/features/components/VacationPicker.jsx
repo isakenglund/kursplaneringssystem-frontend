@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import useGetCourses, { useSaveVacation, useDeleteVacation } from "../hooks.js";
 
 export default function VacationPicker({setVacationDate, vacationDate}) {
    

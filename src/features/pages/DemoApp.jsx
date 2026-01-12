@@ -15,7 +15,8 @@ import useGetCourses, {
     useUpdateCourseEventEndTime,
     useGetMiscs,
     useUpdateMiscEventTime,
-    useUpdateMiscEventEndTime
+    useUpdateMiscEventEndTime,
+    useGetTeachers
 } from '../hooks.js'
 import '../Calendar.css'
 import RightSideBar from "../components/RightSideBar.jsx";
@@ -26,6 +27,7 @@ export default function DemoApp() {
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
     const { data: allCategories } = useGetAllCategories();
+    
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -35,8 +37,9 @@ export default function DemoApp() {
     const [visibleYears, setVisibleYears] = useState([new Date().getFullYear(), new Date().getFullYear() + 1]);
     const { remove: deleteVacation } = useDeleteVacation();
 
-    const { data: listOfCourses, loading: loadingCourses } = useGetCourses();
-    const { data: listOfMiscs} = useGetMiscs();
+    const { data: listOfCourses, loading: loadingCourses, setData: setCourses, refetch: refetchCourses} = useGetCourses();
+    const { data: listOfMiscs, loading: loadingMiscs, setData: setMiscs, refetch: refetchMiscs} = useGetMiscs();
+    const { teachers, loading, err, refetch: refetchTeachers} = useGetTeachers();;
     const { data: vacations = [] } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -87,7 +90,6 @@ export default function DemoApp() {
         return { holidayEvents: events, holidaySet: set };
     }, [holidays, visibleYears]);
 
-
     // vacations = [{ id: 1, date: "2025-12-25" }, { id: 2, date: "2025-12-26" }]
     const { vacationEvents, vacationSet } = useMemo(() => {
         if (!vacations || vacations.length === 0)
@@ -115,7 +117,6 @@ export default function DemoApp() {
 
         return { vacationEvents: events, vacationSet: set };
     }, [vacations]);
-
 
     const listOfPersistantEvents = useMemo(() => {
         // Flatten course events
@@ -197,6 +198,27 @@ export default function DemoApp() {
         }
     }
 
+    const handleCategoryUpdate = (updatedCategory) => {
+        const type = (updatedCategory.type || "").toUpperCase();
+
+        if(type === "COURSE") {
+            setCourses(prev => prev.map(c =>
+                c.id === updatedCategory.id ? { ...c, ...updatedCategory } : c
+            ));
+        } else {
+            setMiscs(prev => prev.map(m =>
+                m.id === updatedCategory.id ? { ...m, ...updatedCategory } : m
+            ));
+        }
+    };
+
+    const handleCleanupEvents = (deletedId, type) => {
+        if (type === "COURSE") {
+            setCourses(prev => prev.filter(c => c.id !== deletedId));
+        } else {
+            setMiscs(prev => prev.filter(m => m.id !== deletedId));
+        }
+    }
 
     const handleCustomDateChange = (direction) => {
 
@@ -232,6 +254,8 @@ export default function DemoApp() {
     async function validateEventDrop(info) {
         if (!info.event.extendedProps) return true;
 
+    
+
         const movedEventId = parseInt(info.event.id, 10);
         const isCourseEvent = !!info.event.extendedProps.courseId;
         const isMiscEvent = !!info.event.extendedProps.miscId;
@@ -239,10 +263,27 @@ export default function DemoApp() {
 
         let eventList, currentIndex;
 
+        const calendar = info.view.calendar;
+        const movedEventStart = info.event.start;
+        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+
         if (isCourseEvent) {
             const courseId = parseInt(info.event.extendedProps.courseId, 10);
             const course = listOfCourses.find(c => c.id === courseId);
+
             if (!course) return true;
+
+            if(new Date(movedEventStart) < new Date(course.startDate)) {
+                alertCustom("Eventet kan inte starta före kursens startdatum.");
+                info.revert();
+                return false;
+            }
+
+            if(new Date(movedEventEnd) > new Date(course.endDate)) {
+                alertCustom("Eventet kan inte sluta efter kursens startdatum.");
+                info.revert();
+                return false;
+            }
 
             eventList = course.event;
             currentIndex = eventList.findIndex(e => e.id === movedEventId);
@@ -262,9 +303,7 @@ export default function DemoApp() {
         }
 
 
-        const calendar = info.view.calendar;
-        const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+      
 
         for (let i = 0; i < currentIndex; i++) {
             const earlierEventData = eventList[i];
@@ -305,7 +344,7 @@ export default function DemoApp() {
 
         const currentTeachers = info.event.extendedProps.teachers || [];
 
-        if(currentTeachers.length > 0) {
+        if (currentTeachers.length > 0) {
             const allEvents = calendar.getEvents();
 
             let crashedTeacherNames = [];
@@ -410,6 +449,10 @@ export default function DemoApp() {
     }
 
     async function handleEventResize(info) {
+        const isValidEventPlacement = validateEventDrop(info);
+        if (!isValidEventPlacement) {
+            return;
+        }
         const event = info.event;
         const isCourseEvent = !!info.event.extendedProps.courseId;
         const isMiscEvent = !!info.event.extendedProps.miscId;
@@ -473,8 +516,6 @@ export default function DemoApp() {
         }
     }
 
-
-
     function handleEvents(events) {
         setCurrentEvents(events)
     }
@@ -490,9 +531,20 @@ export default function DemoApp() {
                 vacationDate={vacationDate}
                 showLeftSidebar={showLeftSidebar}
                 selectedCategories={selectedCategories}
+                onCategoryUpdate={handleCategoryUpdate}
+                onCategoryDelete={handleCleanupEvents}
+                teachers={teachers}
+                loading={loading}
+                err={err}
+                coursesData={listOfCourses}
+                miscsData={listOfMiscs}
+                refetchCourses={refetchCourses}
+                refetchMiscs={refetchMiscs}
+                refetchTeachers={refetchTeachers}
             />
 
-            <div className='demo-app-main flex-grow p-4'>
+            <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>
+
                 <div className="flex justify-between mb-2 w-full">
                     <button
                         onClick={() => setShowLeftSidebar(prev => !prev)}
@@ -663,6 +715,7 @@ export default function DemoApp() {
                         return info.event.extendedProps.color; // use the color you passed
                     }}
                 />
+
             </div>
 
             <RightSideBar
@@ -675,6 +728,7 @@ export default function DemoApp() {
                 loadingCourses={loadingCourses}
                 holidayEvents={holidayEvents}
                 showRightSidebar={showRightSidebar}
+                vacation={vacations}
             />
         </div>
     )
@@ -694,5 +748,3 @@ function renderEventContent(eventInfo) {
         </>
     );
 }
-
-

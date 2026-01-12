@@ -86,7 +86,10 @@ export default function EditCategoryModal({categoryToEdit, onClose, onSaved}) {
                     </div>
 
                     <div>
-                        <ColorPicker handleColorHex={handleColorHex} />
+                        <ColorPicker
+                            handleColorHex={handleColorHex}
+                            categoryToEdit={categoryToEdit}
+                        />
                     </div>
 
                     {/* Kurs-specifika fält */}
