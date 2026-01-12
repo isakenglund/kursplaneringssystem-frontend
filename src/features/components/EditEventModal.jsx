@@ -5,13 +5,15 @@ import { alertCustom, confirmCustom } from "../functions/alertFunctions.jsx";
 import {useGetTeachers, useDeleteTeacher} from "../hooks.js";
 import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
-export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved , teachers, loading, err, refetch}) {
+export default function EditEventModal({ selectedTeachers, setSelectedTeachers,event, onClose, onSaved , 
+    teachers, loading, err, refetch
+}) {
 
     const {save} = useUpdateCourseEvent();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("")
     //const [selectedTeachers, setSelectedTeachers] = useState([]);
-    const {teachers, loading, err, refetch} = useGetTeachers();
+    //const {teachers, loading, err, refetch} = useGetTeachers();
     const {remove: removeTeacher} = useDeleteTeacher();
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
 
