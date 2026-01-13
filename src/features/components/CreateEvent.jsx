@@ -330,7 +330,7 @@ export default function CreateEvent({
                                 }),
                             })}
                             style={{ borderLeft: `4px solid ${parentCategory.colorHex || "#3b82f6"}` }}
-                            className={`p-3 rounded border shadow-sm text-sm font-medium flex flex-col transition
+                            className={`p-2 rounded border shadow-sm text-sm font-medium flex flex-col transition
           ${isDraggable ? "fc-event-external cursor-move" : "cursor-not-allowed"}
           ${disabled || filtered
                                     ? "bg-gray-200 text-gray-400"
@@ -412,7 +412,7 @@ export default function CreateEvent({
 
                             {/* Teachers under the event title, still clickable */}
                             {event.teachers?.length > 0 && (
-                                <div className="pt-2 text-xs text-gray-500 pl-2">
+                                <div className="pt-0.5 text-xs text-gray-500 pl-2">
                                     <button
                                         type="button"
                                         onClick={(e) => {
@@ -574,7 +574,7 @@ export default function CreateEvent({
                                 <div key={course.id}
                                     className="border border-gray-300 rounded-lg bg-gray-50 transition-all flex-col">
                                     <div
-                                        className="flex items-center p-3 cursor-pointer hover:bg-gray-100 rounded-lg select-none "
+                                        className="flex items-center p-2 cursor-pointer hover:bg-gray-100 rounded-lg select-none "
                                         onClick={() => toggleEventSection(toggleEventsId)}
                                     >
                                         <div className="flex items-center gap-2 mr-auto">
@@ -645,7 +645,7 @@ export default function CreateEvent({
                                     </div>
                                     <h3 className="flex justify-center text-sm font-bold text-gray-500">Antal Studenter: {course.numOfStudents}</h3>
                                     {isOpen && (
-                                        <div className="p-3 border-t border-gray-200 mt-2">
+                                        <div className="p-2 border-t border-gray-200 mt-1">
                                             {renderEvents(course.event, course, "COURSE")}
                                         </div>
                                     )}
