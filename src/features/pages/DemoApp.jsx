@@ -137,6 +137,7 @@ export default function DemoApp() {
                         courseId: course.id,
                         description: event.description || '',
                         teachers: event.teachers,
+                        forceColor: course.colorHex || '#ff83ae',
                     },
                 }))
         );
@@ -154,6 +155,7 @@ export default function DemoApp() {
                     extendedProps: {
                         miscId: misc.id,
                         description: event.description || '',
+                        forceColor: misc.colorHex || '#ff83ae',
                     },
                 }))
         );
@@ -546,45 +548,39 @@ export default function DemoApp() {
         setCurrentEvents(events)
     }
 
-   const handleEventMouseEnter = (info) => {
-    const MODAL_WIDTH = 320;   // w-80
-    const MODAL_HEIGHT = 180;  // adjust if your modal height differs
- const { innerWidth, innerHeight } = window;
-  const { clientX, clientY } = info.jsEvent;
-    let {xOffset, yOffset} = 0;
+    const handleEventMouseEnter = (info) => {
+        const MODAL_WIDTH = 320;   // w-80
+        const MODAL_HEIGHT = 180;  // adjust if your modal height differs
+        const {innerWidth, innerHeight} = window;
+        const {clientX, clientY} = info.jsEvent;
+        let {xOffset, yOffset} = 0;
 
-  const centerX = innerWidth / 2;
-  const centerY = innerHeight / 2;
+        const centerX = innerWidth / 2;
+        const centerY = innerHeight / 2;
 
-if(clientX < centerX) {
-    xOffset = MODAL_HEIGHT/2
-   } else{
-    xOffset = -MODAL_HEIGHT/2
-   }
-  
-   if(clientY < centerY) {
-    yOffset = MODAL_HEIGHT/2
-   } else{
-    yOffset = -MODAL_HEIGHT/2
-   }
-      
+        if (clientX < centerX) {
+            xOffset = MODAL_HEIGHT / 2
+        } else {
+            xOffset = -MODAL_HEIGHT / 2
+        }
 
-    setHoverData({
-        event: info.event,
-        x: clientX - MODAL_WIDTH / 2+ xOffset,
-        y: clientY - MODAL_HEIGHT / 2+ yOffset,
-    });
+        if (clientY < centerY) {
+            yOffset = MODAL_HEIGHT / 2
+        } else {
+            yOffset = -MODAL_HEIGHT / 2
+        }
+
+
+        setHoverData({
+            event: info.event,
+            x: clientX - MODAL_WIDTH / 2 + xOffset,
+            y: clientY - MODAL_HEIGHT / 2 + yOffset,
+        });
     };
-
-
-
-
 
     const handleEventMouseLeave = () => {
         setHoverData(null);
     };
-
-
 
     return (
         <div className='demo-app relative h-screen flex'>
@@ -699,6 +695,7 @@ if(clientX < centerX) {
                         customMultiMonth: {
                             type: 'multiMonthYear',
                             buttonText: 'Months',
+                            eventDisplay: 'block'
                         }
                     }}
                     customButtons={{
@@ -798,9 +795,30 @@ if(clientX < centerX) {
 function renderEventContent(eventInfo) {
     const isHoliday = eventInfo.event.extendedProps.wrapText;
 
+    const color = eventInfo.event.extendedProps.forceColor || eventInfo.event.backgroundColor;
+
+    const isMonthView = eventInfo.view.type === 'customMultiMonth' || eventInfo.view.type === 'multiMonthYear' || eventInfo.view.type === 'dayGridMonth';
+
     const titleClass = isHoliday
         ? 'ml-1 whitespace-normal break-words text-sm'
         : 'ml-1';
+
+    if (isMonthView) {
+        return (
+            <div
+                className="overflow-hidden whitespace-nowrap text-ellipsis rounded px-1"
+                style={{
+                    backgroundColor: color,
+                    color: '#fff'
+                }}
+            >
+                {!eventInfo.event.allDay && (
+                    <b className="mr-1 text-xs">{eventInfo.timeText}</b>
+                )}
+                <span className={titleClass}>{eventInfo.event.title}</span>
+            </div>
+        )
+    }
 
     return (
         <>
