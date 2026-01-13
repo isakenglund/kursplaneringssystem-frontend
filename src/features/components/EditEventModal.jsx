@@ -65,12 +65,13 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
         }
     }, [event]);
 
+
     async function handleFormSubmit(e) {
         e.preventDefault();
 
         let payload;
 
-         
+
 
         try {
             if (isCourseEvent) {
@@ -87,7 +88,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
             onSaved?.(updatedEvent);
             onClose();
         }else if (isMiscEvent) {
-           
+
             payload = {
                 id: event.id,
                 name,
@@ -96,7 +97,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
                 endTime: event.endTime ?? event.endDate,
                 miscId: event.categoryId?.id,
             };
-            
+
             const updatedEvent = await saveMisc(payload);
             onSaved?.(updatedEvent);
             onClose();
@@ -104,7 +105,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
             await alertCustom("Okänd eventtyp");
             return;
         }
-            
+
         } catch (err) {
             console.error("Kunde inte spara eventet:", err);
             await alertCustom("Ett fel inträffade vid sparande");

@@ -131,8 +131,8 @@ export function useSaveCourse() {
             setLoading(false);
         }
     }
-  
-    return { data, loading, err, save: save };
+
+    return {data, loading, err, save: save};
 }
 
 export function useSaveMisc() {
@@ -313,20 +313,20 @@ export function useGetTeachers() {
           // if API returns { teachers: [...] } you can use pickList(res, "teachers")
           setTeachers(Array.isArray(res) ? res : (res ?? []));
         }
-      } catch (e) {
-        if (live) {
-          setErr(e);
-          setTeachers([]);
-        }
-      } finally {
-        if (live) setLoading(false);
-      }
-    })();
+            } catch (e) {
+                if (live) {
+                    setErr(e);
+                    setTeachers([]);
+                }
+            } finally {
+                if (live) setLoading(false);
+            }
+        })();
+        return () => {
+            live = false;
+        };
 
-    return () => {
-      live = false;
-    };
-  }, [refreshIndex]); // refetch triggers this
+        }, [refreshIndex]); // refetch triggers this
 
   return { teachers, loading, err, refetch };
 }
@@ -370,69 +370,69 @@ export function useGetTeachers() {
         const [loading, setLoading] = useState(false);
         const [err, setErr] = useState(null);
 
-        async function save(courseEvent) {
-            setLoading(true);
-            setErr(null);
-            try {
-                const res = await API.saveCourseEvent(courseEvent);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-                setErr(e);
-                throw e;
-            } finally {
-                setLoading(false);
-            }
+    async function save(courseEvent) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.saveCourseEvent(courseEvent);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
-
-        return {data, loading, err, save};
     }
+
+    return {data, loading, err, save};
+}
 
     export function useSaveMiscEvent() {
         const [data, setData] = useState([]);
         const [loading, setLoading] = useState(false);
         const [err, setErr] = useState(null);
 
-        async function save(miscEvent) {
-            setLoading(true);
-            setErr(null);
-            try {
-                const res = await API.saveMiscEvent(miscEvent);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-                setErr(e);
-                throw e;
-            } finally {
-                setLoading(false);
-            }
+    async function save(miscEvent) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.saveMiscEvent(miscEvent);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
-
-        return {data, loading, err, save};
     }
+
+    return {data, loading, err, save};
+}
 
     export function useUpdateCourseEvent() {
         const [data, setData] = useState([]);
         const [loading, setLoading] = useState(false);
         const [err, setErr] = useState(null);
 
-        async function save(courseEvent) {
-            setLoading(true);
-            setErr(null);
-            try {
-                const res = await API.updateCourseEvent(courseEvent);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-                setErr(e);
-                throw e;
-            } finally {
-                setLoading(false);
-            }
+    async function save(courseEvent) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.updateCourseEvent(courseEvent);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
-
-        return {data, loading, err, save};
     }
+
+    return {data, loading, err, save};
+}
 
     export function useUpdateMiscEvent() {
         const [data, setData] = useState([]);
@@ -444,7 +444,7 @@ export function useGetTeachers() {
             setErr(null);
             try {
                 const res = await API.updateMiscEvent(miscEvent);
-                
+
                 setData(pickList(res));
                 return res;
             } catch (e) {
@@ -455,8 +455,8 @@ export function useGetTeachers() {
             }
         }
 
-        return {data, loading, err, save};
-    }
+    return {data, loading, err, save};
+}
 
     export function useGetHolidays() {
         const [data, setData] = useState([]);
@@ -481,10 +481,10 @@ export function useGetTeachers() {
                 }
             })();
 
-            return () => {
-                live = false;
-            };
-        }, []);
+        return () => {
+            live = false;
+        };
+    }, []);
 
         return {data, loading, err};
     }
@@ -570,7 +570,7 @@ export function useGetTeachers() {
                     ]);
 
                 const allEvents = [...courses, ...misc];
-              
+
                 if (!live) return;
                 setData(allEvents);
             } catch (e) {
@@ -700,23 +700,23 @@ export function useGetAllCategories(){
         const [loading, setLoading] = useState(false);
         const [err, setErr] = useState(null);
 
-        async function save(vacation) {
-            setLoading(true);
-            setErr(null);
-            try {
-                const res = await API.saveVacation(vacation);
-                setData(pickList(res));
-                return res;
-            } catch (e) {
-                setErr(e);
-                throw e;
-            } finally {
-                setLoading(false);
-            }
+    async function save(vacation) {
+        setLoading(true);
+        setErr(null);
+        try {
+            const res = await API.saveVacation(vacation);
+            setData(pickList(res));
+            return res;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
         }
-
-        return {data, loading, err, save};
     }
+
+    return {data, loading, err, save};
+}
 
 export function useUpdateCourseEventTime() {
     const [data, setData] = useState([]);
@@ -857,5 +857,33 @@ export function useDeleteTeacher() {
     }
 
     return {data, loading, err, remove};
+}
+
+export function useReorderCourseEvents() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(courseId, orderedIds) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            await API.reorderCourseEvents(courseId, orderedIds);
+            return true;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {
+        saveOrder: update,
+        loading,
+        err,
+        data
+    };
 }
 

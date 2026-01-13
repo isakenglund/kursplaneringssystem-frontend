@@ -16,6 +16,12 @@ import {
     useUpdateMisc,
 
 } from "../hooks.js";
+import ButtonEdit from "./ButtonEdit.jsx"
+import ButtonRemove from "./ButtonRemove.jsx";
+import EventList from "./EventList.jsx";
+import { useReorderCourseEvents } from "../hooks.js";
+
+
 
 export default function CreateEvent({
     draggableContainerRef,
@@ -48,13 +54,12 @@ export default function CreateEvent({
     const { update: updateCourse } = useUpdateCourse();
     const { update: updateMisc } = useUpdateMisc();
 
-    const { save: saveCourseEvent } = useSaveCourseEvent();
-    const { save: saveMiscEvent } = useSaveMiscEvent();
+    const {save: saveCourseEvent} = useSaveCourseEvent();
+    const {save: saveMiscEvent} = useSaveMiscEvent();
 
     const [categoryId, setCategoryId] = useState("");
     const [categoryType, setCategoryType] = useState("COURSE");
     const [categoryName, setCategoryName] = useState("");
-
     const [selectedTeachers, setSelectedTeachers] = useState([]);
     const [description, setDescription] = useState("");
     const [endDate, setEndDate] = useState(new Date());
@@ -95,6 +100,39 @@ export default function CreateEvent({
 
     const isEventOnCalendar = (eventId) => {
         return currentEvents.some((ce) => String(ce.id) === String(eventId));
+    };
+
+    // Hämta save-funktionen från hooken
+    const { saveOrder: saveCourseOrder } = useReorderCourseEvents();
+
+    // Funktion som hanterar när sorteringen är klar i listan
+    const handleOrderChange = async (newEventsArray, parentId, type) => {
+
+        // 1. Extrahera ID:n i rätt ordning för att skicka till backend
+        const orderedIds = newEventsArray.map(e => e.id);
+
+        try {
+            if (type === "COURSE") {
+                // 2. Uppdatera UI:t (state) direkt så det inte "hoppar tillbaka"
+                // Vi måste uppdatera 'courses' statet med den nya ordningen
+                setCourses(prev => prev.map(c =>
+                    c.id === parentId ? { ...c, event: newEventsArray } : c
+                ));
+
+                // 3. Skicka till backend
+                await saveCourseOrder(parentId, orderedIds);
+            }
+            else if (type === "MISC") {
+                // Samma logik för Misc...
+                setMiscs(prev => prev.map(m =>
+                    m.id === parentId ? { ...m, event: newEventsArray } : m
+                ));
+                // await saveMiscOrder(parentId, orderedIds);
+            }
+        } catch (error) {
+            console.error("Kunde inte spara ordning:", error);
+            // Här kan man lägga till logik för att återställa ordningen vid fel (valfritt)
+        }
     };
 
     const isEventFiltered = (parentCategoryId) => {
@@ -297,9 +335,6 @@ export default function CreateEvent({
         }
     }
 
-    // ------------------------------------------------------------
-    // Unified event renderer (edit + delete + drag + disabled)
-    // ------------------------------------------------------------
     function renderEvents(eventsArray, parentCategory, type) {
         if (!eventsArray || eventsArray.length === 0)
             return <p className="text-sm text-gray-400 italic">Inga händelser.</p>;
@@ -451,13 +486,28 @@ export default function CreateEvent({
                         </div>
                     );
                 })}
+
+                <EventList
+                    eventsArray={eventsArray}
+                    parentCategory={parentCategory}
+                    type={type}
+                    isEventOnCalendar={isEventOnCalendar}
+                    onEditClick={(event) => {
+                        setEditEventData({...event, type: type});
+                        setShowEditModal(true);
+                    }}
+                    onRemoveClick={(event) => {
+                        handleRemoveEvent(parentCategory.id, event.id, type);
+                    }}
+                    // HÄR KOPPLAR VI IN DET:
+                    onOrderChange={(newOrder) => handleOrderChange(newOrder, parentCategory.id, type)}
+                />
             </div>
         );
     }
 
     return (
         <div>
-            {/* CREATE MODAL */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl w-96">
@@ -517,7 +567,6 @@ export default function CreateEvent({
                 </div>
             )}
 
-            {/* EDIT MODAL */}
             {showEditModal && (
                 <EditEventModal
                     selectedTeachers={selectedTeachers}
@@ -528,7 +577,7 @@ export default function CreateEvent({
                         const courseId = editEventData.categoryId;
                         refetchMiscs();
                         refetchCourses();
-
+                        
                         setCourses(prev =>
                             prev.map(course =>
                                 String(course.id) === String(courseId)

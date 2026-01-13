@@ -4,12 +4,10 @@ export const API = {
 
     courses: () => api('/courses', {
         method: "GET",
-
     }),
 
     miscs: () => api('/miscs', {
         method: "GET",
-
     }),
 
     courseEvents: () => api('/course-events', {
@@ -93,6 +91,8 @@ export const API = {
             startTime: miscEvent.startTime ?? miscEvent.startDate ?? null,
             endTime: miscEvent.endTime ?? miscEvent.endDate ?? null,
             miscId: miscEvent.miscId ?? miscEvent.categoryId?.id ?? null,
+            displayIndex: miscEvent.displayIndex
+
         })
     }),
 
@@ -116,6 +116,7 @@ export const API = {
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
             teachers: courseEvent.teachers,
+            displayIndex: courseEvent.displayIndex
         })
     }),
 
@@ -128,6 +129,7 @@ export const API = {
             startTime: miscEvent.startTime ?? miscEvent.startDate ?? null,
             endTime: miscEvent.endTime ?? miscEvent.endDate ?? null,
             miscId: miscEvent.miscId ?? miscEvent.categoryId?.id ?? null,
+            displayIndex: miscEvent.displayIndex
         })
     }),
 
@@ -239,8 +241,16 @@ export const API = {
         method: "DELETE"
     }),
 
-};
+    reorderCourseEvents: (courseId, orderedIds) =>
+        api(`/course-events/${courseId}/reorder`, { // OBS: course-events, inte courses
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderedIds),
+        }),
 
+};
 
 function formatToISO(date) {
     const pad = (num) => String(num).padStart(2, '0');
@@ -253,4 +263,5 @@ function formatToISO(date) {
     const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
-};
+
+}
