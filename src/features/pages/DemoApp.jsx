@@ -694,7 +694,7 @@ export default function DemoApp() {
                         },
                         customMultiMonth: {
                             type: 'multiMonthYear',
-                            buttonText: 'Months',
+                            buttonText: 'Månader',
                             eventDisplay: 'block'
                         }
                     }}
