@@ -40,7 +40,7 @@ export default function DemoApp() {
 
     const { data: listOfCourses, loading: loadingCourses, setData: setCourses, refetch: refetchCourses } = useGetCourses();
     const { data: listOfMiscs, loading: loadingMiscs, setData: setMiscs, refetch: refetchMiscs } = useGetMiscs();
-    const { teachers, loading, err, refetch: refetchTeachers } = useGetTeachers();;
+    const { teachers, loading, err, refetch: refetchTeachers } = useGetTeachers();
     const { data: vacations = [], refetch: refetchVacation } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -58,6 +58,8 @@ export default function DemoApp() {
     const [showRightSidebar, setShowRightSidebar] = useState(true);
 
     const [hoverData, setHoverData] = useState(null);
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -135,6 +137,7 @@ export default function DemoApp() {
                         courseId: course.id,
                         description: event.description || '',
                         teachers: event.teachers,
+                        forceColor: course.colorHex || '#ff83ae',
                     },
                 }))
         );
@@ -152,6 +155,7 @@ export default function DemoApp() {
                     extendedProps: {
                         miscId: misc.id,
                         description: event.description || '',
+                        forceColor: misc.colorHex || '#ff83ae',
                     },
                 }))
         );
@@ -404,12 +408,21 @@ export default function DemoApp() {
                 return false;
             }
         }
+
+
         if (isCourseEvent) {
+            await updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
 
-            updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
+            // Give backend time to commit/propagate before reloading
+            await sleep(250);
+            console.log("validateEventDrop -> refetchCourses");
+            refetchCourses();
         } else if (isMiscEvent) {
-            updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
+            await updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
 
+            await sleep(250);
+            console.log("validateEventDrop -> refetchMiscs");
+            refetchMiscs();
         } else {
             await alertCustom("Något blev fel");
         }
@@ -456,16 +469,24 @@ export default function DemoApp() {
 
         if (isCourseEvent) {
             await updateCourseEventEndTime(event.id, event.end);
+
+            await sleep(250);
+            console.log("handleEventResize -> refetchCourses");
+            refetchCourses();
         } else if (isMiscEvent) {
             await updateMiscEventEndTime(event.id, event.end);
+
+            await sleep(250);
+            console.log("handleEventResize -> refetchMiscs");
+            refetchMiscs();
         } else {
             await alertCustom("Något blev fel");
         }
-
     }
 
     async function handleEventClick(clickInfo) {
         const { event } = clickInfo;
+
         const isHoliday =
             event.extendedProps?.wrapText &&
             event.id?.startsWith("holiday-");
@@ -484,6 +505,7 @@ export default function DemoApp() {
             if (isVacation) {
                 const vacationId = event.id.replace("vacation-", "");
                 await deleteVacation(vacationId);
+                console.log("handleEventClick -> refetchVacation");
                 await refetchVacation();
             } else {
                 const eventId = parseInt(event.id, 10);
@@ -498,8 +520,16 @@ export default function DemoApp() {
                 }
                 if (parent.type === "COURSE") {
                     await updateCourseEventTime(eventId, null, null);
+
+                    await sleep(250);
+                    console.log("handleEventClick -> refetchCourses");
+                    refetchCourses();
                 } else if (parent.type === "MISC" || parent.type === "MEETING") {
                     await updateMiscEventTime(eventId, null, null);
+
+                    await sleep(250);
+                    console.log("handleEventClick -> refetchMiscs");
+                    refetchMiscs();
                 } else {
                     await alertCustom("Kunde inte ta bort händelsen okänd typ");
                     return;
@@ -518,45 +548,39 @@ export default function DemoApp() {
         setCurrentEvents(events)
     }
 
-   const handleEventMouseEnter = (info) => {
-    const MODAL_WIDTH = 320;   // w-80
-    const MODAL_HEIGHT = 180;  // adjust if your modal height differs
- const { innerWidth, innerHeight } = window;
-  const { clientX, clientY } = info.jsEvent;
-    let {xOffset, yOffset} = 0;
+    const handleEventMouseEnter = (info) => {
+        const MODAL_WIDTH = 320;   // w-80
+        const MODAL_HEIGHT = 180;  // adjust if your modal height differs
+        const {innerWidth, innerHeight} = window;
+        const {clientX, clientY} = info.jsEvent;
+        let {xOffset, yOffset} = 0;
 
-  const centerX = innerWidth / 2;
-  const centerY = innerHeight / 2;
+        const centerX = innerWidth / 2;
+        const centerY = innerHeight / 2;
 
-if(clientX < centerX) {
-    xOffset = MODAL_HEIGHT/2
-   } else{
-    xOffset = -MODAL_HEIGHT/2
-   }
-  
-   if(clientY < centerY) {
-    yOffset = MODAL_HEIGHT/2
-   } else{
-    yOffset = -MODAL_HEIGHT/2
-   }
-      
+        if (clientX < centerX) {
+            xOffset = MODAL_HEIGHT / 2
+        } else {
+            xOffset = -MODAL_HEIGHT / 2
+        }
 
-    setHoverData({
-        event: info.event,
-        x: clientX - MODAL_WIDTH / 2+ xOffset,
-        y: clientY - MODAL_HEIGHT / 2+ yOffset,
-    });
+        if (clientY < centerY) {
+            yOffset = MODAL_HEIGHT / 2
+        } else {
+            yOffset = -MODAL_HEIGHT / 2
+        }
+
+
+        setHoverData({
+            event: info.event,
+            x: clientX - MODAL_WIDTH / 2 + xOffset,
+            y: clientY - MODAL_HEIGHT / 2 + yOffset,
+        });
     };
-
-
-
-
 
     const handleEventMouseLeave = () => {
         setHoverData(null);
     };
-
-
 
     return (
         <div className='demo-app relative h-screen flex'>
@@ -670,7 +694,8 @@ if(clientX < centerX) {
                         },
                         customMultiMonth: {
                             type: 'multiMonthYear',
-                            buttonText: 'Months',
+                            buttonText: 'Månader',
+                            eventDisplay: 'block'
                         }
                     }}
                     customButtons={{
@@ -775,9 +800,30 @@ if(clientX < centerX) {
 function renderEventContent(eventInfo) {
     const isHoliday = eventInfo.event.extendedProps.wrapText;
 
+    const color = eventInfo.event.extendedProps.forceColor || eventInfo.event.backgroundColor;
+
+    const isMonthView = eventInfo.view.type === 'customMultiMonth' || eventInfo.view.type === 'multiMonthYear' || eventInfo.view.type === 'dayGridMonth';
+
     const titleClass = isHoliday
         ? 'ml-1 whitespace-normal break-words text-sm'
         : 'ml-1';
+
+    if (isMonthView) {
+        return (
+            <div
+                className="overflow-hidden whitespace-nowrap text-ellipsis rounded px-1"
+                style={{
+                    backgroundColor: color,
+                    color: '#fff'
+                }}
+            >
+                {!eventInfo.event.allDay && (
+                    <b className="mr-1 text-xs">{eventInfo.timeText}</b>
+                )}
+                <span className={titleClass}>{eventInfo.event.title}</span>
+            </div>
+        )
+    }
 
     return (
         <>
