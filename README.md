@@ -1,4 +1,4 @@
-# Kursplaneringssystem – Frontend (React + Vite)
+# HoardBoard - Frontend
 Detta repository innehåller **frontend** för ett kursplaneringssystem. Applikationen bygger på **React 19** och och använder **FullCalendar** för kalender-/schema-vy samt **Tailwind CSS** för styling. Frontenden kommunicerar med ett separat backend-API via ett tunt API-lager och React-hooks. **Vite**
 Den här README:n beskriver systemet på en teknisk nivå (arkitektur, flöden, katalogstruktur, integrationer, drift). Den utgår från projektstrukturen och namngivning i koden men undviker onödiga kodutdrag.
 ## Innehåll
