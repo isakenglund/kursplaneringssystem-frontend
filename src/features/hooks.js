@@ -131,6 +131,7 @@ export function useSaveCourse() {
             setLoading(false);
         }
     }
+  
     return { data, loading, err, save: save };
 }
 
@@ -568,7 +569,7 @@ export function useGetTeachers() {
                     ]);
 
                 const allEvents = [...courses, ...misc];
-                console.log("ALL EVENTS",allEvents);
+              
                 if (!live) return;
                 setData(allEvents);
             } catch (e) {
@@ -620,36 +621,47 @@ export function useGetAllCategories(){
         return {data, loading, err};
     }
 
-    export function useGetVacation() {
-        const [data, setData] = useState([]);
-        const [loading, setLoading] = useState(false);
-        const [err, setErr] = useState(null);
+   export function useGetVacation() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(null);
 
-        useEffect(() => {
-            let live = true;
+  // force effect to re-run
+  const [refreshIndex, setRefreshIndex] = useState(0);
 
-            (async () => {
-                try {
-                    setLoading(true);
-                    setErr(null);
+  const refetch = useCallback(() => {
+    setRefreshIndex((i) => i + 1);
+  }, []);
 
-                    const res = await API.getVacation(); // fetch from DB
-                    if (!live) return;
-                    setData(res); // assign directly
-                } catch (e) {
-                    if (live) setErr(e);
-                } finally {
-                    if (live) setLoading(false);
-                }
-            })();
+  useEffect(() => {
+    let live = true;
 
-            return () => {
-                live = false;
-            };
-        }, []);
+    (async () => {
+      try {
+        setLoading(true);
+        setErr(null);
 
-        return {data, loading, err};
-    }
+        const res = await API.getVacation(); // fetch from DB
+        if (!live) return;
+
+        setData(Array.isArray(res) ? res : (res ?? []));
+      } catch (e) {
+        if (live) {
+          setErr(e);
+          setData([]);
+        }
+      } finally {
+        if (live) setLoading(false);
+      }
+    })();
+
+    return () => {
+      live = false;
+    };
+  }, [refreshIndex]); // refetch triggers this
+
+  return { data, loading, err, refetch };
+}
 
     export function useDeleteVacation() {
         const [data, setData] = useState(null);

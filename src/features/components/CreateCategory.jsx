@@ -4,7 +4,7 @@ import { useSaveCourse, useSaveVacation, useSaveMisc } from "../hooks.js";
 import VacationPicker from "./VacationPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
 
-export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate,onCreated}) {
+export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate, onCreated, refetchVacation , refetchCourse, refetchMisc}) {
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -47,10 +47,13 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                     endDate: endDate
                 }
                 await saveCourse(course);
+                await refetchCourse();
             } else if (categoryType === "vacation") {
                 await saveVacation({ date: vacationDate });
+                await refetchVacation();
             } else if (categoryType === "misc") {
                 await saveMisc({ type: "MISC", name, colorHex });
+                await refetchMisc();
             } else {
                 console.warn("Unknown categoryType:", categoryType);
                 return;

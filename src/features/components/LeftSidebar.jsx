@@ -19,7 +19,8 @@ export default function LeftSidebar({
     miscsData,
     refetchCourses,
     refetchMiscs,
-    refetchTeachers
+    refetchTeachers,
+    refetchVacation,
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -72,7 +73,10 @@ export default function LeftSidebar({
                     setIsCategoryModalOpen={setIsCategoryModalOpen}
                     setVacationDate={setVacationDate}
                     vacationDate={vacationDate}
-                    onCreated={fetchCategories} />
+                    onCreated={fetchCategories} 
+                    refetchVacation={refetchVacation}
+                    refetchCourse={refetchCourses}
+                    refetchMisc={refetchMiscs}/>
             )}
 
             <div className='demo-app-sidebar-section mb-8'>
