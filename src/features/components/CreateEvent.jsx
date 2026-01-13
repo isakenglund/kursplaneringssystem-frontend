@@ -487,7 +487,7 @@ export default function CreateEvent({
 
                             <div className="flex justify-end gap-2 mt-4">
                                 {categoryType === "COURSE" && (
-                                    <div className="mt-2">
+                                    <div className="mr-auto">
                                         <TeacherPicker
                                             selectedTeachers={selectedTeachers}
                                             setSelectedTeachers={setSelectedTeachers}

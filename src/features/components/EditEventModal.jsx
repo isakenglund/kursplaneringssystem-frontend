@@ -134,13 +134,9 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
                             onChange={(e) => setDescription(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
+                        <div className="flex justify-end gap-2 mt-4">
                         {isCourseEvent &&
-                            (<div className="mt-4">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    {selectedTeachers.map(teacher => (
-                                        <span key={teacher.id}>{teacher.name} </span>
-                                    ))}
-                                </label>
+                            <div className="mr-auto">
                                 <TeacherPicker
                                     teachers={teachers}
                                     loading={loading}
@@ -150,16 +146,16 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
                                     onCreate={() => setIsCreateTeacherModalOpen(true)}
                                     onDelete={handleDeleteTeacher}
                                 />
-                            </div>)}
+                            </div>
+                            }
 
-                    </div>
-                    <div className="flex justify-end gap-2 mt-4">
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                            Spara
-                        </button>
-                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
-                            Avbryt
-                        </button>
+                            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                Spara
+                            </button>
+                            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
+                                Avbryt
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
