@@ -66,7 +66,7 @@ export default function LeftSidebar({
 
 
     return (
-        <div className="w-96 h-full bg-slate-50 border-r border-gray-200 p-0 flex flex-col overflow-y-auto">
+        <div className="w-96 h-full flex flex-col overflow-y-auto p-4">
 
             {isCategoryModalOpen && (
                 <CreateCategory

@@ -681,7 +681,12 @@ if(clientX < centerX) {
                         smartNext: {
                             icon: 'chevron-right',
                             click: () => handleCustomDateChange('next')
-                        }
+                        },
+                        smartWeekendsToggle: {
+                            text: weekendsVisible ? 'Dölj helg' : 'Visa helg',
+                            click: () => handleWeekendsToggle()
+                        },
+
                     }}
                     dayHeaderFormat={{
                         weekday: 'short',
@@ -692,7 +697,7 @@ if(clientX < centerX) {
                     headerToolbar={{
                         left: 'smartPrev,smartNext,today',
                         center: 'title',
-                        right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay'
+                        right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay smartWeekendsToggle'
                     }}
                     height="100%"
                     expandRows={true}

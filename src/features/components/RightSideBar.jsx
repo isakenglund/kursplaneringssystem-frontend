@@ -5,8 +5,6 @@ import makeAnimated from 'react-select/animated'
 
 export default function RightSideBar({
                                          currentEvents,
-                                         weekendsVisible,
-                                         handleWeekendsToggle,
                                          selectedCategories,
                                          setSelectedCategories,
                                          listOfCategories,
@@ -53,28 +51,10 @@ vacation,
     if(!showRightSidebar){return null}
 
     return (
-        <div className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-96" : "w-0"}`} >
-        <div
-            className={` bg-slate-50 border-l border-gray-200 p-6 flex flex-col h-full overflow-y-auto transition-transform duration-300 
-            ${showRightSidebar ? "translate-x-0" : "translate-x-full"
-                }`}
-        >
-            <div className='demo-app-sidebar-section pt-6 border-t border-gray-200'>
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                    <input
-                        type='checkbox'
-                        checked={weekendsVisible}
-                        onChange={handleWeekendsToggle}
-                        className="
-                             h-5 w-5 rounded-md border border-gray-400 accent-blue-600
-                             flex items-center justify-center">
+        <div className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-96" : "w-0"} p-4`} >
 
-                    </input>
-                    <span className="text-lg font-bold text-gray-600">Visa helger</span>
-                </label>
-            </div>
 
-            <div className='pt-6 border-t border-gray-200'>
+            <div>
                 <Select
                     closeMenyOnSelect={false}
                     components={animatedComponents}
@@ -102,7 +82,6 @@ vacation,
                     ))}
                 </ul>
             </div>
-        </div>
         </div>
     )
 }
