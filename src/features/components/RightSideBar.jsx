@@ -39,10 +39,9 @@ vacation,
     function SidebarEvent({event}) {
         return (
             <>
-                <li className="text-xs text-gray-600 p-2 rounded border-l-4"
+                <li className="text-gray-600 rounded border-l-4 border border-gray-200"
                     style={{ borderLeftColor: event.backgroundColor }}>
-                    <b>{formatDate(event.start, {year: 'numeric', month: 'short', day: 'numeric'})}</b>
-                    <span className="block italic">{event.title}</span>
+                    <b className="ml-3">{formatDate(event.start, {year: 'numeric', month: 'short', day: 'numeric'})}</b><span className="italic"> {event.title}</span>
                 </li>
             </>
         )
@@ -51,24 +50,21 @@ vacation,
     if(!showRightSidebar){return null}
 
     return (
-        <div className={`h-full overflow-hidden transition-[width] duration-300 ${showRightSidebar ? "w-96" : "w-0"} p-4`} >
-
-
-            <div>
-                <Select
-                    closeMenyOnSelect={false}
-                    components={animatedComponents}
-                    isMulti
-                    isLoading={loadingCourses}
-                    onChange={(selectedOptions) => setSelectedCategories(selectedOptions)}
-                    options={listOfCategories.map(category => ({value: category.id, label: category.name}))}
-                    placeholder="Filtrera på kategorier..."
-                />
-            </div>
+        <div className="w-96 h-full flex flex-col overflow-y-auto p-4" >
 
                 <div className='demo-app-sidebar-section'>
+                        <Select
+                            closeMenyOnSelect={false}
+                            components={animatedComponents}
+                            isMulti
+                            isLoading={loadingCourses}
+                            onChange={(selectedOptions) => setSelectedCategories(selectedOptions)}
+                            options={listOfCategories.map(category => ({value: category.id, label: category.name}))}
+                            placeholder="Filtrera på kategorier..."
+                        />
+
                     <h2
-                        className={`text-lg font-bold mb-3 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
+                        className={`text-lg font-bold pt-4 mb-2 ${Number(activeCount) === Number(totalCount) ? "text-green-600" : "text-gray-700"
                             }`}
                     >
                         Aktiva i kalendern {activeCount} / {totalCount}

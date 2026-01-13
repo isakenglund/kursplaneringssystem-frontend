@@ -79,7 +79,7 @@ export default function LeftSidebar({
                     refetchMisc={refetchMiscs}/>
             )}
 
-            <div className='demo-app-sidebar-section mb-8'>
+            <div className='demo-app-sidebar-section'>
                 <button
                     className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
                     onClick={() => setIsCategoryModalOpen(true)}>Skapa kategori
