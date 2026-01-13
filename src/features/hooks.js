@@ -444,6 +444,7 @@ export function useGetTeachers() {
             setErr(null);
             try {
                 const res = await API.updateMiscEvent(miscEvent);
+                
                 setData(pickList(res));
                 return res;
             } catch (e) {

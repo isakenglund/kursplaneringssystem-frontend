@@ -21,6 +21,7 @@
     import '../Calendar.css'
     import RightSideBar from "../components/RightSideBar.jsx";
     import { confirmCustom, alertCustom } from '../functions/alertFunctions.jsx'
+import HoverModal from '../components/HoverModal.jsx'
 
     export default function DemoApp() {
         const [weekendsVisible, setWeekendsVisible] = useState(true)
@@ -55,6 +56,8 @@
 
         const [showLeftSidebar, setShowLeftSidebar] = useState(true);
         const [showRightSidebar, setShowRightSidebar] = useState(true);
+
+        const [hoverData, setHoverData] = useState(null);
 
         const { holidayEvents, holidaySet } = useMemo(() => {
             if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -264,7 +267,9 @@
             const calendar = info.view.calendar;
             const movedEventStart = info.event.start;
             const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
-
+if (!info.event.end) {
+  info.event.setEnd(movedEventEnd); 
+}
         
 
             if (isCourseEvent) {
@@ -401,9 +406,9 @@
             }
             if (isCourseEvent) {
                 
-                const ok = await updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
+                updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
             } else if (isMiscEvent) {
-                await updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
+                updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
                 
             } else {
                 await alertCustom("Något blev fel");
@@ -513,6 +518,24 @@
             setCurrentEvents(events)
         }
 
+        const handleEventMouseEnter = (info) => {
+            //if (info.event.id?.startsWith("holiday-")) return;
+
+            const offset = 12;
+            setHoverData({
+                event: info.event,
+                x: info.jsEvent.clientX + offset,
+                y: info.jsEvent.clientY + offset,
+            });
+        };
+
+
+        const handleEventMouseLeave = () => {
+            setHoverData(null);
+        };
+        
+
+
         return (
             <div className='demo-app relative h-screen flex'>
 
@@ -610,6 +633,8 @@
 
                     <FullCalendar
                         ref={calendarRef}
+                        defaultTimedEventDuration="01:00:00"
+                        defaultAllDayEventDuration={{ days: 1 }}
                         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
                         views={{
                             customTwoWeeks: {
@@ -694,8 +719,14 @@
                         eventColor={function (info) {
                             return info.event.extendedProps.color; // use the color you passed
                         }}
+                        eventMouseEnter={handleEventMouseEnter}
+                        eventMouseLeave={handleEventMouseLeave}
                     />
-
+                    <HoverModal 
+                        hoverData={hoverData} 
+                        listOfCourses={listOfCourses} 
+                        listOfMiscs={listOfMiscs} 
+                    />
                 </div>
 
                 <RightSideBar

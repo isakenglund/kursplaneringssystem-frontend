@@ -77,6 +77,15 @@ export default function CreateEvent({
         setOpenTeachers(prev => ({ ...prev, [eventId]: !prev[eventId] }));
     };
 
+
+    const openEventSection = (sectionId) => {
+  setShowExpandedEvents(prev => {
+    if (prev[sectionId]) return prev; // already open -> do nothing
+    return { ...prev, [sectionId]: true };
+  });
+};
+
+
     const toggleEventSection = (sectionId) => {
         setShowExpandedEvents(prev => ({
             ...prev,
@@ -244,7 +253,8 @@ export default function CreateEvent({
                             : c
                     )
                 );
-                toggleEventSection(`course-${categoryId}`);
+                openEventSection(`course-${categoryId}`);
+
                 await refetchCourses(); // säkerställer att course.event blir korrekt från backend
 
             } else {
@@ -268,7 +278,8 @@ export default function CreateEvent({
                             : m
                     )
                 );
-                toggleEventSection(`misc-${categoryId}`);
+                openEventSection(`misc-${categoryId}`);
+
                 await refetchMiscs();
 
             }
@@ -310,8 +321,10 @@ export default function CreateEvent({
                                     title: event.name,
                                     start: event.startDate || event.startTime,
                                     end: event.endDate || event.endTime,
+                                    duration: (!event.endDate && !event.endTime) ? "01:00" : undefined,
                                     courseId: type === "COURSE" ? parentCategory.id : undefined,
                                     miscId: type !== "COURSE" ? parentCategory.id : undefined,
+                                    description: event.description,
                                     color: parentCategory.colorHex || "#3b82f6",
                                     teachers: event.teachers,
                                 }),

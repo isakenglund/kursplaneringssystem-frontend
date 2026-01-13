@@ -51,7 +51,7 @@ export const API = {
         })
     },),
 
-    updateCourse: (course) => api (`/courses/${course.id}`, {
+    updateCourse: (course) => api(`/courses/${course.id}`, {
         method: "PUT",
         body: JSON.stringify({
             id: course.id,
@@ -63,7 +63,7 @@ export const API = {
         })
     }),
 
-    updateMisc: (misc) => api (`/miscs/${misc.id}`, {
+    updateMisc: (misc) => api(`/miscs/${misc.id}`, {
         method: "PUT",
         body: JSON.stringify({
             id: misc.id,
@@ -89,10 +89,10 @@ export const API = {
         method: "POST",
         body: JSON.stringify({
             description: miscEvent.description,
-            endDate: miscEvent.endDate,
             name: miscEvent.name,
-            startDate: miscEvent.startDate,
-            miscId: miscEvent.miscId,
+            startTime: miscEvent.startTime ?? miscEvent.startDate ?? null,
+            endTime: miscEvent.endTime ?? miscEvent.endDate ?? null,
+            miscId: miscEvent.miscId ?? miscEvent.categoryId?.id ?? null,
         })
     }),
 
@@ -119,14 +119,15 @@ export const API = {
         })
     }),
 
-    updateMiscEvent: (miscEvent) => api ('/misc-events', {
+    updateMiscEvent: (miscEvent) => api('/misc-events', {
         method: "PUT",
         body: JSON.stringify({
-            description: miscEvent.description,
-            endDate: miscEvent.endDate,
+            id: miscEvent.id,
             name: miscEvent.name,
-            startDate: miscEvent.startDate,
-            miscId: miscEvent.courseId,
+            description: miscEvent.description,
+            startTime: miscEvent.startTime ?? miscEvent.startDate ?? null,
+            endTime: miscEvent.endTime ?? miscEvent.endDate ?? null,
+            miscId: miscEvent.miscId ?? miscEvent.categoryId?.id ?? null,
         })
     }),
 
