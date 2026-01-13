@@ -40,7 +40,7 @@ export default function DemoApp() {
 
     const { data: listOfCourses, loading: loadingCourses, setData: setCourses, refetch: refetchCourses } = useGetCourses();
     const { data: listOfMiscs, loading: loadingMiscs, setData: setMiscs, refetch: refetchMiscs } = useGetMiscs();
-    const { teachers, loading, err, refetch: refetchTeachers } = useGetTeachers();;
+    const { teachers, loading, err, refetch: refetchTeachers } = useGetTeachers();
     const { data: vacations = [], refetch: refetchVacation } = useGetVacation();
     const { data: holidays = [] } = useGetHolidays();
     const [dateRange, setDateRange] = useState({
@@ -58,6 +58,8 @@ export default function DemoApp() {
     const [showRightSidebar, setShowRightSidebar] = useState(true);
 
     const [hoverData, setHoverData] = useState(null);
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -404,12 +406,21 @@ export default function DemoApp() {
                 return false;
             }
         }
+
+
         if (isCourseEvent) {
+            await updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
 
-            updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
+            // Give backend time to commit/propagate before reloading
+            await sleep(250);
+            console.log("validateEventDrop -> refetchCourses");
+            refetchCourses();
         } else if (isMiscEvent) {
-            updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
+            await updateMiscEventTime(movedEventId, movedEventStart, movedEventEnd);
 
+            await sleep(250);
+            console.log("validateEventDrop -> refetchMiscs");
+            refetchMiscs();
         } else {
             await alertCustom("Något blev fel");
         }
@@ -456,16 +467,24 @@ export default function DemoApp() {
 
         if (isCourseEvent) {
             await updateCourseEventEndTime(event.id, event.end);
+
+            await sleep(250);
+            console.log("handleEventResize -> refetchCourses");
+            refetchCourses();
         } else if (isMiscEvent) {
             await updateMiscEventEndTime(event.id, event.end);
+
+            await sleep(250);
+            console.log("handleEventResize -> refetchMiscs");
+            refetchMiscs();
         } else {
             await alertCustom("Något blev fel");
         }
-
     }
 
     async function handleEventClick(clickInfo) {
         const { event } = clickInfo;
+
         const isHoliday =
             event.extendedProps?.wrapText &&
             event.id?.startsWith("holiday-");
@@ -484,6 +503,7 @@ export default function DemoApp() {
             if (isVacation) {
                 const vacationId = event.id.replace("vacation-", "");
                 await deleteVacation(vacationId);
+                console.log("handleEventClick -> refetchVacation");
                 await refetchVacation();
             } else {
                 const eventId = parseInt(event.id, 10);
@@ -498,8 +518,16 @@ export default function DemoApp() {
                 }
                 if (parent.type === "COURSE") {
                     await updateCourseEventTime(eventId, null, null);
+
+                    await sleep(250);
+                    console.log("handleEventClick -> refetchCourses");
+                    refetchCourses();
                 } else if (parent.type === "MISC" || parent.type === "MEETING") {
                     await updateMiscEventTime(eventId, null, null);
+
+                    await sleep(250);
+                    console.log("handleEventClick -> refetchMiscs");
+                    refetchMiscs();
                 } else {
                     await alertCustom("Kunde inte ta bort händelsen okänd typ");
                     return;
