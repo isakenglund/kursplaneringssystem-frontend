@@ -80,6 +80,7 @@ export const API = {
             startDate: courseEvent.startDate,
             courseId: courseEvent.courseId,
             teachers: courseEvent.teachers,
+            displayIndex: courseEvent.displayIndex
         })
     }),
 

@@ -4,7 +4,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-ki
 import { SortableEventItem } from "./SortableEventItem.jsx";
 
 // Lägg till onOrderChange i props
-export default function EventList({ eventsArray, parentCategory, type, isEventOnCalendar, onEditClick, onRemoveClick, onOrderChange }) {
+export default function EventList({ eventsArray, parentCategory, type, isEventOnCalendar, isEventFiltered, onEditClick, onRemoveClick, onOrderChange }) {
     const [items, setItems] = useState([]);
 
     // 1. SORTERA listan när vi får in ny data från props
@@ -70,13 +70,13 @@ export default function EventList({ eventsArray, parentCategory, type, isEventOn
                     items={items.map(item => item.id)}
                     strategy={verticalListSortingStrategy}
                 >
-                    {items.map((event, index) => (
+                    {items.map((event) => (
                         <SortableEventItem
                             key={event.id}
                             event={event}
-                            index={index} // Detta används för visning (1, 2, 3...)
                             parentCategory={parentCategory}
                             type={type}
+                            isEventFiltered={isEventFiltered}
                             isEventOnCalendar={isEventOnCalendar}
                             onEdit={onEditClick}
                             onRemove={onRemoveClick}
