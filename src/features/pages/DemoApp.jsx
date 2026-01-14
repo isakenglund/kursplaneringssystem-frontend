@@ -66,6 +66,7 @@ export default function DemoApp() {
     const [hoverData, setHoverData] = useState(null);
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+    const hoverTimeoutRef = useRef(null);
 
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -543,39 +544,54 @@ export default function DemoApp() {
     function handleEvents(events) {
         setCurrentEvents(events)
     }
-
-    const handleEventMouseEnter = (info) => {
-        const MODAL_WIDTH = 320;   // w-80
-        const MODAL_HEIGHT = 180;  // adjust if your modal height differs
-        const {innerWidth, innerHeight} = window;
-        const {clientX, clientY} = info.jsEvent;
-        let {xOffset, yOffset} = 0;
-
-        const centerX = innerWidth / 2;
-        const centerY = innerHeight / 2;
-
-        if (clientX < centerX) {
-            xOffset = MODAL_HEIGHT / 2
-        } else {
-            xOffset = -MODAL_HEIGHT / 2
-        }
-
-        if (clientY < centerY) {
-            yOffset = MODAL_HEIGHT / 2
-        } else {
-            yOffset = -MODAL_HEIGHT / 2
-        }
-
-        setHoverData({
-            event: info.event,
-            x: clientX - MODAL_WIDTH / 2 + xOffset,
-            y: clientY - MODAL_HEIGHT / 2 + yOffset,
-        });
-    };
-
-    const handleEventMouseLeave = () => {
+    const hideHover = () => {
+        clearTimeout(hoverTimeoutRef.current);
         setHoverData(null);
     };
+
+
+    const handleEventMouseEnter = (info) => {
+        const MODAL_WIDTH = 320;
+        const MODAL_HEIGHT = 180;
+
+        const { innerWidth, innerHeight } = window;
+        const { clientX, clientY } = info.jsEvent;
+
+        clearTimeout(hoverTimeoutRef.current);
+
+        hoverTimeoutRef.current = setTimeout(() => {
+            let xOffset = 0;
+            let yOffset = 0;
+
+            const centerX = innerWidth / 2;
+            const centerY = innerHeight / 2;
+
+            if (clientX < centerX) {
+                xOffset = MODAL_HEIGHT / 2;
+            } else {
+                xOffset = -MODAL_HEIGHT / 2;
+            }
+
+            if (clientY < centerY) {
+                yOffset = MODAL_HEIGHT / 2;
+            } else {
+                yOffset = -MODAL_HEIGHT / 2;
+            }
+
+            setHoverData({
+                event: info.event,
+                x: clientX - MODAL_WIDTH / 2 + xOffset,
+                y: clientY - MODAL_HEIGHT / 2 + yOffset,
+            });
+        }, 400);
+    };
+
+
+    const handleEventMouseLeave = hideHover;
+    const handleEventDragStart = hideHover;
+    const handleEventResizeStart = hideHover;
+
+
 
     return (
         <div className='demo-app relative h-screen flex'>
@@ -763,6 +779,8 @@ export default function DemoApp() {
                     }}
                     eventMouseEnter={handleEventMouseEnter}
                     eventMouseLeave={handleEventMouseLeave}
+                    eventDragStart={handleEventDragStart}
+                    eventResizeStart={handleEventResizeStart}
                 />
                 <HoverModal
                     hoverData={hoverData}

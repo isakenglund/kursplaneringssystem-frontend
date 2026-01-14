@@ -83,6 +83,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
                 endTime: event.endTime ?? event.endDate,
                 courseId: event.categoryId?.id,
                 teachers: selectedTeachers,
+                displayIndex: event.displayIndex,
             };
              const updatedEvent = await saveCourse(payload);
             onSaved?.(updatedEvent);
@@ -96,6 +97,7 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
                 startTime: event.startTime ?? event.startDate,
                 endTime: event.endTime ?? event.endDate,
                 miscId: event.categoryId?.id,
+                displayIndex: event.displayIndex,
             };
 
             const updatedEvent = await saveMisc(payload);
