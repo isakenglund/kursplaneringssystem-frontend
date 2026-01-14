@@ -262,8 +262,8 @@ export default function CreateEvent({
                 const payload = {
                     name,
                     description,
-                    startTime: startDate,
-                    endTime: endDate,
+                    startTime: null,
+                    endTime: null,
                     courseId: categoryId,
                     teachers: selectedTeachers,
                     displayIndex: nextDisplayIndex,
@@ -290,8 +290,8 @@ export default function CreateEvent({
                 const payload = {
                     name,
                     description,
-                    startTime: startDate,
-                    endTime: endDate,
+                    startTime: null,
+                    endTime: null,
                     miscId: categoryId,
                     displayIndex: nextDisplayIndex,
                 }
