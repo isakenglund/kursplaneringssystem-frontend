@@ -23,8 +23,7 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
     const { data: savedVacation, loading: savingCourse, err: courseSaveErr, save: saveVacation } = useSaveVacation();
     const { data: savedCourse, loading: savingVacation, err: vacationSaveErr, save: saveCourse } = useSaveCourse();
 
-
-
+    const startAfterEnd = new Date(startDate) > new Date(endDate);
 
     const handleColorHex = (colorHex) => {
         setColorHex(colorHex);
@@ -80,10 +79,18 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                             value={name}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="T.ex Datasystem"
+                            maxLength={50}
                             onChange={(t) => {
                                 setName(t.target.value)
                             }}
                         />
+                        <p className={`${name.length === 50
+                                        ? "text-xs text-red-500"
+                                        : "text-xs text-gray-500 "
+                                        }`}>
+                            {name.length} / 50 
+                            {name.length === 50 && (<span> Max längd nådd</span>)}
+                        </p>
                     </div>
                 )}
                  {categoryType !== "vacation" && categoryType === "misc" &&(
@@ -225,18 +232,22 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                             />
                         </div>
                         {/* Datum-varningar */}
-                        {new Date(startDate) > new Date(endDate) && (
-                            <p className="text-red-600 text-sm">⚠️ Startdatum är efter slutdatum</p>
+                        {startAfterEnd && (
+                            <p className="text-red-600 text-sm">⚠️ Error: Startdatum är efter slutdatum</p>
                         )}
 
-                        {new Date(startDate) < new Date(todayDate) && (
-                            <p className="text-red-600 text-sm">⚠️ Startdatum är före dagens datum</p>
-                        )}
                     </div>
                 )}
                 <div className="flex justify-end gap-2 mt-4">
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                            onClick={handleCreateClick}>Skapa
+                    <button 
+                        className={`px-4 py-2 rounded text-white transition
+                                        ${startAfterEnd
+                                        ? "bg-red-600 cursor-not-allowed"
+                                        : "bg-blue-600 hover:bg-blue-700"
+                                        }`}
+                        onClick={handleCreateClick}
+                        disabled={startAfterEnd}>
+                            Skapa
                     </button>
                     <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
                             onClick={() => setIsCategoryModalOpen(false)}>Avbryt

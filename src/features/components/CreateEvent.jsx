@@ -482,7 +482,7 @@ export default function CreateEvent({
                                         className="flex items-center p-2 cursor-pointer hover:bg-gray-100 rounded-lg select-none "
                                         onClick={() => toggleEventSection(toggleEventsId)}
                                     >
-                                        <div className="flex items-center gap-2 mr-auto">
+                                        <div className="flex items-center gap-2 mr-auto min-w-0">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 viewBox="0 0 20 20"
@@ -494,7 +494,9 @@ export default function CreateEvent({
                                                       clipRule="evenodd" />
                                             </svg>
 
-                                            <h2 className="text-base font-bold text-gray-700">{course.name}</h2>
+                                            <h2 className="text-base font-bold text-gray-700 flex-1 min-w-0 break-words [overflow-wrap:anywhere]">
+                                                {course.name}
+                                            </h2>
                                         </div>
 
                                         <div className="flex items-center gap-2">

@@ -6,9 +6,6 @@ export default function HoverModal({ hoverData, listOfCourses, listOfMiscs }) {
 
     const { x, y, event } = hoverData;
 
-    console.log("HoverModal event:", event);
-    console.log("event endtime:", event.end);
-
     const baseColor =
         event.backgroundColor ||
         event.borderColor ||
