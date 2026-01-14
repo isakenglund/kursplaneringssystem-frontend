@@ -23,6 +23,12 @@ import RightSideBar from "../components/RightSideBar.jsx";
 import { confirmCustom, alertCustom } from '../functions/alertFunctions.jsx'
 import HoverModal from '../components/HoverModal.jsx'
 
+/**
+ * Main application page (orchestrator).
+ * Owns the high-level UI state and composes the calendar view, sidebars, and modals.
+ * Responsible for fetching data via hooks, transforming it into calendar events,
+ * and wiring up FullCalendar interactions (click, drag/drop, resize, hover).
+ */
 export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])

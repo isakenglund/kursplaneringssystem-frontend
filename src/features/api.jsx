@@ -1,5 +1,10 @@
 import { api } from "../lib/fetcher.jsx";
 
+/**
+ * Backend API client (thin wrapper).
+ * Exposes functions for CRUD operations on categories, events, teachers/persons, holidays, and vacations.
+ * All network calls are delegated to a shared fetcher to keep request/response handling consistent.
+ */
 export const API = {
 
     courses: () => api('/courses', {

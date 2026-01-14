@@ -3,6 +3,11 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { SortableEventItem } from "./SortableEventItem.jsx";
 
+/**
+ * Event list component.
+ * Renders a list of events (often grouped by category) and delegates actions such as
+ * select, edit, delete, and drag handles to child components or callbacks.
+ */
 // Lägg till onOrderChange i props
 export default function EventList({ eventsArray, parentCategory, type, isEventOnCalendar, isEventFiltered, onEditClick, onRemoveClick, onOrderChange }) {
     const [items, setItems] = useState([]);

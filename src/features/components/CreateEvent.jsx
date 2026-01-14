@@ -18,10 +18,13 @@ import {
     useReorderCourseEvents,
 } from "../hooks.js";
 
-
-
-
-
+/**
+ * Sidebar event/category browser and event creation launcher.
+ * Displays categories (courses/miscs) with their events and provides controls to:
+ * - expand/collapse category event lists
+ * - open create/edit dialogs
+ * - expose external draggable event templates for the calendar
+ */
 export default function CreateEvent({
                                         draggableContainerRef,
                                         currentEvents,

@@ -1,3 +1,7 @@
+/**
+ * Reusable "Remove/Delete" icon/button component.
+ * Encapsulates styling and click handling for destructive actions used across the UI.
+ */
 export default function ButtonRemove({ onClick }) {
     return(
     <button

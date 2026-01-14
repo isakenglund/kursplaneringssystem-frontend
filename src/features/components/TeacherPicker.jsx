@@ -2,7 +2,11 @@ import {useEffect, useRef, useState} from "react";
 
 import { CheckIcon, UserPlusIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
 
-
+/**
+ * Teacher multi-select dropdown.
+ * Allows selecting/unselecting teachers for an event, shows the number selected,
+ * and supports creating a new teacher or deleting an existing one via callbacks.
+ */
 export default function TeacherPicker({
                              teachers,
                             loading,

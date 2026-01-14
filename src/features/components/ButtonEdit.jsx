@@ -1,3 +1,8 @@
+
+/**
+ * Reusable "Edit" icon/button component.
+ * Encapsulates styling and click handling for edit actions used across lists and cards.
+ */
 export default function ButtonEdit({ onClick, className = "", onPointerDown}) {
     return (
         <button

@@ -3,6 +3,11 @@ import { formatDate } from "@fullcalendar/core";
 import Select from "react-select";
 import makeAnimated from 'react-select/animated'
 
+/**
+ * Right sidebar panel.
+ * Provides filtering (multi-select) by category and displays a sorted summary list of events currently in the calendar.
+ * Also shows basic counts (active vs total) to give the user a quick overview.
+ */
 export default function RightSideBar({
                                          currentEvents,
                                          selectedCategories,

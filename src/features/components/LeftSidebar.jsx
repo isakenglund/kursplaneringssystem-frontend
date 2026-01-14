@@ -3,6 +3,11 @@ import { Draggable } from "@fullcalendar/interaction";
 import CreateCategory from "./CreateCategory.jsx";
 import CreateEvent from "./CreateEvent.jsx";
 
+/**
+ * Left sidebar panel.
+ * Hosts category creation and the draggable external events area.
+ * Sets up FullCalendar Draggable integration so items can be dragged into the calendar.
+ */
 export default function LeftSidebar({
     currentEvents,
     removeExternalEvent,

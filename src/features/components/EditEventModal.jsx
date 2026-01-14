@@ -5,6 +5,11 @@ import { alertCustom, confirmCustom } from "../functions/alertFunctions.jsx";
 import { useGetTeachers, useDeleteTeacher } from "../hooks.js";
 import CreateTeacherModal from "./CreateTeacherModal.jsx";
 
+/**
+ * Modal dialog for editing an existing event.
+ * Supports both course events and misc events, building the correct update payload per type.
+ * For course events, also supports selecting teachers and managing teacher creation/deletion.
+ */
 export default function EditEventModal({ selectedTeachers, setSelectedTeachers, event, onClose, onSaved,
     teachers, loading, err, refetch
 }) {

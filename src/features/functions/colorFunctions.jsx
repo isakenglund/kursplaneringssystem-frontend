@@ -1,3 +1,8 @@
+/**
+ * Color utility functions.
+ * Includes helpers for parsing colors, computing luminance, generating lighter backgrounds,
+ * and choosing a readable text color for a given background color.
+ */
 export function parseColorToRGB(color) {
   if (!color) return { r: 255, g: 255, b: 255 };
 

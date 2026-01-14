@@ -1,3 +1,7 @@
+/**
+ * Modal dialog for creating a new event under a selected category.
+ * Collects basic event fields (title/description) and submits them via a parent-provided handler.
+ */
 export default function CreateEventModal(
     categoryName=categoryName,
     handleFormSubmit=handleFormSubmit,

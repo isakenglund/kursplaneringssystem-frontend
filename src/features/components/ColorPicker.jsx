@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { HexColorPicker } from "react-colorful";
 
+/**
+ * Color picker input component.
+ * Lets the user choose a color via a visual picker and a hex input field.
+ * Notifies the parent when the color changes, and handles closing when clicking outside.
+ */
 export default function ColorPicker({ handleColorHex, categoryToEdit }) {
   const [color, setColor] = useState(categoryToEdit?.colorHex ||"#0077ff");
   const [showPicker, setShowPicker] = useState(false);

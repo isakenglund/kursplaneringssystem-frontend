@@ -1,6 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import {API} from './api';
 
+/**
+ * Data-fetching and mutation hooks for the application.
+ * Wraps API calls into React hooks that expose { data, loading, err } plus action functions and refetch helpers.
+ * Centralizes client-side data access patterns to keep UI components clean and consistent.
+ */
+
 const USE_MOCK = (import.meta.env?.VITE_USE_MOCK ?? 'true') === 'false';
 
 const MOCK = {

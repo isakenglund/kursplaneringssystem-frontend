@@ -1,6 +1,11 @@
 import React, {useState, useEffect} from "react";
 import ColorPicker from "./ColorPicker.jsx";
 
+/**
+ * Modal dialog for editing an existing category (course or misc).
+ * Initializes form state from the selected category, validates updates, and returns
+ * the updated payload to the parent via callbacks for persistence.
+ */
 export default function EditCategoryModal({categoryToEdit, onClose, onSaved}) {
 
     const isCourse = (categoryToEdit.type || "").toUpperCase() === "COURSE";

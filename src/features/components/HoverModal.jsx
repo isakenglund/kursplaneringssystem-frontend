@@ -1,6 +1,11 @@
 import React, { useMemo } from "react";
 import { getReadableTextColor, lightenColor, getRelativeLuminance, parseColorToRGB } from '../functions/colorFunctions.jsx';
 
+/**
+ * Calendar hover tooltip/modal.
+ * Displays contextual details about a hovered calendar event (time, description, teachers, parent category),
+ * and adapts styling (background/text color) based on the event color for readability.
+ */
 export default function HoverModal({ hoverData, listOfCourses, listOfMiscs }) {
     if (!hoverData) return null;
 

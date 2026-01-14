@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import {useSaveTeacher} from "../hooks.js";
 
+/**
+ * Modal dialog for creating a new teacher/person.
+ * Collects teacher details and persists them via a hook.
+ * Notifies the parent when the teacher is created so the UI can refresh and/or auto-select them.
+ */
 export default function CreateTeacherModal({ onClose, onSaved }) {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");

@@ -1,3 +1,8 @@
+/**
+ * Event transformation utilities.
+ * Contains helpers to convert backend event/category data into the shape expected by FullCalendar,
+ * and to normalize/format event fields used across the UI.
+ */
 
 let eventGuid = 0
 let todayStr = new Date().toISOString().replace(/T.*$/, '') // YYYY-MM-DD of today

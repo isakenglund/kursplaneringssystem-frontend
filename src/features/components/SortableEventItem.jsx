@@ -4,7 +4,12 @@ import { CSS } from "@dnd-kit/utilities";
 import ButtonEdit from "./ButtonEdit.jsx";
 import ButtonRemove from "./ButtonRemove.jsx";
 
-// En enkel ikon för handtaget
+/**
+ * Sortable/draggable event list item.
+ * Represents a single event entry in a list with drag affordances and action controls.
+ * Used when events need to be reordered or dragged as templates.
+ */
+
 const DragHandleIcon = () => (
     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />

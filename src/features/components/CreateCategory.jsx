@@ -4,6 +4,11 @@ import { useSaveCourse, useSaveVacation, useSaveMisc } from "../hooks.js";
 import VacationPicker from "./VacationPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
 
+/**
+ * Category creation modal.
+ * Handles creating new categories (e.g., course, misc, vacation) by collecting form input,
+ * validating required fields, and calling parent callbacks to persist and refresh data.
+ */
 export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate, onCreated, refetchVacation , refetchCourse, refetchMisc}) {
 
     const today = new Date();
