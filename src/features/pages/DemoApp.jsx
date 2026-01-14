@@ -481,6 +481,47 @@ export default function DemoApp() {
         }
     }
 
+    async function handleRemoveAll() {
+        const selectedNames =
+            selectedCategories && selectedCategories.length > 0
+                ? selectedCategories
+                    .map(c => c?.label ?? c?.name ?? c?.value)
+                    .filter(Boolean)
+                    .join(", ")
+                : "alla kategorier";
+
+        const confirmed = await confirmCustom(
+            `Är du säker på att du vill rensa aktiva event för ${selectedNames}?`
+        );
+        if (!confirmed) return;
+
+
+        for (const e of filteredPersistantEvents) {
+            const eventId = parseInt(e.id, 10);
+            if (Number.isNaN(eventId)) continue;
+
+            const isCourseEvent = !!e.extendedProps?.courseId;
+            const isMiscEvent = !!e.extendedProps?.miscId;
+
+            try {
+                if (isCourseEvent) {
+                    await updateCourseEventTime(eventId, null, null);
+                } else if (isMiscEvent) {
+                    await updateMiscEventTime(eventId, null, null);
+
+                } else {
+                    await alertCustom("Kunde inte ta bort händelsen (okänd typ)");
+                }
+            } catch (err) {
+                console.error("handleRemoveAll failed for event:", eventId, err);
+                await alertCustom("Kunde inte uppdatera händelsen");
+            }
+        }
+        await sleep(250);
+        await refetchCourses();
+        await refetchMiscs();
+    }
+
     async function handleEventClick(clickInfo) {
         const { event } = clickInfo;
 
@@ -719,6 +760,10 @@ export default function DemoApp() {
                             text: weekendsVisible ? 'Dölj helg' : 'Visa helg',
                             click: () => handleWeekendsToggle()
                         },
+                        smartRemoveEvents: {
+                            text: 'Rensa Events',
+                            click: () => handleRemoveAll()
+                        },
 
                     }}
                     dayHeaderFormat={{
@@ -728,7 +773,7 @@ export default function DemoApp() {
                         omitCommas: true
                     }}
                     headerToolbar={{
-                        left: 'smartPrev,smartNext,today',
+                        left: 'smartPrev,smartNext,today smartRemoveEvents',
                         center: 'title',
                         right: 'customInterval,customMultiMonth,customTwoWeeks,timeGridWeek,timeGridDay smartWeekendsToggle'
                     }}
