@@ -68,13 +68,15 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
                 }),
             })}
         >
-            <div
-                {...attributes}
-                {...listeners}
-                className="p-2 cursor-grab active:cursor-grabbing hover:text-gray-600 border-r border-gray-100 touch-none"
-            >
-                <DragHandleIcon />
-            </div>
+            {!disabled && (
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="p-2 cursor-grab active:cursor-grabbing hover:text-gray-600 border-r border-gray-100 touch-none"
+                >
+                    <DragHandleIcon />
+                </div>
+            )}
             <div className={`flex-1 p-2 min-w-0 flex flex-col ${!disabled ? "cursor-move" : ""}`}>
                 {/* Row 1: title + buttons */}
                 <div className="flex items-center justify-between min-w-0">
