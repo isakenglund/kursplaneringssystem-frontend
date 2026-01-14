@@ -1,5 +1,11 @@
 import React from "react";
 
+/**
+ * Generic alert/confirm modal.
+ * Supports simple "OK" messages and "Confirm/Cancel" flows, returning the user choice via callbacks.
+ * Used by alert helper functions to provide promise-based dialogs.
+ */
+
 export const ALERT_TYPES = {
     OK: "ok",
     CONFIRM: "confirm",

@@ -1,29 +1,32 @@
+/**
+ * FullCalendar-specific styling overrides.
+ * Contains layout and visual tweaks needed to integrate FullCalendar with the app design system.
+ */
+
 .fc-day-mon {
     border-left: 5px solid #ccc !important;
 }
 
-.fc { /* the calendar root */
+.fc {
     width: 100%;
     max-width: none !important;
     margin: 0;
 }
 
 @layer components {
-  /* Wrap normal events */
-  .fc-event-title {
-    @apply whitespace-normal break-words;
-  }
+    .fc-event-title {
+        @apply whitespace-normal break-words;
+    }
 
-  /* Wrap background events (holidays) */
-  .fc-bg-event {
-    @apply whitespace-normal break-words;
-  }
+    .fc-bg-event {
+        @apply whitespace-normal break-words;
+    }
 
-  /* Optional: make the height auto for multi-line events */
-  .fc-daygrid-event {
-    height: auto !important;
-  }
+    .fc-daygrid-event {
+        height: auto !important;
+    }
 }
+
 .fc {
     width: 100%;
     max-width: none;

@@ -1,8 +1,11 @@
-import React from "react";
 import { createRoot } from "react-dom/client";
 import AlertModal, { ALERT_TYPES }  from "../components/AlertModal";
 
-
+/**
+ * Promise-based alert/confirm helpers.
+ * Programmatically mounts AlertModal and resolves a Promise when the user responds.
+ * Used to simplify async UI flows that require user confirmation.
+ */
 export function confirmCustom(message) {
     return new Promise((resolve) => {
         const container = document.createElement("div");
@@ -28,7 +31,6 @@ export function confirmCustom(message) {
     });
 }
 
-
 export function alertCustom(message) {
     return new Promise((resolve) => {
         const container = document.createElement("div");
@@ -37,7 +39,7 @@ export function alertCustom(message) {
         const root = createRoot(container);
 
         const handleClose = () => {
-            resolve(); // resolve the promise when OK is clicked
+            resolve();
             root.unmount();
             container.remove();
         };

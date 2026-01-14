@@ -4,7 +4,12 @@ import { useSaveCourse, useSaveVacation, useSaveMisc } from "../hooks.js";
 import VacationPicker from "./VacationPicker.jsx";
 import { alertCustom } from "../functions/alertFunctions.jsx";
 
-export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate,onCreated}) {
+/**
+ * Category creation modal.
+ * Handles creating new categories (e.g., course, misc, vacation) by collecting form input,
+ * validating required fields, and calling parent callbacks to persist and refresh data.
+ */
+export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate, onCreated, refetchVacation , refetchCourse, refetchMisc}) {
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -19,12 +24,11 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
 
-    const {data: savedMisc, loading: savingMisc, err: miscSaveErr, save: saveMisc} = useSaveMisc();
-    const { data: savedVacation, loading: savingCourse, err: courseSaveErr, save: saveVacation } = useSaveVacation();
-    const { data: savedCourse, loading: savingVacation, err: vacationSaveErr, save: saveCourse } = useSaveCourse();
+    const { save: saveMisc } = useSaveMisc();
+    const { save: saveVacation } = useSaveVacation();
+    const { save: saveCourse } = useSaveCourse();
 
-
-
+    const startAfterEnd = new Date(startDate) > new Date(endDate);
 
     const handleColorHex = (colorHex) => {
         setColorHex(colorHex);
@@ -47,10 +51,13 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                     endDate: endDate
                 }
                 await saveCourse(course);
+                await refetchCourse();
             } else if (categoryType === "vacation") {
                 await saveVacation({ date: vacationDate });
+                await refetchVacation();
             } else if (categoryType === "misc") {
                 await saveMisc({ type: "MISC", name, colorHex });
+                await refetchMisc();
             } else {
                 console.warn("Unknown categoryType:", categoryType);
                 return;
@@ -68,7 +75,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96 gap-y-4">
                 <h3 className="text-xl font-bold mb-4">Skapa kategori</h3>
-                {/* Kategorinamn */}
                 {categoryType !== "vacation" && categoryType === "course" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
@@ -77,10 +83,18 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                             value={name}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="T.ex Datasystem"
+                            maxLength={50}
                             onChange={(t) => {
                                 setName(t.target.value)
                             }}
                         />
+                        <p className={`${name.length === 50
+                                        ? "text-xs text-red-500"
+                                        : "text-xs text-gray-500 "
+                                        }`}>
+                            {name.length} / 50 
+                            {name.length === 50 && (<span> Max längd nådd</span>)}
+                        </p>
                     </div>
                 )}
                  {categoryType !== "vacation" && categoryType === "misc" &&(
@@ -103,7 +117,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                         vacationDate={vacationDate}
                     />
                 )}
-                {/* Radioknappar */}
                 <div className="flex gap-6 items-center text-sm text-gray-700 my-3">
                     <label className="flex items-center gap-2">
                         <input
@@ -150,10 +163,8 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                     <ColorPicker handleColorHex={handleColorHex} />
                 )}
 
-                {/* Extra fält för kurs */}
                 {categoryType === "course" && (
                     <div className="space-y-3">
-                        {/* Antal studenter */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Antal studenter:</label>
                             <input
@@ -199,7 +210,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {/* Startdatum */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Startdatum:</label>
                             <input
@@ -210,7 +220,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {/* Slutdatum */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Slutdatum</label>
                             <input
@@ -221,19 +230,22 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {/* Datum-varningar */}
-                        {new Date(startDate) > new Date(endDate) && (
-                            <p className="text-red-600 text-sm">⚠️ Startdatum är efter slutdatum</p>
+                        {startAfterEnd && (
+                            <p className="text-red-600 text-sm">⚠️ Error: Startdatum är efter slutdatum</p>
                         )}
 
-                        {new Date(startDate) < new Date(todayDate) && (
-                            <p className="text-red-600 text-sm">⚠️ Startdatum är före dagens datum</p>
-                        )}
                     </div>
                 )}
                 <div className="flex justify-end gap-2 mt-4">
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                            onClick={handleCreateClick}>Skapa
+                    <button 
+                        className={`px-4 py-2 rounded text-white transition
+                                        ${startAfterEnd
+                                        ? "bg-red-600 cursor-not-allowed"
+                                        : "bg-blue-600 hover:bg-blue-700"
+                                        }`}
+                        onClick={handleCreateClick}
+                        disabled={startAfterEnd}>
+                            Skapa
                     </button>
                     <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
                             onClick={() => setIsCategoryModalOpen(false)}>Avbryt
