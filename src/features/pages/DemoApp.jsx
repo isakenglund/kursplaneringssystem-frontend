@@ -293,7 +293,7 @@ export default function DemoApp() {
                 return false;
             }
 
-            eventList = course.event;
+            eventList = course.event.sort((a, b) => a.displayIndex - b.displayIndex);
             currentIndex = eventList.findIndex(e => e.id === movedEventId);
             if (currentIndex === -1) return true;
 
