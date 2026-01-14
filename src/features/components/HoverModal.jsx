@@ -21,7 +21,6 @@ export default function HoverModal({ hoverData, listOfCourses, listOfMiscs }) {
     const textColor = getReadableTextColor(bgColor);
     const p = event.extendedProps || {};
 
-
     function isVacationOrHoliday(event) {
         if (event.id?.startsWith("vacation-")) return true;
         else if (event.id?.startsWith("holiday-")) return true;
@@ -31,7 +30,6 @@ export default function HoverModal({ hoverData, listOfCourses, listOfMiscs }) {
     function formatDateOnly(date) {
         return new Date(date).toLocaleDateString("sv-SE");
     }
-
 
     const { parentTypeLabel, parentName } = useMemo(() => {
         if (p.courseId != null) {

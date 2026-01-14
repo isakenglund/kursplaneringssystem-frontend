@@ -18,8 +18,6 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
     const {save: saveMisc } = useUpdateMiscEvent();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("")
-    //const [selectedTeachers, setSelectedTeachers] = useState([]);
-    //const {teachers, loading, err, refetch} = useGetTeachers();
     const { remove: removeTeacher } = useDeleteTeacher();
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
 
@@ -31,7 +29,6 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
         const confirmDelete = await confirmCustom(
             `Är du säker på att du vill radera ${teacherToDelete.firstName} ${teacherToDelete.lastName} permanent?`
         );
-
 
         if (!confirmDelete) return;
 
@@ -58,7 +55,6 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
 
     useEffect(() => {
         if (event) {
-            //console.log("event", event);
             setName(event.name ?? "");
             setDescription(event.description ?? "");
 
@@ -69,7 +65,6 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
             }
         }
     }, [event]);
-
 
     async function handleFormSubmit(e) {
         e.preventDefault();
@@ -117,7 +112,6 @@ export default function EditEventModal({ selectedTeachers, setSelectedTeachers, 
         }
         refetch();
     }
-
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">

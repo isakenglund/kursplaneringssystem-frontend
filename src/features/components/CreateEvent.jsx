@@ -64,9 +64,9 @@ export default function CreateEvent({
     const [categoryName, setCategoryName] = useState("");
     const [selectedTeachers, setSelectedTeachers] = useState([]);
     const [description, setDescription] = useState("");
+    const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [name, setName] = useState("");
-    const [startDate, setStartDate] = useState(new Date());
     const [courseId, setCourseId] = useState("");
 
     const [editEventData, setEditEventData] = useState(null);
@@ -84,7 +84,6 @@ export default function CreateEvent({
         });
     };
 
-
     const toggleEventSection = (sectionId) => {
         setShowExpandedEvents(prev => ({
             ...prev,
@@ -96,36 +95,27 @@ export default function CreateEvent({
         return currentEvents.some((ce) => String(ce.id) === String(eventId));
     };
 
-    // Hämta save-funktionen från hooken
     const { saveOrder: saveCourseOrder } = useReorderCourseEvents();
 
-    // Funktion som hanterar när sorteringen är klar i listan
     const handleOrderChange = async (newEventsArray, parentId, type) => {
 
-        // 1. Extrahera ID:n i rätt ordning för att skicka till backend
         const orderedIds = newEventsArray.map(e => e.id);
 
         try {
             if (type === "COURSE") {
-                // 2. Uppdatera UI:t (state) direkt så det inte "hoppar tillbaka"
-                // Vi måste uppdatera 'courses' statet med den nya ordningen
                 setCourses(prev => prev.map(c =>
                     c.id === parentId ? { ...c, event: newEventsArray } : c
                 ));
 
-                // 3. Skicka till backend
                 await saveCourseOrder(parentId, orderedIds);
             }
             else if (type === "MISC") {
-                // Samma logik för Misc...
                 setMiscs(prev => prev.map(m =>
                     m.id === parentId ? { ...m, event: newEventsArray } : m
                 ));
-                // await saveMiscOrder(parentId, orderedIds);
             }
         } catch (error) {
             console.error("Kunde inte spara ordning:", error);
-            // Här kan man lägga till logik för att återställa ordningen vid fel (valfritt)
         }
     };
 
@@ -134,13 +124,11 @@ export default function CreateEvent({
         return !selectedCategories.some((c) => String(c.value) === String(parentCategoryId));
     };
 
-
     const handleDeleteTeacher = async (teacherToDelete) => {
 
         const confirmDelete = await confirmCustom(
             `Är du säker på att du vill radera ${teacherToDelete.firstName} ${teacherToDelete.lastName} permanent?`
         );
-
 
         if (!confirmDelete) return;
 
@@ -292,7 +280,7 @@ export default function CreateEvent({
                 );
                 openEventSection(`course-${categoryId}`);
 
-                await refetchCourses(); // säkerställer att course.event blir korrekt från backend
+                await refetchCourses();
 
             } else {
                 const misc = miscs.find(m => String(m.id) === String(categoryId));
@@ -358,7 +346,6 @@ export default function CreateEvent({
                     onRemoveClick={(event) => {
                         handleRemoveEvent(parentCategory.id, event.id, type);
                     }}
-                    // HÄR KOPPLAR VI IN DET:
                     onOrderChange={(newOrder) => handleOrderChange(newOrder, parentCategory.id, type)}
                 />
             </div>

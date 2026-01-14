@@ -26,7 +26,6 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
         isDragging
     } = useSortable({ id: event.id });
 
-    // CSS för rörelsen
     const style = {
         transform: CSS.Translate.toString(transform),
         transition,
@@ -44,7 +43,6 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
     const toggleTeachers = (eventId) => {
         setOpenTeachers(prev => ({ ...prev, [eventId]: !prev[eventId] }));
     };
-
 
     return (
         <div
@@ -83,7 +81,6 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
                 </div>
             )}
             <div className={`flex-1 p-2 min-w-0 flex flex-col ${!disabled ? "cursor-move" : ""}`}>
-                {/* Row 1: title + buttons */}
                 <div className="flex items-center justify-between min-w-0">
                     <div className="min-w-0 flex-1 mr-2">
                         <span
@@ -96,7 +93,6 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
 
                     {!disabled && (
                         <div className="flex gap-2 flex-shrink-0 ml-auto">
-                            {/* EDIT */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -126,7 +122,6 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
                                 </svg>
                             </button>
 
-                            {/* DELETE */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -154,7 +149,6 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
                     )}
                 </div>
 
-                {/* Row 2: teachers */}
                 {event.teachers?.length > 0 && (
                     <div className="mt-1 text-xs text-gray-500 pl-2">
                         <button

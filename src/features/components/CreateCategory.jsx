@@ -24,9 +24,9 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
     const [startDate, setStartDate] = useState(todayDate);
     const [endDate, setEndDate] = useState(todayDate);
 
-    const {data: savedMisc, loading: savingMisc, err: miscSaveErr, save: saveMisc} = useSaveMisc();
-    const { data: savedVacation, loading: savingCourse, err: courseSaveErr, save: saveVacation } = useSaveVacation();
-    const { data: savedCourse, loading: savingVacation, err: vacationSaveErr, save: saveCourse } = useSaveCourse();
+    const { save: saveMisc } = useSaveMisc();
+    const { save: saveVacation } = useSaveVacation();
+    const { save: saveCourse } = useSaveCourse();
 
     const startAfterEnd = new Date(startDate) > new Date(endDate);
 
@@ -75,7 +75,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96 gap-y-4">
                 <h3 className="text-xl font-bold mb-4">Skapa kategori</h3>
-                {/* Kategorinamn */}
                 {categoryType !== "vacation" && categoryType === "course" &&(
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Namn på kategorin:</label>
@@ -118,7 +117,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                         vacationDate={vacationDate}
                     />
                 )}
-                {/* Radioknappar */}
                 <div className="flex gap-6 items-center text-sm text-gray-700 my-3">
                     <label className="flex items-center gap-2">
                         <input
@@ -165,10 +163,8 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                     <ColorPicker handleColorHex={handleColorHex} />
                 )}
 
-                {/* Extra fält för kurs */}
                 {categoryType === "course" && (
                     <div className="space-y-3">
-                        {/* Antal studenter */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Antal studenter:</label>
                             <input
@@ -214,7 +210,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {/* Startdatum */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Startdatum:</label>
                             <input
@@ -225,7 +220,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {/* Slutdatum */}
                         <div className="space-y-1">
                             <label className="block text-sm font-medium text-gray-700">Slutdatum</label>
                             <input
@@ -236,7 +230,6 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                                    focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {/* Datum-varningar */}
                         {startAfterEnd && (
                             <p className="text-red-600 text-sm">⚠️ Error: Startdatum är efter slutdatum</p>
                         )}

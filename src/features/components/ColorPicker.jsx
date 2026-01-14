@@ -20,7 +20,6 @@ export default function ColorPicker({ handleColorHex, categoryToEdit }) {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // If click is inside any of these, do NOT close
       if (
         pickerRef.current?.contains(event.target) ||
         boxRef.current?.contains(event.target) ||
@@ -29,7 +28,6 @@ export default function ColorPicker({ handleColorHex, categoryToEdit }) {
         return;
       }
 
-      // Click is outside all three → close
       setShowPicker(false);
     };
 
@@ -42,7 +40,6 @@ export default function ColorPicker({ handleColorHex, categoryToEdit }) {
 
       <label className="block text-sm font-medium text-gray-600">Färg</label>
       <br></br>
-      {/* Color Box */}
       <div
         ref={boxRef}
         onClick={() => setShowPicker(!showPicker)}
@@ -50,7 +47,6 @@ export default function ColorPicker({ handleColorHex, categoryToEdit }) {
         style={{ backgroundColor: color }}
       ></div>
 
-      {/* Input Field */}
       <input
         ref={inputRef}
         type="text"
@@ -78,8 +74,6 @@ export default function ColorPicker({ handleColorHex, categoryToEdit }) {
         }}
         className="w-24 p-2 border border-gray-300 rounded font-mono"
       />
-
-      {/* Color Picker */}
 
       {showPicker && (
         <div ref={pickerRef} className="absolute mt-12 ms-15">

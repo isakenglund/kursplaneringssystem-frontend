@@ -8,16 +8,15 @@ import { CheckIcon, UserPlusIcon, PlusIcon, TrashIcon } from "@heroicons/react/2
  * and supports creating a new teacher or deleting an existing one via callbacks.
  */
 export default function TeacherPicker({
-                             teachers,
-                            loading,
-                            err,
+                                          teachers,
+                                          loading,
+                                          err,
                                           selectedTeachers,
                                           setSelectedTeachers,
                                           onCreate,
                                           onDelete,
                                       }) {
 
-    //console.log("teachers in TeacherPicker:", teachers);
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
     const isSelected = (teacher) => selectedTeachers.some((t) => t.id === teacher.id);

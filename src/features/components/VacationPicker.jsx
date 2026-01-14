@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 
 /**
  * Vacation date picker input.

@@ -30,10 +30,6 @@ export default function LeftSidebar({
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    // const { data: courses = [], isLoading: loadingCourses, refetch: refetchCourses, } = ;
-    //const { data: miscs = [], isLoading: loadingMiscs, refetch: refetchMiscs, } = ;
-
-    
 
     const [courses, setCourses] = useState([]);
     const [miscs, setMiscs] = useState([]);
@@ -51,7 +47,6 @@ export default function LeftSidebar({
         refetchMiscs();
     }
 
-
     useEffect(() => {
         if (!showLeftSidebar) return;
 
@@ -66,9 +61,7 @@ export default function LeftSidebar({
         return () => draggable.destroy();
     }, [showLeftSidebar, courses, miscs]);
 
-
     if (!showLeftSidebar) { return null }
-
 
     return (
         <div className="w-96 h-full flex flex-col overflow-y-auto p-4">

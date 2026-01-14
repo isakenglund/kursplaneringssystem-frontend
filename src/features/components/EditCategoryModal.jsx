@@ -97,11 +97,9 @@ export default function EditCategoryModal({categoryToEdit, onClose, onSaved}) {
                         />
                     </div>
 
-                    {/* Kurs-specifika fält */}
                     {isCourse && (
                         <div className="space-y-3 pt-2 border-t border-gray-100">
 
-                            {/* Antal studenter */}
                             <div className="space-y-1">
                                 <label className="block text-sm font-medium text-gray-700">Antal studenter:</label>
                                 <input
@@ -126,7 +124,6 @@ export default function EditCategoryModal({categoryToEdit, onClose, onSaved}) {
                                 />
                             </div>
 
-                            {/* Datum */}
                             <div className="space-y-1">
                                 <label className="block text-sm font-medium text-gray-700">Startdatum:</label>
                                 <input
@@ -146,7 +143,6 @@ export default function EditCategoryModal({categoryToEdit, onClose, onSaved}) {
                                 />
                             </div>
 
-                            {/* Varningar */}
                             {startDate && endDate && new Date(startDate) > new Date(endDate) && (
                                 <p className="text-red-600 text-sm">⚠️ Startdatum är efter slutdatum</p>
                             )}

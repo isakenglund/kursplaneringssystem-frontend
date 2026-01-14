@@ -15,8 +15,8 @@ export default function RightSideBar({
                                          listOfCategories,
                                          loadingCourses,
                                          holidayEvents,
-showRightSidebar,
-vacation,
+                                         showRightSidebar,
+                                         vacation,
                                      }) {
 
     const animatedComponents = makeAnimated();
@@ -29,10 +29,6 @@ vacation,
     }).sort((a, b) => {
         return new Date(a.start) - new Date(b.start);
     });
-
-
-
-   
 
     const totalCount = listOfCategories.reduce((sum, course) => sum + course.event.length, 0);
 
@@ -74,8 +70,6 @@ vacation,
                     >
                         Aktiva i kalendern {activeCount} / {totalCount}
                     </h2>
-
-
 
                 <ul className="space-y-2">
                     {filteredEvents.filter((event) => !event.extendedProps?.wrapText).map((event) => (

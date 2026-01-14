@@ -122,14 +122,13 @@ export default function DemoApp() {
 
             const month = start.getMonth() + 1;
             const day = start.getDate();
-            set.add(`${month}-${day}`); // for CSS highlighting
+            set.add(`${month}-${day}`);
         });
 
         return { vacationEvents: events, vacationSet: set };
     }, [vacations]);
 
     const listOfPersistantEvents = useMemo(() => {
-        // Flatten course events
         const courseEvents = listOfCourses.flatMap(course =>
             course.event
                 .filter(event => event.startTime)
@@ -148,7 +147,6 @@ export default function DemoApp() {
                 }))
         );
 
-        // Flatten misc events
         const miscEvents = listOfMiscs.flatMap(misc =>
             misc.event
                 .filter(event => event.startTime)
@@ -166,7 +164,6 @@ export default function DemoApp() {
                 }))
         );
 
-        // Combine both
         return [...courseEvents, ...miscEvents];
     }, [listOfCourses, listOfMiscs]);
 
@@ -196,7 +193,6 @@ export default function DemoApp() {
         const endYear = dateInfo.end.getFullYear();
 
         setVisibleYears((prevYears) => {
-            // Om gamla statet redan innehåller samma år, gör ingenting
             if (prevYears[0] === startYear && prevYears[1] === endYear) {
                 return prevYears;
             }
@@ -266,11 +262,9 @@ export default function DemoApp() {
     async function validateEventDrop(info) {
         if (!info.event.extendedProps) return true;
 
-
         const movedEventId = parseInt(info.event.id, 10);
         const isCourseEvent = !!info.event.extendedProps.courseId;
         const isMiscEvent = !!info.event.extendedProps.miscId;
-
 
         let eventList, currentIndex;
 
@@ -280,7 +274,6 @@ export default function DemoApp() {
         if (!info.event.end) {
             info.event.setEnd(movedEventEnd);
         }
-
 
         if (isCourseEvent) {
             const courseId = parseInt(info.event.extendedProps.courseId, 10);
@@ -315,8 +308,6 @@ export default function DemoApp() {
         } else {
             return true;
         }
-
-
 
         for (let i = 0; i < currentIndex; i++) {
             const earlierEventData = eventList[i];
@@ -419,7 +410,6 @@ export default function DemoApp() {
         if (isCourseEvent) {
             await updateCourseEventTime(movedEventId, movedEventStart, movedEventEnd);
 
-            // Give backend time to commit/propagate before reloading
             await sleep(250);
             console.log("validateEventDrop -> refetchCourses");
             refetchCourses();
@@ -576,7 +566,6 @@ export default function DemoApp() {
             yOffset = -MODAL_HEIGHT / 2
         }
 
-
         setHoverData({
             event: info.event,
             x: clientX - MODAL_WIDTH / 2 + xOffset,
@@ -635,7 +624,6 @@ export default function DemoApp() {
                         </svg>
                     </button>
 
-
                     <button
                         onClick={() => {
                             setShowRightSidebar(prev => !prev)
@@ -657,7 +645,6 @@ export default function DemoApp() {
                         </svg>
                     </button>
                 </div>
-
 
                 <div className="fc">
                     {showDateInputs && (
@@ -681,7 +668,6 @@ export default function DemoApp() {
                         </div>
                     )}
                 </div>
-
 
                 <FullCalendar
                     ref={calendarRef}
@@ -744,11 +730,9 @@ export default function DemoApp() {
 
                     editable={true}
                     firstDay={1}
-                    //selectable={true}
                     selectMirror={true}
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
-                    //initialEvents={INITIAL_EVENTS}
                     events={eventsForCalendar}
                     dayCellClassNames={(arg) => {
                         const day = arg.date.getDate();
@@ -775,7 +759,7 @@ export default function DemoApp() {
                     eventsSet={handleEvents}
                     eventResize={handleEventResize}
                     eventColor={function (info) {
-                        return info.event.extendedProps.color; // use the color you passed
+                        return info.event.extendedProps.color;
                     }}
                     eventMouseEnter={handleEventMouseEnter}
                     eventMouseLeave={handleEventMouseLeave}

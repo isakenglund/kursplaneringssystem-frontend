@@ -31,7 +31,6 @@ export function confirmCustom(message) {
     });
 }
 
-
 export function alertCustom(message) {
     return new Promise((resolve) => {
         const container = document.createElement("div");
@@ -40,7 +39,7 @@ export function alertCustom(message) {
         const root = createRoot(container);
 
         const handleClose = () => {
-            resolve(); // resolve the promise when OK is clicked
+            resolve();
             root.unmount();
             container.remove();
         };
