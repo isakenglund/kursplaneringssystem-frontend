@@ -19,7 +19,7 @@
     "dist": "npm run build && electron-builder"
   },
   "build": {
-    "appId": "com.exempel.dinapp",
+    "appId": "se.hig.hoardBoard",
     "productName": "HoardBoard",
     "directories": {
       "output": "release"
@@ -30,6 +30,10 @@
       "package.json"
     ],
     "extraResources": [
+      {
+        "from": "icon.png",
+        "to": "assets/icon.png"
+      },
       {
         "from": "java-backend/backend.jar",
         "to": "backend.jar"
@@ -45,7 +49,7 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -54,7 +58,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
-      "deleteAppDataOnUninstall": true
+      "deleteAppDataOnUninstall": true,
+      "license": "license.txt"
     },
     "mac": {
       "target": "dmg"

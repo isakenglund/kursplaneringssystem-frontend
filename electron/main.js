@@ -1,22 +1,24 @@
-import { app, BrowserWindow, Menu, shell, dialog } from "electron"; // 👈 Lägg till dialog
+import { app, BrowserWindow, Menu, shell, dialog } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
-// OBS: Vi behöver 'http' för att kolla om backend lever
 import http from "http";
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'assets', 'icon.png')
+    : path.join(__dirname, '../icon.png');
+
 
 let backendProcess = null;
 let splashWindow = null;
 let mainWindow = null;
 
-// Konfiguration
-const BACKEND_PORT = 8080; // Din Spring Boot port
-const CHECK_INTERVAL = 500; // Hur ofta vi kollar (ms)
-const MAX_RETRIES = 60; // Ge upp efter 30 sekunder (60 * 500ms)
+const BACKEND_PORT = 8080;
+const CHECK_INTERVAL = 500;
+const MAX_RETRIES = 60;
 
 function startBackend() {
     let jarPath;
@@ -36,7 +38,6 @@ function startBackend() {
     backendProcess.stdout.on('data', (data) => console.log(`Backend: ${data}`));
     backendProcess.stderr.on('data', (data) => console.error(`Backend Error: ${data}`));
 
-    // Om Java kraschar direkt
     backendProcess.on('close', (code) => {
         console.log(`Backend dog med kod: ${code}`);
         if (splashWindow) splashWindow.close();
@@ -48,7 +49,7 @@ function createSplashWindow() {
     splashWindow = new BrowserWindow({
         width: 400,
         height: 300,
-        frame: false, // Tar bort fönsterramen (ser snyggare ut)
+        frame: false,
         alwaysOnTop: true,
         transparent: false,
         webPreferences: {
@@ -61,9 +62,10 @@ function createSplashWindow() {
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
-        width: 1200, // Dessa används om användaren avmaximerar fönstret
+        width: 1200,
         height: 800,
-        show: false, // Dölj fönstret tills det är helt laddat
+        show: false,
+        icon: iconPath,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
         },
@@ -75,28 +77,23 @@ function createMainWindow() {
         mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
     }
 
-    // Visa fönstret när UI:t är redo
     mainWindow.once('ready-to-show', () => {
         if (splashWindow) {
             splashWindow.close();
             splashWindow = null;
         }
 
-        mainWindow.maximize(); // Maximerar fönstret
-        mainWindow.show();     // Visar fönstret
+        mainWindow.maximize();
+        mainWindow.show();
     });
 }
 
-// Denna funktion pingar localhost:8080 tills den får svar
 function checkBackendStatus(retryCount = 0) {
     const request = http.get(`http://localhost:${BACKEND_PORT}/actuator/health`, (res) => {
-        // Om vi får status 200 (OK) eller liknande, är backend redo!
         if (res.statusCode === 200 || res.statusCode === 404 || res.statusCode === 401) {
             console.log("Backend är redo!");
             createMainWindow();
         } else {
-            // Servern svarar men med fel kod, vi antar att den lever ändå?
-            // Oftast vill man vänta på 200, men beroende på din security config kan det variera.
             console.log(`Backend svarar med status ${res.statusCode}, startar appen...`);
             createMainWindow();
         }
@@ -109,7 +106,6 @@ function checkBackendStatus(retryCount = 0) {
         } else {
             console.error("Timeout: Backend startade aldrig.");
             if (splashWindow) splashWindow.close();
-            // Här kan du visa en felruta till användaren om du vill
             app.quit();
         }
     });
@@ -203,8 +199,16 @@ function setAppMenu() {
                 { type: 'separator' },
                 {
                     label: 'Om HoardBoard',
-                    click: async () => {
-                        await shell.openExternal('https://gitlab.com/');
+                    click: () => {
+                        app.setAboutPanelOptions({
+                            applicationName: 'HoardBoard',
+                            applicationVersion: '1.0.0',
+                            copyright: `Copyright © ${new Date().getFullYear()} hoardTeam`,
+
+                            credits: 'Developed by hoardTeam\n\nContributors:\nElov, Simon, Izzy, Imran, Isak',
+                        });
+
+                        app.showAboutPanel();
                     }
                 }
             ]
@@ -214,8 +218,6 @@ function setAppMenu() {
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
 }
-
-
 
 app.whenReady().then(() => {
     setAppMenu();
