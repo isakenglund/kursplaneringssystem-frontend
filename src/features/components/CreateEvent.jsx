@@ -91,8 +91,20 @@ export default function CreateEvent({
         }));
     };
 
-    const isEventOnCalendar = (eventId) => {
-        return currentEvents.some((ce) => String(ce.id) === String(eventId));
+    const isEventOnCalendar = (eventId, type) => {
+        return currentEvents.some((ce) => {
+            const calendarId = parseInt(ce.id, 10);
+
+            if (calendarId !== parseInt(eventId, 10)) return false;
+
+            const isCourseOnCalendar = !!ce.extendedProps?.courseId;
+            const isMiscOnCalendar = !!ce.extendedProps?.miscId;
+
+            if (type === "COURSE" && isCourseOnCalendar) return true;
+            if (type === "MISC" && isMiscOnCalendar) return true;
+
+            return false;
+        });
     };
 
     const { saveOrder: saveCourseOrder } = useReorderCourseEvents();
@@ -337,7 +349,7 @@ export default function CreateEvent({
                     eventsArray={eventsArray}
                     parentCategory={parentCategory}
                     type={type}
-                    isEventOnCalendar={isEventOnCalendar}
+                    isEventOnCalendar={(eventId) => isEventOnCalendar(eventId, type)}
                     isEventFiltered={isEventFiltered}
                     onEditClick={(event) => {
                         setEditEventData({...event, categoryId: parentCategory,type: type});
