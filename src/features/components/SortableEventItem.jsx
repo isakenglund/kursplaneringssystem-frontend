@@ -45,7 +45,7 @@ export function SortableEventItem({ id, event, parentCategory, isEventOnCalendar
     };
 
     const disabled = isEventOnCalendar(event.id);
-    const filtered = isEventFiltered(parentCategory.id);
+    const filtered = isEventFiltered(parentCategory.id, type);
     const isDraggable = !disabled && !filtered;
 
     const [openTeachers, setOpenTeachers] = useState({});

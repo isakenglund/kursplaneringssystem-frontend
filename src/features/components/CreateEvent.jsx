@@ -140,9 +140,18 @@ export default function CreateEvent({
         }
     };
 
-    const isEventFiltered = (parentCategoryId) => {
+    const isEventFiltered = (parentCategoryId, type) => {
         if (!selectedCategories || selectedCategories.length === 0) return false;
-        return !selectedCategories.some((c) => String(c.value) === String(parentCategoryId));
+
+        const isSelected = selectedCategories.some((c) => {
+            const sameId = String(c.value) === String(parentCategoryId);
+
+            const sameType = (c.type || "").toUpperCase() === (type || "").toUpperCase();
+
+            return sameId && sameType;
+        });
+
+        return !isSelected;
     };
 
     const handleDeleteTeacher = async (teacherToDelete) => {

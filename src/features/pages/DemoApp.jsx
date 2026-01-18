@@ -171,11 +171,19 @@ export default function DemoApp() {
     const filteredPersistantEvents = useMemo(() => {
         if (!selectedCategories || selectedCategories.length === 0) return listOfPersistantEvents;
 
-        const selectedIds = new Set(selectedCategories.map(c => c.value));
         return listOfPersistantEvents.filter(e => {
-            const courseId = e.extendedProps?.courseId;
-            const miscId = e.extendedProps?.miscId;
-            return selectedIds.has(courseId) || selectedIds.has(miscId);
+            const eventCourseId = e.extendedProps?.courseId;
+            const eventMiscId = e.extendedProps?.miscId;
+
+            return selectedCategories.some(selected => {
+                const idMatch = (selected.value === eventCourseId) || (selected.value === eventMiscId);
+                if (!idMatch) return false;
+
+                if (selected.type === "COURSE" && eventCourseId) return true;
+                if (selected.type === "MISC" && eventMiscId) return true;
+
+                return false;
+            });
         });
     }, [listOfPersistantEvents, selectedCategories]);
 
