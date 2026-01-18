@@ -821,3 +821,31 @@ export function useReorderCourseEvents() {
     };
 }
 
+export function useReorderMiscEvents() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(miscId, orderedIds) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            await API.reorderMiscEvents(miscId, orderedIds);
+            return true;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {
+        saveOrder: update,
+        loading,
+        err,
+        data
+    };
+}
+

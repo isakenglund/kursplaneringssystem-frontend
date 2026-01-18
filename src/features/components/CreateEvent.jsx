@@ -16,6 +16,7 @@ import {
     useUpdateCourse,
     useUpdateMisc,
     useReorderCourseEvents,
+    useReorderMiscEvents
 } from "../hooks.js";
 
 /**
@@ -108,10 +109,16 @@ export default function CreateEvent({
     };
 
     const { saveOrder: saveCourseOrder } = useReorderCourseEvents();
+    const { saveOrder: saveMiscOrder } = useReorderMiscEvents();
 
     const handleOrderChange = async (newEventsArray, parentId, type) => {
-
-        const orderedIds = newEventsArray.map(e => e.id);
+        const orderedIds = newEventsArray.map(e => {
+            if (typeof e.id === 'string' && (e.id.includes('_') || e.id.includes('-'))) {
+                const match = e.id.match(/\d+/);
+                return match ? parseInt(match[0], 10) : e.id;
+            }
+            return e.id;
+        });
 
         try {
             if (type === "COURSE") {
@@ -125,6 +132,8 @@ export default function CreateEvent({
                 setMiscs(prev => prev.map(m =>
                     m.id === parentId ? { ...m, event: newEventsArray } : m
                 ));
+
+                await saveMiscOrder(parentId, orderedIds);
             }
         } catch (error) {
             console.error("Kunde inte spara ordning:", error);

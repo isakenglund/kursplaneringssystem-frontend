@@ -248,7 +248,7 @@ export const API = {
     }),
 
     reorderCourseEvents: (courseId, orderedIds) =>
-        api(`/course-events/${courseId}/reorder`, { // OBS: course-events, inte courses
+        api(`/course-events/${courseId}/reorder`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -256,6 +256,14 @@ export const API = {
             body: JSON.stringify(orderedIds),
         }),
 
+    reorderMiscEvents: (miscId, orderedIds) =>
+        api(`/misc-events/${miscId}/reorder`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderedIds),
+        }),
 };
 
 function formatToISO(date) {
