@@ -663,6 +663,7 @@ export default function DemoApp() {
                 refetchMiscs={refetchMiscs}
                 refetchTeachers={refetchTeachers}
                 refetchVacation={refetchVacation}
+                sleep={sleep}
             />
 
             <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>

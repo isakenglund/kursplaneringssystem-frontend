@@ -48,6 +48,7 @@ export default function EventList({ eventsArray, parentCategory, type, isEventOn
                 onOrderChange(updatedItems);
             }
 
+
             return updatedItems;
         });
     };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
@@ -44,9 +44,14 @@ export default function CreateEvent({
                                         teachers,
                                         loading,
                                         err,
-                                        refetch
+                                        refetch,
+                                        sleep
                                     }) {
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
+
+    const reorderSeqRef = useRef(0);
+    const refetchTimersRef = useRef(new Map());
+
     const { remove: removeTeacher } = useDeleteTeacher();
     const { remove: deleteCourse } = useDeleteCourse();
     const { remove: deleteMisc } = useDeleteMisc();
@@ -120,6 +125,12 @@ export default function CreateEvent({
             return e.id;
         });
 
+        const seq = ++reorderSeqRef.current;
+        const key = `${type}:${parentId}`;
+
+        const oldTimer = refetchTimersRef.current.get(key);
+        if (oldTimer) clearTimeout(oldTimer);
+
         try {
             if (type === "COURSE") {
                 setCourses(prev => prev.map(c =>
@@ -127,13 +138,27 @@ export default function CreateEvent({
                 ));
 
                 await saveCourseOrder(parentId, orderedIds);
-            }
-            else if (type === "MISC") {
+
+                const t = setTimeout(() => {
+                    if (reorderSeqRef.current !== seq) return; // a newer reorder happened
+                    refetchCourses();
+                }, 400);
+
+                refetchTimersRef.current.set(key, t);
+
+            } else if (type === "MISC") {
                 setMiscs(prev => prev.map(m =>
                     m.id === parentId ? { ...m, event: newEventsArray } : m
                 ));
 
                 await saveMiscOrder(parentId, orderedIds);
+
+                const t = setTimeout(() => {
+                    if (reorderSeqRef.current !== seq) return; // a newer reorder happened
+                    refetchMiscs();
+                }, 400);
+
+                refetchTimersRef.current.set(key, t);
             }
         } catch (error) {
             console.error("Kunde inte spara ordning:", error);
