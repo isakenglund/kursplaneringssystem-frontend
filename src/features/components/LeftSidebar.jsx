@@ -25,7 +25,7 @@ export default function LeftSidebar({
     refetchCourses,
     refetchMiscs,
     refetchTeachers,
-    refetchVacation,
+    refetchVacation, refetchAllCategories,
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -74,7 +74,8 @@ export default function LeftSidebar({
                     onCreated={fetchCategories} 
                     refetchVacation={refetchVacation}
                     refetchCourse={refetchCourses}
-                    refetchMisc={refetchMiscs}/>
+                    refetchMisc={refetchMiscs}
+                    refetchAllCategories={refetchAllCategories}/>
             )}
 
             <div className='demo-app-sidebar-section'>
@@ -103,6 +104,7 @@ export default function LeftSidebar({
                     loading={loading}
                     err={err}
                     refetch={refetchTeachers}
+                    refetchAllCategories={refetchAllCategories}
                 />
 
             </div>

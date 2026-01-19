@@ -45,7 +45,7 @@ export default function CreateEvent({
                                         loading,
                                         err,
                                         refetch,
-                                        sleep
+                                        refetchAllCategories
                                     }) {
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
 
@@ -222,6 +222,7 @@ export default function CreateEvent({
             } : c));
             try {
                 await deleteCourseEvent(eventId);
+                await refetchAllCategories();
             } catch (error) {
                 console.error("Failed to delete course event", error);
                 setCourses(previous);
@@ -234,6 +235,7 @@ export default function CreateEvent({
             } : m));
             try {
                 await deleteMiscEvent(eventId);
+                await refetchAllCategories();
             } catch (error) {
                 console.error("Failed to delete misc event", error);
                 setMiscs(previous);
@@ -251,9 +253,11 @@ export default function CreateEvent({
             if (type === "COURSE") {
                 await deleteCourse(id);
                 setCourses(prev => prev.filter(c => c.id !== id));
+                await refetchCourses();
             } else {
                 await deleteMisc(id);
                 setMiscs(prev => prev.filter(m => m.id !== id));
+                await refetchAllCategories();
             }
 
             if (onCategoryDelete) {
@@ -374,6 +378,7 @@ export default function CreateEvent({
             setSelectedTeachers([]);
             setStartDate(new Date());
             setEndDate(new Date());
+            await refetchAllCategories();
             closeModal();
 
         } catch (error) {

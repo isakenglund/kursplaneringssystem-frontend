@@ -532,6 +532,12 @@ export function useGetAllCategories() {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
 
+    const [refreshIndex, setRefreshIndex] = useState(0);
+
+    const refetch = useCallback(() => {
+        setRefreshIndex((i) => i + 1);
+    }, []);
+
     useEffect(() => {
         let live = true;
 
@@ -558,9 +564,10 @@ export function useGetAllCategories() {
         return () => {
             live = false;
         };
-    }, []);
+    }, [refreshIndex]);
 
-    return {data, loading, err};
+    return {data, loading, err, refetch};
+
 }
 
 export function useGetVacation() {

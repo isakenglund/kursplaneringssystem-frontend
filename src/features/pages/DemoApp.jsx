@@ -33,8 +33,7 @@ export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const { data: allCategories } = useGetAllCategories();
-
+    const { data: allCategories, refetch: refetchAllCategories } = useGetAllCategories();
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -67,6 +66,27 @@ export default function DemoApp() {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
     const hoverTimeoutRef = useRef(null);
+
+    const isAllDayRange = (start, end) => {
+        if (!start || !end) return false;
+
+        const s = new Date(start);
+        const e = new Date(end);
+
+        if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return false;
+
+        const isMidnight =
+            s.getHours() === 0 && s.getMinutes() === 0 && s.getSeconds() === 0 &&
+            e.getHours() === 0 && e.getMinutes() === 0 && e.getSeconds() === 0;
+
+        if (!isMidnight) return false;
+
+        const diffMs = e.getTime() - s.getTime();
+        const dayMs = 24 * 60 * 60 * 1000;
+
+        return diffMs > 0 && diffMs % dayMs === 0;
+    };
+
 
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -138,6 +158,7 @@ export default function DemoApp() {
                     title: event.name,
                     start: event.startTime,
                     end: event.endTime || undefined,
+                    allDay: isAllDayRange(event.startTime, event.endTime),
                     color: course.colorHex || '#3788d8',
                     extendedProps: {
                         courseId: course.id,
@@ -156,6 +177,7 @@ export default function DemoApp() {
                     title: event.name || misc.name,
                     start: event.startTime,
                     end: event.endTime || undefined,
+                    allDay: isAllDayRange(event.startTime, event.endTime),
                     color: misc.colorHex || '#3788d8',
                     extendedProps: {
                         miscId: misc.id,
@@ -229,12 +251,14 @@ export default function DemoApp() {
         }
     };
 
-    const handleCleanupEvents = (deletedId, type) => {
+    const handleCleanupEvents = async (deletedId, type) => {
         if (type === "COURSE") {
             setCourses(prev => prev.filter(c => c.id !== deletedId));
         } else {
             setMiscs(prev => prev.filter(m => m.id !== deletedId));
         }
+
+        await refetchAllCategories()
     }
 
     const handleCustomDateChange = (direction) => {
@@ -278,10 +302,27 @@ export default function DemoApp() {
         let eventList, currentIndex;
 
         const calendar = info.view.calendar;
-        const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
-        if (!info.event.end) {
-            info.event.setEnd(movedEventEnd);
+        let movedEventStart = info.event.start;
+        let movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+
+        if (info.event.allDay) {
+            info.event.setAllDay(true);
+
+            const start = new Date(movedEventStart);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+
+            info.event.setStart(start);
+            info.event.setEnd(end);
+
+            movedEventStart = start;
+            movedEventEnd = end;
+        } else {
+            if (!info.event.end) {
+                info.event.setEnd(movedEventEnd);
+            }
         }
 
         if (isCourseEvent) {
@@ -663,7 +704,7 @@ export default function DemoApp() {
                 refetchMiscs={refetchMiscs}
                 refetchTeachers={refetchTeachers}
                 refetchVacation={refetchVacation}
-                sleep={sleep}
+                refetchAllCategories={refetchAllCategories}
             />
 
             <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>

@@ -9,7 +9,7 @@ import { alertCustom } from "../functions/alertFunctions.jsx";
  * Handles creating new categories (e.g., course, misc, vacation) by collecting form input,
  * validating required fields, and calling parent callbacks to persist and refresh data.
  */
-export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate, onCreated, refetchVacation , refetchCourse, refetchMisc}) {
+export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate, vacationDate, onCreated, refetchVacation , refetchCourse, refetchMisc, refetchAllCategories}) {
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -52,12 +52,14 @@ export default function CreateCategory({ setIsCategoryModalOpen, setVacationDate
                 }
                 await saveCourse(course);
                 await refetchCourse();
+                await refetchAllCategories();
             } else if (categoryType === "vacation") {
                 await saveVacation({ date: vacationDate });
                 await refetchVacation();
             } else if (categoryType === "misc") {
                 await saveMisc({ type: "MISC", name, colorHex });
                 await refetchMisc();
+                await refetchAllCategories();
             } else {
                 console.warn("Unknown categoryType:", categoryType);
                 return;
