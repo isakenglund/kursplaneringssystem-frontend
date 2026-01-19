@@ -26,7 +26,7 @@ const DisabledDragHandleIcon = () => (
     </svg>
 );
 
-export function SortableEventItem({ event, parentCategory, isEventOnCalendar, onEdit, onRemove, isEventFiltered, type }) {
+export function SortableEventItem({ id, event, parentCategory, isEventOnCalendar, onEdit, onRemove, isEventFiltered, type }) {
     const {
         attributes,
         listeners,
@@ -34,7 +34,7 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
         transform,
         transition,
         isDragging
-    } = useSortable({ id: event.id });
+    } = useSortable({ id: id });
 
     const style = {
         transform: CSS.Translate.toString(transform),
@@ -45,7 +45,7 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
     };
 
     const disabled = isEventOnCalendar(event.id);
-    const filtered = isEventFiltered(parentCategory.id);
+    const filtered = isEventFiltered(parentCategory.id, type);
     const isDraggable = !disabled && !filtered;
 
     const [openTeachers, setOpenTeachers] = useState({});
@@ -67,7 +67,7 @@ export function SortableEventItem({ event, parentCategory, isEventOnCalendar, on
 
             {...(isDraggable && {
                 "data-event": JSON.stringify({
-                    id: event.id,
+                    id: `${event.id}_${type === "COURSE" ? "course" : "misc"}`,
                     title: event.name,
                     start: event.startDate || event.startTime,
                     end: event.endDate || event.endTime,

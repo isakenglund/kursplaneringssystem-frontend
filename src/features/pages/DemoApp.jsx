@@ -134,7 +134,7 @@ export default function DemoApp() {
             course.event
                 .filter(event => event.startTime)
                 .map(event => ({
-                    id: event.id,
+                    id: `${event.id}_course`,
                     title: event.name,
                     start: event.startTime,
                     end: event.endTime || undefined,
@@ -152,7 +152,7 @@ export default function DemoApp() {
             misc.event
                 .filter(event => event.startTime)
                 .map(event => ({
-                    id: event.id,
+                    id: `${event.id}_misc`,
                     title: event.name || misc.name,
                     start: event.startTime,
                     end: event.endTime || undefined,
@@ -171,11 +171,19 @@ export default function DemoApp() {
     const filteredPersistantEvents = useMemo(() => {
         if (!selectedCategories || selectedCategories.length === 0) return listOfPersistantEvents;
 
-        const selectedIds = new Set(selectedCategories.map(c => c.value));
         return listOfPersistantEvents.filter(e => {
-            const courseId = e.extendedProps?.courseId;
-            const miscId = e.extendedProps?.miscId;
-            return selectedIds.has(courseId) || selectedIds.has(miscId);
+            const eventCourseId = e.extendedProps?.courseId;
+            const eventMiscId = e.extendedProps?.miscId;
+
+            return selectedCategories.some(selected => {
+                const idMatch = (selected.value === eventCourseId) || (selected.value === eventMiscId);
+                if (!idMatch) return false;
+
+                if (selected.type === "COURSE" && eventCourseId) return true;
+                if (selected.type === "MISC" && eventMiscId) return true;
+
+                return false;
+            });
         });
     }, [listOfPersistantEvents, selectedCategories]);
 
@@ -302,7 +310,7 @@ export default function DemoApp() {
             const misc = listOfMiscs.find(m => m.id === miscId);
             if (!misc) return true;
 
-            eventList = misc.event;
+            eventList = misc.event.sort((a, b) => a.displayIndex - b.displayIndex);
             currentIndex = eventList.findIndex(e => e.id === movedEventId);
             if (currentIndex === -1) return true;
 
@@ -310,9 +318,12 @@ export default function DemoApp() {
             return true;
         }
 
+        const suffix = isCourseEvent ? "_course" : "_misc";
+
         for (let i = 0; i < currentIndex; i++) {
             const earlierEventData = eventList[i];
-            const earlierEventOnCalendar = calendar.getEventById(String(earlierEventData.id));
+            const earlierIdOnCalendar = `${earlierEventData.id}${suffix}`;
+            const earlierEventOnCalendar = calendar.getEventById(earlierIdOnCalendar);
             if (earlierEventOnCalendar) {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
                 if (movedEventStart < earlierEventEnd) {
@@ -330,7 +341,8 @@ export default function DemoApp() {
         }
         for (let i = currentIndex + 1; i < eventList.length; i++) {
             const laterEventData = eventList[i];
-            const laterEventOnCalendar = calendar.getEventById(String(laterEventData.id));
+            const laterIdOnCalendar = `${laterEventData.id}${suffix}`;
+            const laterEventOnCalendar = calendar.getEventById(laterIdOnCalendar);
             if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
                 if (movedEventEnd > laterEventStart) {
@@ -548,34 +560,29 @@ export default function DemoApp() {
             } else {
                 const eventId = parseInt(event.id, 10);
 
-                const parent = [...listOfCourses, ...listOfMiscs].find(
-                    p => p.event.some(e => e.id === eventId)
-                );
+                const isCourseEvent = event.id.endsWith('_course');
+                const isMiscEvent = event.id.endsWith('_misc');
 
-                if (!parent) {
-                    await alertCustom("Kunde inte ta bort händelsen förälder saknas");
-                    return;
-                }
-                if (parent.type === "COURSE") {
+                if (isCourseEvent) {
                     await updateCourseEventTime(eventId, null, null);
 
                     await sleep(250);
                     console.log("handleEventClick -> refetchCourses");
                     refetchCourses();
-                } else if (parent.type === "MISC" || parent.type === "MEETING") {
+
+                } else if (isMiscEvent) {
                     await updateMiscEventTime(eventId, null, null);
 
                     await sleep(250);
                     console.log("handleEventClick -> refetchMiscs");
                     refetchMiscs();
+
                 } else {
-                    await alertCustom("Kunde inte ta bort händelsen okänd typ");
-                    return;
+                    await alertCustom("Kunde inte identifiera typ av händelse (saknar suffix)");
                 }
             }
 
             event.remove();
-
         } catch (err) {
             console.error("Could not remove event:", err);
             alertCustom("Kunde inte ta bort händelsen");
@@ -656,6 +663,7 @@ export default function DemoApp() {
                 refetchMiscs={refetchMiscs}
                 refetchTeachers={refetchTeachers}
                 refetchVacation={refetchVacation}
+                sleep={sleep}
             />
 
             <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>
