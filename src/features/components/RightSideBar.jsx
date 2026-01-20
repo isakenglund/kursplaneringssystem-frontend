@@ -23,9 +23,20 @@ export default function RightSideBar({
 
     const filteredEvents = currentEvents.filter(event => {
         if (selectedCategories.length === 0) return true;
+
         const eventCourseId = event.extendedProps?.courseId;
         const eventMiscId = event.extendedProps?.miscId;
-        return selectedCategories.some(choice => choice.value === eventCourseId || choice.value === eventMiscId);
+
+        return selectedCategories.some(choice => {
+            const idMatch = (choice.value === eventCourseId) || (choice.value === eventMiscId);
+
+            if (!idMatch) return false;
+
+            if (choice.type === "COURSE" && eventCourseId) return true;
+            if (choice.type === "MISC" && eventMiscId) return true;
+
+            return false;
+        });
     }).sort((a, b) => {
         return new Date(a.start) - new Date(b.start);
     });
@@ -60,7 +71,11 @@ export default function RightSideBar({
                             isMulti
                             isLoading={loadingCourses}
                             onChange={(selectedOptions) => setSelectedCategories(selectedOptions)}
-                            options={listOfCategories.map(category => ({value: category.id, label: category.name}))}
+                            options={listOfCategories.map(category => ({
+                                value: category.id,
+                                label: category.name,
+                                type: category.type
+                            }))}
                             placeholder="Filtrera på kategorier..."
                         />
 

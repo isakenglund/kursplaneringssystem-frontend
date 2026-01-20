@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import EditEventModal from "./EditEventModal.jsx";
 import EditCategoryModal from "./EditCategoryModal.jsx";
 import TeacherPicker from "./TeacherPicker.jsx";
@@ -16,6 +16,7 @@ import {
     useUpdateCourse,
     useUpdateMisc,
     useReorderCourseEvents,
+    useReorderMiscEvents
 } from "../hooks.js";
 
 /**
@@ -43,9 +44,14 @@ export default function CreateEvent({
                                         teachers,
                                         loading,
                                         err,
-                                        refetch
+                                        refetch,
+                                        refetchAllCategories
                                     }) {
     const [isCreateTeacherModalOpen, setIsCreateTeacherModalOpen] = useState(false);
+
+    const reorderSeqRef = useRef(0);
+    const refetchTimersRef = useRef(new Map());
+
     const { remove: removeTeacher } = useDeleteTeacher();
     const { remove: deleteCourse } = useDeleteCourse();
     const { remove: deleteMisc } = useDeleteMisc();
@@ -91,15 +97,39 @@ export default function CreateEvent({
         }));
     };
 
-    const isEventOnCalendar = (eventId) => {
-        return currentEvents.some((ce) => String(ce.id) === String(eventId));
+    const isEventOnCalendar = (eventId, type) => {
+        return currentEvents.some((ce) => {
+            const calendarId = parseInt(ce.id, 10);
+
+            if (calendarId !== parseInt(eventId, 10)) return false;
+
+            const isCourseOnCalendar = !!ce.extendedProps?.courseId;
+            const isMiscOnCalendar = !!ce.extendedProps?.miscId;
+
+            if (type === "COURSE" && isCourseOnCalendar) return true;
+            if (type === "MISC" && isMiscOnCalendar) return true;
+
+            return false;
+        });
     };
 
     const { saveOrder: saveCourseOrder } = useReorderCourseEvents();
+    const { saveOrder: saveMiscOrder } = useReorderMiscEvents();
 
     const handleOrderChange = async (newEventsArray, parentId, type) => {
+        const orderedIds = newEventsArray.map(e => {
+            if (typeof e.id === 'string' && (e.id.includes('_') || e.id.includes('-'))) {
+                const match = e.id.match(/\d+/);
+                return match ? parseInt(match[0], 10) : e.id;
+            }
+            return e.id;
+        });
 
-        const orderedIds = newEventsArray.map(e => e.id);
+        const seq = ++reorderSeqRef.current;
+        const key = `${type}:${parentId}`;
+
+        const oldTimer = refetchTimersRef.current.get(key);
+        if (oldTimer) clearTimeout(oldTimer);
 
         try {
             if (type === "COURSE") {
@@ -108,20 +138,45 @@ export default function CreateEvent({
                 ));
 
                 await saveCourseOrder(parentId, orderedIds);
-            }
-            else if (type === "MISC") {
+
+                const t = setTimeout(() => {
+                    if (reorderSeqRef.current !== seq) return; // a newer reorder happened
+                    refetchCourses();
+                }, 400);
+
+                refetchTimersRef.current.set(key, t);
+
+            } else if (type === "MISC") {
                 setMiscs(prev => prev.map(m =>
                     m.id === parentId ? { ...m, event: newEventsArray } : m
                 ));
+
+                await saveMiscOrder(parentId, orderedIds);
+
+                const t = setTimeout(() => {
+                    if (reorderSeqRef.current !== seq) return; // a newer reorder happened
+                    refetchMiscs();
+                }, 400);
+
+                refetchTimersRef.current.set(key, t);
             }
         } catch (error) {
             console.error("Kunde inte spara ordning:", error);
         }
     };
 
-    const isEventFiltered = (parentCategoryId) => {
+    const isEventFiltered = (parentCategoryId, type) => {
         if (!selectedCategories || selectedCategories.length === 0) return false;
-        return !selectedCategories.some((c) => String(c.value) === String(parentCategoryId));
+
+        const isSelected = selectedCategories.some((c) => {
+            const sameId = String(c.value) === String(parentCategoryId);
+
+            const sameType = (c.type || "").toUpperCase() === (type || "").toUpperCase();
+
+            return sameId && sameType;
+        });
+
+        return !isSelected;
     };
 
     const handleDeleteTeacher = async (teacherToDelete) => {
@@ -167,6 +222,7 @@ export default function CreateEvent({
             } : c));
             try {
                 await deleteCourseEvent(eventId);
+                await refetchAllCategories();
             } catch (error) {
                 console.error("Failed to delete course event", error);
                 setCourses(previous);
@@ -179,6 +235,7 @@ export default function CreateEvent({
             } : m));
             try {
                 await deleteMiscEvent(eventId);
+                await refetchAllCategories();
             } catch (error) {
                 console.error("Failed to delete misc event", error);
                 setMiscs(previous);
@@ -196,9 +253,11 @@ export default function CreateEvent({
             if (type === "COURSE") {
                 await deleteCourse(id);
                 setCourses(prev => prev.filter(c => c.id !== id));
+                await refetchCourses();
             } else {
                 await deleteMisc(id);
                 setMiscs(prev => prev.filter(m => m.id !== id));
+                await refetchAllCategories();
             }
 
             if (onCategoryDelete) {
@@ -319,6 +378,7 @@ export default function CreateEvent({
             setSelectedTeachers([]);
             setStartDate(new Date());
             setEndDate(new Date());
+            await refetchAllCategories();
             closeModal();
 
         } catch (error) {
@@ -337,7 +397,7 @@ export default function CreateEvent({
                     eventsArray={eventsArray}
                     parentCategory={parentCategory}
                     type={type}
-                    isEventOnCalendar={isEventOnCalendar}
+                    isEventOnCalendar={(eventId) => isEventOnCalendar(eventId, type)}
                     isEventFiltered={isEventFiltered}
                     onEditClick={(event) => {
                         setEditEventData({...event, categoryId: parentCategory,type: type});

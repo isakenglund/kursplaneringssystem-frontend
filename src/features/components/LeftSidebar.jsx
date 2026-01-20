@@ -25,7 +25,7 @@ export default function LeftSidebar({
     refetchCourses,
     refetchMiscs,
     refetchTeachers,
-    refetchVacation,
+    refetchVacation, refetchAllCategories,
 }) {
     const draggableContainerRef = useRef(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -74,13 +74,14 @@ export default function LeftSidebar({
                     onCreated={fetchCategories} 
                     refetchVacation={refetchVacation}
                     refetchCourse={refetchCourses}
-                    refetchMisc={refetchMiscs}/>
+                    refetchMisc={refetchMiscs}
+                    refetchAllCategories={refetchAllCategories}/>
             )}
 
             <div className='demo-app-sidebar-section'>
                 <button
                     className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-700 transition"
-                    onClick={() => setIsCategoryModalOpen(true)}>Skapa kategori
+                    onClick={() => setIsCategoryModalOpen(true)}>Skapa
                 </button>
 
                 <CreateEvent
@@ -103,6 +104,7 @@ export default function LeftSidebar({
                     loading={loading}
                     err={err}
                     refetch={refetchTeachers}
+                    refetchAllCategories={refetchAllCategories}
                 />
 
             </div>

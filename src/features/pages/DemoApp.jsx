@@ -33,8 +33,7 @@ export default function DemoApp() {
     const [weekendsVisible, setWeekendsVisible] = useState(true)
     const [currentEvents, setCurrentEvents] = useState([])
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const { data: allCategories } = useGetAllCategories();
-
+    const { data: allCategories, refetch: refetchAllCategories } = useGetAllCategories();
 
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -67,6 +66,27 @@ export default function DemoApp() {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
     const hoverTimeoutRef = useRef(null);
+
+    const isAllDayRange = (start, end) => {
+        if (!start || !end) return false;
+
+        const s = new Date(start);
+        const e = new Date(end);
+
+        if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return false;
+
+        const isMidnight =
+            s.getHours() === 0 && s.getMinutes() === 0 && s.getSeconds() === 0 &&
+            e.getHours() === 0 && e.getMinutes() === 0 && e.getSeconds() === 0;
+
+        if (!isMidnight) return false;
+
+        const diffMs = e.getTime() - s.getTime();
+        const dayMs = 24 * 60 * 60 * 1000;
+
+        return diffMs > 0 && diffMs % dayMs === 0;
+    };
+
 
     const { holidayEvents, holidaySet } = useMemo(() => {
         if (!holidays || visibleYears.length === 0) return { holidayEvents: [], holidaySet: new Set() };
@@ -134,10 +154,11 @@ export default function DemoApp() {
             course.event
                 .filter(event => event.startTime)
                 .map(event => ({
-                    id: event.id,
+                    id: `${event.id}_course`,
                     title: event.name,
                     start: event.startTime,
                     end: event.endTime || undefined,
+                    allDay: isAllDayRange(event.startTime, event.endTime),
                     color: course.colorHex || '#3788d8',
                     extendedProps: {
                         courseId: course.id,
@@ -152,10 +173,11 @@ export default function DemoApp() {
             misc.event
                 .filter(event => event.startTime)
                 .map(event => ({
-                    id: event.id,
+                    id: `${event.id}_misc`,
                     title: event.name || misc.name,
                     start: event.startTime,
                     end: event.endTime || undefined,
+                    allDay: isAllDayRange(event.startTime, event.endTime),
                     color: misc.colorHex || '#3788d8',
                     extendedProps: {
                         miscId: misc.id,
@@ -171,11 +193,19 @@ export default function DemoApp() {
     const filteredPersistantEvents = useMemo(() => {
         if (!selectedCategories || selectedCategories.length === 0) return listOfPersistantEvents;
 
-        const selectedIds = new Set(selectedCategories.map(c => c.value));
         return listOfPersistantEvents.filter(e => {
-            const courseId = e.extendedProps?.courseId;
-            const miscId = e.extendedProps?.miscId;
-            return selectedIds.has(courseId) || selectedIds.has(miscId);
+            const eventCourseId = e.extendedProps?.courseId;
+            const eventMiscId = e.extendedProps?.miscId;
+
+            return selectedCategories.some(selected => {
+                const idMatch = (selected.value === eventCourseId) || (selected.value === eventMiscId);
+                if (!idMatch) return false;
+
+                if (selected.type === "COURSE" && eventCourseId) return true;
+                if (selected.type === "MISC" && eventMiscId) return true;
+
+                return false;
+            });
         });
     }, [listOfPersistantEvents, selectedCategories]);
 
@@ -221,12 +251,14 @@ export default function DemoApp() {
         }
     };
 
-    const handleCleanupEvents = (deletedId, type) => {
+    const handleCleanupEvents = async (deletedId, type) => {
         if (type === "COURSE") {
             setCourses(prev => prev.filter(c => c.id !== deletedId));
         } else {
             setMiscs(prev => prev.filter(m => m.id !== deletedId));
         }
+
+        await refetchAllCategories()
     }
 
     const handleCustomDateChange = (direction) => {
@@ -270,10 +302,27 @@ export default function DemoApp() {
         let eventList, currentIndex;
 
         const calendar = info.view.calendar;
-        const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
-        if (!info.event.end) {
-            info.event.setEnd(movedEventEnd);
+        let movedEventStart = info.event.start;
+        let movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+
+        if (info.event.allDay) {
+            info.event.setAllDay(true);
+
+            const start = new Date(movedEventStart);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+
+            info.event.setStart(start);
+            info.event.setEnd(end);
+
+            movedEventStart = start;
+            movedEventEnd = end;
+        } else {
+            if (!info.event.end) {
+                info.event.setEnd(movedEventEnd);
+            }
         }
 
         if (isCourseEvent) {
@@ -302,7 +351,7 @@ export default function DemoApp() {
             const misc = listOfMiscs.find(m => m.id === miscId);
             if (!misc) return true;
 
-            eventList = misc.event;
+            eventList = misc.event.sort((a, b) => a.displayIndex - b.displayIndex);
             currentIndex = eventList.findIndex(e => e.id === movedEventId);
             if (currentIndex === -1) return true;
 
@@ -310,9 +359,12 @@ export default function DemoApp() {
             return true;
         }
 
+        const suffix = isCourseEvent ? "_course" : "_misc";
+
         for (let i = 0; i < currentIndex; i++) {
             const earlierEventData = eventList[i];
-            const earlierEventOnCalendar = calendar.getEventById(String(earlierEventData.id));
+            const earlierIdOnCalendar = `${earlierEventData.id}${suffix}`;
+            const earlierEventOnCalendar = calendar.getEventById(earlierIdOnCalendar);
             if (earlierEventOnCalendar) {
                 const earlierEventEnd = earlierEventOnCalendar.end || earlierEventOnCalendar.start;
                 if (movedEventStart < earlierEventEnd) {
@@ -330,7 +382,8 @@ export default function DemoApp() {
         }
         for (let i = currentIndex + 1; i < eventList.length; i++) {
             const laterEventData = eventList[i];
-            const laterEventOnCalendar = calendar.getEventById(String(laterEventData.id));
+            const laterIdOnCalendar = `${laterEventData.id}${suffix}`;
+            const laterEventOnCalendar = calendar.getEventById(laterIdOnCalendar);
             if (laterEventOnCalendar) {
                 const laterEventStart = laterEventOnCalendar.start;
                 if (movedEventEnd > laterEventStart) {
@@ -548,34 +601,29 @@ export default function DemoApp() {
             } else {
                 const eventId = parseInt(event.id, 10);
 
-                const parent = [...listOfCourses, ...listOfMiscs].find(
-                    p => p.event.some(e => e.id === eventId)
-                );
+                const isCourseEvent = event.id.endsWith('_course');
+                const isMiscEvent = event.id.endsWith('_misc');
 
-                if (!parent) {
-                    await alertCustom("Kunde inte ta bort händelsen förälder saknas");
-                    return;
-                }
-                if (parent.type === "COURSE") {
+                if (isCourseEvent) {
                     await updateCourseEventTime(eventId, null, null);
 
                     await sleep(250);
                     console.log("handleEventClick -> refetchCourses");
                     refetchCourses();
-                } else if (parent.type === "MISC" || parent.type === "MEETING") {
+
+                } else if (isMiscEvent) {
                     await updateMiscEventTime(eventId, null, null);
 
                     await sleep(250);
                     console.log("handleEventClick -> refetchMiscs");
                     refetchMiscs();
+
                 } else {
-                    await alertCustom("Kunde inte ta bort händelsen okänd typ");
-                    return;
+                    await alertCustom("Kunde inte identifiera typ av händelse (saknar suffix)");
                 }
             }
 
             event.remove();
-
         } catch (err) {
             console.error("Could not remove event:", err);
             alertCustom("Kunde inte ta bort händelsen");
@@ -656,6 +704,7 @@ export default function DemoApp() {
                 refetchMiscs={refetchMiscs}
                 refetchTeachers={refetchTeachers}
                 refetchVacation={refetchVacation}
+                refetchAllCategories={refetchAllCategories}
             />
 
             <div className='demo-app-main flex-1 min-w-0 min-h-0 p-4 flex flex-col'>
@@ -742,9 +791,11 @@ export default function DemoApp() {
                             buttonText: 'Intervall',
                         },
                         customMultiMonth: {
-                            type: 'multiMonthYear',
+                            type: 'dayGridYear',
                             buttonText: 'Månader',
-                            eventDisplay: 'block'
+                            eventDisplay: 'block',
+                            weekNumbers: true,
+                            dayHeaderFormat: { weekday: 'long'}
                         }
                     }}
                     customButtons={{
@@ -787,7 +838,7 @@ export default function DemoApp() {
                         : undefined}
 
                     slotMinTime={'06:00:00'}
-                    slotMaxTime={'18:00:00'}
+                    slotMaxTime={'24:00:00'}
 
                     editable={true}
                     firstDay={1}

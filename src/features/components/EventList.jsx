@@ -34,8 +34,8 @@ export default function EventList({ eventsArray, parentCategory, type, isEventOn
         }
 
         setItems((prev) => {
-            const oldIndex = prev.findIndex((item) => item.id === active.id);
-            const newIndex = prev.findIndex((item) => item.id === over.id);
+            const oldIndex = prev.findIndex((item) => `${type}-${item.id}` === active.id);
+            const newIndex = prev.findIndex((item) => `${type}-${item.id}` === over.id);
 
             const reorderedList = arrayMove(prev, oldIndex, newIndex);
 
@@ -47,6 +47,7 @@ export default function EventList({ eventsArray, parentCategory, type, isEventOn
             if (onOrderChange) {
                 onOrderChange(updatedItems);
             }
+
 
             return updatedItems;
         });
@@ -63,12 +64,13 @@ export default function EventList({ eventsArray, parentCategory, type, isEventOn
         >
             <div className="space-y-1">
                 <SortableContext
-                    items={items.map(item => item.id)}
+                    items={items.map(item => `${type}-${item.id}`)}
                     strategy={verticalListSortingStrategy}
                 >
                     {items.map((event) => (
                         <SortableEventItem
-                            key={event.id}
+                            key={`${type}-${event.id}`}
+                            id={`${type}-${event.id}`}
                             event={event}
                             parentCategory={parentCategory}
                             type={type}

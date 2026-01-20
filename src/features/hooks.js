@@ -532,6 +532,12 @@ export function useGetAllCategories() {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);
 
+    const [refreshIndex, setRefreshIndex] = useState(0);
+
+    const refetch = useCallback(() => {
+        setRefreshIndex((i) => i + 1);
+    }, []);
+
     useEffect(() => {
         let live = true;
 
@@ -558,9 +564,10 @@ export function useGetAllCategories() {
         return () => {
             live = false;
         };
-    }, []);
+    }, [refreshIndex]);
 
-    return {data, loading, err};
+    return {data, loading, err, refetch};
+
 }
 
 export function useGetVacation() {
@@ -804,6 +811,34 @@ export function useReorderCourseEvents() {
 
         try {
             await API.reorderCourseEvents(courseId, orderedIds);
+            return true;
+        } catch (e) {
+            setErr(e);
+            throw e;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {
+        saveOrder: update,
+        loading,
+        err,
+        data
+    };
+}
+
+export function useReorderMiscEvents() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
+    async function update(miscId, orderedIds) {
+        setLoading(true);
+        setErr(null);
+
+        try {
+            await API.reorderMiscEvents(miscId, orderedIds);
             return true;
         } catch (e) {
             setErr(e);

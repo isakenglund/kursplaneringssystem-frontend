@@ -1,13 +1,72 @@
 {
-  "name": "untitled2",
+  "name": "HoardBoard",
+  "author": {
+    "name": "HoardTeam",
+    "email": "imrantzaga@gmail.com",
+    "url": "https://hig.se"
+  },
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "electron .",
+    "electron:dev": "concurrently \"vite\" \"electron .\"",
+    "dist": "npm run build && electron-builder"
+  },
+  "build": {
+    "appId": "se.hig.hoardBoard",
+    "productName": "HoardBoard",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "icon.png",
+        "to": "assets/icon.png"
+      },
+      {
+        "from": "java-backend/backend.jar",
+        "to": "backend.jar"
+      },
+      {
+        "from": "java-runtime",
+        "to": "java-runtime"
+      },
+      {
+        "from": "manual.pdf",
+        "to": "manual.pdf"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true,
+      "license": "license.txt"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -34,6 +93,9 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.4.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
