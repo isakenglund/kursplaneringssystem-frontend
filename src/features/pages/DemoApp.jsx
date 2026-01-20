@@ -270,10 +270,26 @@ export default function DemoApp() {
         let eventList, currentIndex;
 
         const calendar = info.view.calendar;
-        const movedEventStart = info.event.start;
-        const movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
-        if (!info.event.end) {
-            info.event.setEnd(movedEventEnd);
+        let movedEventStart = info.event.start;
+        let movedEventEnd = info.event.end || new Date(movedEventStart.getTime() + (info.event.allDay ? 24 : 1) * 60 * 60 * 1000);
+        if (info.event.allDay) {
+            info.event.setAllDay(true);
+
+            const start = new Date(movedEventStart);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+
+            info.event.setStart(start);
+            info.event.setEnd(end);
+
+            movedEventStart = start;
+            movedEventEnd = end;
+        } else {
+            if (!info.event.end) {
+                info.event.setEnd(movedEventEnd);
+            }
         }
 
         if (isCourseEvent) {
