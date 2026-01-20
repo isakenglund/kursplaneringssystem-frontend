@@ -742,9 +742,11 @@ export default function DemoApp() {
                             buttonText: 'Intervall',
                         },
                         customMultiMonth: {
-                            type: 'multiMonthYear',
+                            type: 'dayGridYear',
                             buttonText: 'Månader',
-                            eventDisplay: 'block'
+                            eventDisplay: 'block',
+                            weekNumbers: true,
+                            dayHeaderFormat: { weekday: 'long'}
                         }
                     }}
                     customButtons={{
@@ -787,7 +789,7 @@ export default function DemoApp() {
                         : undefined}
 
                     slotMinTime={'06:00:00'}
-                    slotMaxTime={'18:00:00'}
+                    slotMaxTime={'24:00:00'}
 
                     editable={true}
                     firstDay={1}
