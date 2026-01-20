@@ -1,6 +1,10 @@
 # HoardBoard - Frontend
-Detta repository innehåller **frontend** för ett kursplaneringssystem. Applikationen bygger på **React 19** och och använder **FullCalendar** för kalender-/schema-vy samt **Tailwind CSS** för styling. Frontenden kommunicerar med ett separat backend-API via ett tunt API-lager och React-hooks. **Vite**
+Detta repository innehåller **frontend** för HoardBoard. Applikationen bygger på **React 19** och och använder opensource biblioteket **FullCalendar** för kalender-/schema-vy samt **Tailwind CSS** för styling. Frontenden kommunicerar med ett separat backend-API via ett tunt API-lager och React-hooks. **Vite**
 Den här README:n beskriver systemet på en teknisk nivå (arkitektur, flöden, katalogstruktur, integrationer, drift). Den utgår från projektstrukturen och namngivning i koden men undviker onödiga kodutdrag.
+
+### Viktig info om kodstruktur
+Det är inte utmärkt kodstruktur, särskilt i komponenterna `DemoApp` och `CreateEvent`. Dessa kan med fördel refaktoreras, exemepelvis i form av att separera logik till andra komponenter som `LeftSidebar`eller till nya klasser/komponenter. Teamet är medveten om detta men har inte haft tid att fixa bättre struktur. Funktionerna har dock bra namngivning så det bör inte vara större problem att förstå vad som händer och var. 
+
 ## Innehåll
 - [Översikt](#%C3%B6versikt)
 - [Teknisk stack](#teknisk-stack)
