@@ -218,3 +218,17 @@ Efter en mutation (t.ex. skapa event) anropas ofta refetch...() för att synka U
 `@tailwindcss/vite`
 
 FullCalendar kräver ofta extra CSS-justeringar för spacing, overflow och event-rendering—det brukar ligga i Calendar.css och/eller Tailwind-klasser runt kalendern.
+
+## Förbättringar
+* Responsivitet
+* Välja intervall för semester, exempelvis start och slut
+* Ändra semsterdagar till heldagar med valfri titel, ger mer frihet till heldagsalternativ
+* Refaktorering av CreateEvent och DemoApp. Out sourca funktioner och logik till andra komponenter(ex. LeftSidebar) eller nya komponenter/klasser
+* Dynamiskt ändra textfärg beroende på eventfärg på kalendern.
+
+
+# Guide för packetering och uppstart av systemet (lokal körning av systemet)
+* I backend: Maven -> clean och package. Detta bildar en jar-fil, som hamnar i rest-lagret i en mapp. Det skapas en snapshot fil, `rest-versionnr-snapshot.jar`, döp om den till `backend.jar` OBS, viktigt ta filen från rest-mappen!
+* I frontend: Ersätt `.jar` filen i frontendprojektet under mappen java-backend med den ni skapade. 
+* Skapa en java-runtime mapp och lägg in eran java installation (innehållet från denna mapp från eran egen dator `C:\Users\namn\.jdks\openjdk-25.0.1`)
+* I frontend: Kör `npm run dist` för att packetera allt i frontend, då skapas en release mapp där en `HoardBoardSetup.exe` finns, vilket är installern för programmet
