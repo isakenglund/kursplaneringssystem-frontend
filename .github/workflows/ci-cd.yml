@@ -1,0 +1,137 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master, main]
+    tags: ['v*']
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Check and build frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # Existing lint debt is reported without blocking delivery.
+      # Remove continue-on-error when npm run lint passes.
+      - name: Lint (advisory)
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+      - name: Report lint errors
+        if: steps.lint.outcome == 'failure'
+        run: |
+          echo '::warning::Lint failed. See the lint step for details.'
+          echo '### Lint failed (advisory)' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Existing lint errors must be fixed before lint can become a required check.' >> "$GITHUB_STEP_SUMMARY"
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  windows:
+    name: Package Windows installer
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -cne "v$version") {
+            throw "Tag must be v$version to match package.json."
+          }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          architecture: x64
+      - name: Prepare bundled Java runtime
+        shell: pwsh
+        run: |
+          if (!(Test-Path -LiteralPath 'java-backend/backend.jar')) {
+            throw 'Missing java-backend/backend.jar. Build and commit the backend before releasing.'
+          }
+          Copy-Item -LiteralPath $env:JAVA_HOME -Destination java-runtime -Recurse
+          & ./java-runtime/bin/java.exe -version
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled Java failed to start.' }
+      - run: npm ci
+      - name: Build installer
+        run: npm run dist -- --win --x64 --publish never
+      - name: Verify packaged resources
+        shell: pwsh
+        run: |
+          foreach ($resource in @('backend.jar', 'java-runtime/bin/java.exe', 'manual.pdf', 'assets/icon.png')) {
+            if (!(Test-Path -LiteralPath "release/win-unpacked/resources/$resource")) {
+              throw "Missing packaged resource: $resource"
+            }
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: release/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Create draft release
+    needs: windows
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: installer
+      - name: Upload installer to draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft > release.json; then
+            if [ "$(jq -r '.isDraft' release.json)" != 'true' ]; then
+              echo '::error::Release is already published; refusing to replace its installer.'
+              exit 1
+            fi
+          else
+            gh release create "$RELEASE_TAG" --draft --verify-tag --generate-notes --title "HoardBoard $RELEASE_TAG"
+          fi
+          gh release upload "$RELEASE_TAG" installer/*.exe --clobber

@@ -72,6 +72,29 @@ I finns: `package.json`
 - `npm run build` – bygger produktion (Vite build)
 - `npm run preview` – kör built output lokalt
 
+## CI/CD med GitHub Actions
+
+Flödet finns i `.github/workflows/ci-cd.yml` och körs på GitHub:
+
+- Pull requests mot `master`/`main`: installerar med `npm ci`, kör lint och bygger frontenden med Node.js 22. Bygget sparas som `frontend-dist` i 14 dagar.
+- Push till `master`/`main`: samma kontroller samt en Windows x64-installer, tillgänglig som `windows-installer` under körningens **Artifacts** i 14 dagar.
+- Taggar som `v1.0.0`: bygger installern och laddar upp den till ett utkast under **Releases**. Taggen måste motsvara versionen i `package.json`.
+- Flödet kan också startas manuellt via **Actions → CI/CD → Run workflow** för att bygga en installer utan att skapa en release.
+
+Lint är tills vidare rådgivande eftersom projektet har befintliga lint-fel. Felen syns i loggen och körningens sammanfattning, men stoppar inte leveransen. Ta bort `continue-on-error: true` när dessa är åtgärdade. Installations-, bygg- och paketeringsfel stoppar flödet. Projektet har ännu inget automatiserat testscript.
+
+Installern innehåller den incheckade `java-backend/backend.jar`, manualen och en Windows-version av Temurin Java 25 som hämtas automatiskt. Backend byggs inte från källkod i detta repository. Uppdatera JAR-filen före en release om backend har ändrats. Installern är inte kodsignerad; testa installation och backend-start på Windows innan utkastet publiceras.
+
+För att skapa en release:
+
+1. Uppdatera versionen med exempelvis `npm version patch` (skapar en versionscommit och tagg; kräver en ren arbetskatalog).
+2. Pusha commit och tagg till GitHub: `git push github master --follow-tags` (anpassa branchnamnet vid behov).
+3. Vänta tills CI/CD är klart, hämta och testa installern från releaseutkastet och publicera sedan utkastet under **Releases**.
+
+Inga egna secrets behövs. Release-jobbet använder GitHubs inbyggda `GITHUB_TOKEN` med `contents: write`; övriga jobb har endast läsrättighet. GitHub Actions måste vara aktiverat för repositoryt. GitLab-remoten kör inte detta flöde.
+
+Referenser: [Node.js i GitHub Actions](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs), [Java-installation](https://github.com/actions/setup-java) och [releaseutkast med GitHub CLI](https://cli.github.com/manual/gh_release_create).
+
 ## Arkitektur och dataflöde
 ### Huvudkomponenter
 - **Entry**: mountar React-appen och renderar huvudsidan. `src/index.jsx`
